@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import TestSessionShell from "@/components/tasks/common/TestSessionShell";
 import DeviceRecommendationNotice from "@/components/tasks/common/DeviceRecommendationNotice";
+import ParticipantGate from "@/components/tasks/common/ParticipantGate";
 import FlexibilitySwitchTask from "@/components/tasks/flexibility/FlexibilitySwitchTask";
 import { defaultFlexibilityConfig, practiceFlexibilityConfig } from "@/lib/flexibilityEngine";
 import { analyzeFlexibilityTrials } from "@/lib/flexibilityAnalysis";
@@ -11,32 +12,38 @@ import { saveTestResult } from "@/lib/resultStorage";
 import AccuracyPieChart from "@/components/results/AccuracyPieChart";
 import ReactionTimeLineChart from "@/components/results/ReactionTimeLineChart";
 import ResultViewToggle, { ResultViewMode } from "@/components/results/ResultViewToggle";
-import type { TestPhase, TrialRecord } from "@/types";
+import type { ParticipantInfo, TestPhase, TrialRecord } from "@/types";
 
 export default function FlexibilityTestPage() {
   const [practiceTrials, setPracticeTrials] = useState<TrialRecord[]>([]);
   const [mainTrials, setMainTrials] = useState<TrialRecord[]>([]);
 
   return (
-    <TestSessionShell
-      title="인지적 유연성 검사"
-      renderPhase={(phase, goToNext) => (
-        <PhaseContent
-          phase={phase}
-          goToNext={goToNext}
-          practiceTrials={practiceTrials}
-          setPracticeTrials={setPracticeTrials}
-          mainTrials={mainTrials}
-          setMainTrials={setMainTrials}
+    <ParticipantGate>
+      {(participant) => (
+        <TestSessionShell
+          title="인지적 유연성 검사"
+          renderPhase={(phase, goToNext) => (
+            <PhaseContent
+              phase={phase}
+              goToNext={goToNext}
+              participant={participant}
+              practiceTrials={practiceTrials}
+              setPracticeTrials={setPracticeTrials}
+              mainTrials={mainTrials}
+              setMainTrials={setMainTrials}
+            />
+          )}
         />
       )}
-    />
+    </ParticipantGate>
   );
 }
 
 interface PhaseContentProps {
   phase: TestPhase;
   goToNext: () => void;
+  participant: ParticipantInfo;
   practiceTrials: TrialRecord[];
   setPracticeTrials: (trials: TrialRecord[]) => void;
   mainTrials: TrialRecord[];
@@ -46,6 +53,7 @@ interface PhaseContentProps {
 function PhaseContent({
   phase,
   goToNext,
+  participant,
   practiceTrials,
   setPracticeTrials,
   mainTrials,
@@ -141,7 +149,7 @@ function PhaseContent({
           config={defaultFlexibilityConfig}
           onComplete={(trials) => {
             setMainTrials(trials);
-            saveTestResult("flexibility", trials);
+            saveTestResult("flexibility", trials, participant);
             goToNext();
           }}
         />

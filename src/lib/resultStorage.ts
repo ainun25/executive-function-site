@@ -1,6 +1,6 @@
 "use client";
 
-import { EFDomain, TestSessionSummary, TrialRecord } from "@/types";
+import { EFDomain, ParticipantInfo, TestSessionSummary, TrialRecord } from "@/types";
 import { supabase, isSupabaseConfigured } from "./supabaseClient";
 import { getParticipantId } from "./participant";
 
@@ -12,7 +12,11 @@ const STORAGE_KEY_PREFIX = "ef-site:result:";
 
 const ALL_DOMAINS: EFDomain[] = ["inhibition", "workingMemory", "flexibility"];
 
-export function saveTestResult(domain: EFDomain, trials: TrialRecord[]): void {
+export function saveTestResult(
+  domain: EFDomain,
+  trials: TrialRecord[],
+  participant: ParticipantInfo | null = null
+): void {
   if (typeof window === "undefined" || trials.length === 0) return;
   const summary: TestSessionSummary = {
     taskType: domain,
@@ -27,11 +31,15 @@ export function saveTestResult(domain: EFDomain, trials: TrialRecord[]): void {
   }
 
   if (isSupabaseConfigured) {
-    void syncResultToSupabase(domain, summary);
+    void syncResultToSupabase(domain, summary, participant);
   }
 }
 
-async function syncResultToSupabase(domain: EFDomain, summary: TestSessionSummary): Promise<void> {
+async function syncResultToSupabase(
+  domain: EFDomain,
+  summary: TestSessionSummary,
+  participant: ParticipantInfo | null
+): Promise<void> {
   if (!supabase) return;
   try {
     const participantId = getParticipantId();
@@ -41,6 +49,9 @@ async function syncResultToSupabase(domain: EFDomain, summary: TestSessionSummar
       .from("test_sessions")
       .insert({
         participant_id: participantId,
+        participant_name: participant?.name ?? null,
+        age_years: participant?.ageYears ?? null,
+        age_months: participant?.ageMonths ?? null,
         task_type: domain,
         started_at: new Date(summary.startedAt).toISOString(),
         finished_at: new Date(summary.finishedAt).toISOString(),

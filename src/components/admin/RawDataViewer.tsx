@@ -53,9 +53,9 @@ export default function RawDataViewer() {
         </button>
       </div>
 
-      <p className="text-xs text-slate-400">
-        참여자 실명은 저장되지 않으며, participantId는 브라우저가 만든 익명 식별자입니다.
-        age/grade는 아직 수집하지 않아 빈 값으로 표시됩니다.
+      <p className="text-xs text-indigo-600">
+        ⚠️ 이 화면과 CSV에는 참여자 실명이 포함되어 있어요. 관리자만 볼 수 있도록 계정 정보를
+        안전하게 관리해주세요. grade(학년)는 아직 수집하지 않아 빈 값으로 표시됩니다.
       </p>
 
       {isLoading ? (
@@ -69,20 +69,33 @@ export default function RawDataViewer() {
           <table className="min-w-full text-left text-xs">
             <thead className="bg-slate-50 text-slate-500">
               <tr>
-                {["participantId", "task", "trial", "condition", "stimulus", "answer", "correct", "reactionTime", "errorType", "date"].map(
-                  (col) => (
-                    <th key={col} className="whitespace-nowrap px-3 py-2 font-semibold">
-                      {col}
-                    </th>
-                  )
-                )}
+                {[
+                  "name",
+                  "age",
+                  "task",
+                  "trial",
+                  "condition",
+                  "stimulus",
+                  "answer",
+                  "correct",
+                  "reactionTime",
+                  "errorType",
+                  "date",
+                ].map((col) => (
+                  <th key={col} className="whitespace-nowrap px-3 py-2 font-semibold">
+                    {col}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {rows.slice(0, 100).map((row, index) => (
                 <tr key={index} className="border-t border-slate-100">
-                  <td className="whitespace-nowrap px-3 py-2 text-slate-400">
-                    {row.participantId.slice(0, 8)}...
+                  <td className="whitespace-nowrap px-3 py-2 font-medium text-slate-700">
+                    {row.participantName ?? row.participantId.slice(0, 8) + "..."}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2">
+                    {row.ageYears !== null ? `${row.ageYears}세 ${row.ageMonths}개월` : "-"}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2">{TASK_LABELS[row.task]}</td>
                   <td className="whitespace-nowrap px-3 py-2">{row.trialNumber}</td>

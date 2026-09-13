@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import TestSessionShell from "@/components/tasks/common/TestSessionShell";
 import DeviceRecommendationNotice from "@/components/tasks/common/DeviceRecommendationNotice";
+import ParticipantGate from "@/components/tasks/common/ParticipantGate";
 import GoNoGoTask from "@/components/tasks/inhibition/GoNoGoTask";
 import { defaultInhibitionConfig, practiceInhibitionConfig } from "@/lib/inhibitionEngine";
 import { analyzeInhibitionTrials } from "@/lib/inhibitionAnalysis";
@@ -11,32 +12,38 @@ import { saveTestResult } from "@/lib/resultStorage";
 import AccuracyPieChart from "@/components/results/AccuracyPieChart";
 import ReactionTimeLineChart from "@/components/results/ReactionTimeLineChart";
 import ResultViewToggle, { ResultViewMode } from "@/components/results/ResultViewToggle";
-import type { TestPhase, TrialRecord } from "@/types";
+import type { ParticipantInfo, TestPhase, TrialRecord } from "@/types";
 
 export default function InhibitionTestPage() {
   const [practiceTrials, setPracticeTrials] = useState<TrialRecord[]>([]);
   const [mainTrials, setMainTrials] = useState<TrialRecord[]>([]);
 
   return (
-    <TestSessionShell
-      title="억제통제 검사"
-      renderPhase={(phase, goToNext) => (
-        <PhaseContent
-          phase={phase}
-          goToNext={goToNext}
-          practiceTrials={practiceTrials}
-          setPracticeTrials={setPracticeTrials}
-          mainTrials={mainTrials}
-          setMainTrials={setMainTrials}
+    <ParticipantGate>
+      {(participant) => (
+        <TestSessionShell
+          title="억제통제 검사"
+          renderPhase={(phase, goToNext) => (
+            <PhaseContent
+              phase={phase}
+              goToNext={goToNext}
+              participant={participant}
+              practiceTrials={practiceTrials}
+              setPracticeTrials={setPracticeTrials}
+              mainTrials={mainTrials}
+              setMainTrials={setMainTrials}
+            />
+          )}
         />
       )}
-    />
+    </ParticipantGate>
   );
 }
 
 interface PhaseContentProps {
   phase: TestPhase;
   goToNext: () => void;
+  participant: ParticipantInfo;
   practiceTrials: TrialRecord[];
   setPracticeTrials: (trials: TrialRecord[]) => void;
   mainTrials: TrialRecord[];
@@ -46,6 +53,7 @@ interface PhaseContentProps {
 function PhaseContent({
   phase,
   goToNext,
+  participant,
   practiceTrials,
   setPracticeTrials,
   mainTrials,
@@ -144,7 +152,7 @@ function PhaseContent({
           config={defaultInhibitionConfig}
           onComplete={(trials) => {
             setMainTrials(trials);
-            saveTestResult("inhibition", trials);
+            saveTestResult("inhibition", trials, participant);
             goToNext();
           }}
         />

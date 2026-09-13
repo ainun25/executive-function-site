@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import TestSessionShell from "@/components/tasks/common/TestSessionShell";
 import DeviceRecommendationNotice from "@/components/tasks/common/DeviceRecommendationNotice";
+import ParticipantGate from "@/components/tasks/common/ParticipantGate";
 import SpanTask from "@/components/tasks/working-memory/SpanTask";
 import { defaultWorkingMemoryConfig, practiceWorkingMemoryConfig } from "@/lib/workingMemoryEngine";
 import { analyzeWorkingMemoryTrials } from "@/lib/workingMemoryAnalysis";
@@ -11,32 +12,38 @@ import { saveTestResult } from "@/lib/resultStorage";
 import AccuracyPieChart from "@/components/results/AccuracyPieChart";
 import ReactionTimeLineChart from "@/components/results/ReactionTimeLineChart";
 import ResultViewToggle, { ResultViewMode } from "@/components/results/ResultViewToggle";
-import type { TestPhase, TrialRecord } from "@/types";
+import type { ParticipantInfo, TestPhase, TrialRecord } from "@/types";
 
 export default function WorkingMemoryTestPage() {
   const [practiceTrials, setPracticeTrials] = useState<TrialRecord[]>([]);
   const [mainTrials, setMainTrials] = useState<TrialRecord[]>([]);
 
   return (
-    <TestSessionShell
-      title="작업기억 검사"
-      renderPhase={(phase, goToNext) => (
-        <PhaseContent
-          phase={phase}
-          goToNext={goToNext}
-          practiceTrials={practiceTrials}
-          setPracticeTrials={setPracticeTrials}
-          mainTrials={mainTrials}
-          setMainTrials={setMainTrials}
+    <ParticipantGate>
+      {(participant) => (
+        <TestSessionShell
+          title="작업기억 검사"
+          renderPhase={(phase, goToNext) => (
+            <PhaseContent
+              phase={phase}
+              goToNext={goToNext}
+              participant={participant}
+              practiceTrials={practiceTrials}
+              setPracticeTrials={setPracticeTrials}
+              mainTrials={mainTrials}
+              setMainTrials={setMainTrials}
+            />
+          )}
         />
       )}
-    />
+    </ParticipantGate>
   );
 }
 
 interface PhaseContentProps {
   phase: TestPhase;
   goToNext: () => void;
+  participant: ParticipantInfo;
   practiceTrials: TrialRecord[];
   setPracticeTrials: (trials: TrialRecord[]) => void;
   mainTrials: TrialRecord[];
@@ -46,6 +53,7 @@ interface PhaseContentProps {
 function PhaseContent({
   phase,
   goToNext,
+  participant,
   practiceTrials,
   setPracticeTrials,
   mainTrials,
@@ -136,7 +144,7 @@ function PhaseContent({
           config={defaultWorkingMemoryConfig}
           onComplete={(trials) => {
             setMainTrials(trials);
-            saveTestResult("workingMemory", trials);
+            saveTestResult("workingMemory", trials, participant);
             goToNext();
           }}
         />

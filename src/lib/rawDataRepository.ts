@@ -2,8 +2,13 @@ import { supabase } from "./supabaseClient";
 import type { EFDomain } from "@/types";
 
 // 관리자/연구자용 원자료(raw data) 한 행의 데이터 구조 (섹션 14)
+// participantName/age는 실제 개인정보이므로, 이 함수는 관리자 페이지에서만 호출되어야 합니다
+// (Supabase 쪽에서도 로그인한 사람만 조회 가능하도록 RLS로 제한되어 있습니다 - phase10_schema.sql).
 export interface RawDataRow {
   participantId: string;
+  participantName: string | null;
+  ageYears: number | null;
+  ageMonths: number | null;
   task: EFDomain;
   trialNumber: number;
   condition: string | null;
@@ -29,6 +34,9 @@ interface TrialWithSession {
   invalid_reason: string | null;
   test_sessions: {
     participant_id: string;
+    participant_name: string | null;
+    age_years: number | null;
+    age_months: number | null;
     started_at: string;
   } | null;
 }
@@ -46,7 +54,7 @@ export async function fetchRawDataRows(taskFilter: EFDomain | "all"): Promise<Ra
   let query = supabase
     .from("trials")
     .select(
-      "trial_number, task_type, condition, stimulus, user_answer, is_correct, reaction_time, is_omission, is_commission_error, valid_trial, invalid_reason, test_sessions(participant_id, started_at)"
+      "trial_number, task_type, condition, stimulus, user_answer, is_correct, reaction_time, is_omission, is_commission_error, valid_trial, invalid_reason, test_sessions(participant_id, participant_name, age_years, age_months, started_at)"
     )
     .order("session_id", { ascending: false })
     .order("trial_number", { ascending: true })
@@ -65,6 +73,9 @@ export async function fetchRawDataRows(taskFilter: EFDomain | "all"): Promise<Ra
 
   return (data as unknown as TrialWithSession[]).map((trial) => ({
     participantId: trial.test_sessions?.participant_id ?? "unknown",
+    participantName: trial.test_sessions?.participant_name ?? null,
+    ageYears: trial.test_sessions?.age_years ?? null,
+    ageMonths: trial.test_sessions?.age_months ?? null,
     task: trial.task_type,
     trialNumber: trial.trial_number,
     condition: trial.condition,
@@ -87,12 +98,15 @@ function escapeCsvCell(value: string | number | boolean | null): string {
   return text;
 }
 
-// 섹션 14의 CSV 컬럼 형식: participantId, age, grade, task, trial, condition, stimulus, answer, correct, reactionTime, errorType, date
-// age/grade는 아직 수집하지 않으므로 빈 값으로 둡니다 (섹션 17: 개인정보 최소 수집).
+// 섹션 14의 CSV 컬럼 형식에 name/ageYears/ageMonths를 추가로 포함합니다.
+// grade(학년)는 아직 수집하지 않으므로 빈 값으로 둡니다.
+// ⚠️ 이 CSV에는 실명이 포함되므로, 다운로드한 파일은 안전하게 보관/관리해야 합니다.
 export function buildRawDataCsv(rows: RawDataRow[]): string {
   const header = [
     "participantId",
-    "age",
+    "name",
+    "ageYears",
+    "ageMonths",
     "grade",
     "task",
     "trial",
@@ -108,7 +122,9 @@ export function buildRawDataCsv(rows: RawDataRow[]): string {
   const lines = rows.map((row) =>
     [
       row.participantId,
-      "",
+      row.participantName ?? "",
+      row.ageYears ?? "",
+      row.ageMonths ?? "",
       "",
       row.task,
       row.trialNumber,
