@@ -51,11 +51,14 @@ function toErrorType(trial: TrialWithSession): string {
 export async function fetchRawDataRows(taskFilter: EFDomain | "all"): Promise<RawDataRow[]> {
   if (!supabase) return [];
 
+  // session_id(UUID)는 생성 순서와 무관한 무작위 값이라 정렬 기준으로 쓸 수 없습니다.
+  // 세션 시작 시각(started_at) 기준으로 최신 검사가 먼저 오도록 정렬합니다.
   let query = supabase
     .from("trials")
     .select(
-      "trial_number, task_type, condition, stimulus, user_answer, is_correct, reaction_time, is_omission, is_commission_error, valid_trial, invalid_reason, test_sessions(participant_id, participant_name, age_years, age_months, started_at)"
+      "trial_number, task_type, condition, stimulus, user_answer, is_correct, reaction_time, is_omission, is_commission_error, valid_trial, invalid_reason, test_sessions!inner(participant_id, participant_name, age_years, age_months, started_at)"
     )
+    .order("started_at", { referencedTable: "test_sessions", ascending: false })
     .order("session_id", { ascending: false })
     .order("trial_number", { ascending: true })
     .limit(5000);
