@@ -20,7 +20,7 @@ export interface RawDataRow {
   date: string; // YYYY-MM-DD (세션 시작일 기준)
 }
 
-interface TrialWithSession {
+interface TrialRow {
   trial_number: number;
   task_type: EFDomain;
   condition: string | null;
@@ -32,16 +32,18 @@ interface TrialWithSession {
   is_commission_error: boolean;
   valid_trial: boolean;
   invalid_reason: string | null;
-  test_sessions: {
-    participant_id: string;
-    participant_name: string | null;
-    age_years: number | null;
-    age_months: number | null;
-    started_at: string;
-  } | null;
 }
 
-function toErrorType(trial: TrialWithSession): string {
+interface SessionWithTrials {
+  participant_id: string;
+  participant_name: string | null;
+  age_years: number | null;
+  age_months: number | null;
+  started_at: string;
+  trials: TrialRow[];
+}
+
+function toErrorType(trial: TrialRow): string {
   if (!trial.valid_trial) return `invalid:${trial.invalid_reason ?? "unknown"}`;
   if (trial.is_omission) return "omission";
   if (trial.is_commission_error) return "commission";
@@ -51,17 +53,16 @@ function toErrorType(trial: TrialWithSession): string {
 export async function fetchRawDataRows(taskFilter: EFDomain | "all"): Promise<RawDataRow[]> {
   if (!supabase) return [];
 
-  // session_id(UUID)는 생성 순서와 무관한 무작위 값이라 정렬 기준으로 쓸 수 없습니다.
-  // 세션 시작 시각(started_at) 기준으로 최신 검사가 먼저 오도록 정렬합니다.
+  // trials가 아니라 test_sessions를 기준 테이블로 조회해야 "최신 검사 순" 정렬이 실제로 적용됩니다.
+  // (PostgREST에서 관련 테이블 기준 정렬은 "부모" 테이블 순서에는 영향을 주지 않습니다.)
   let query = supabase
-    .from("trials")
+    .from("test_sessions")
     .select(
-      "trial_number, task_type, condition, stimulus, user_answer, is_correct, reaction_time, is_omission, is_commission_error, valid_trial, invalid_reason, test_sessions!inner(participant_id, participant_name, age_years, age_months, started_at)"
+      "participant_id, participant_name, age_years, age_months, started_at, task_type, trials(trial_number, task_type, condition, stimulus, user_answer, is_correct, reaction_time, is_omission, is_commission_error, valid_trial, invalid_reason)"
     )
-    .order("started_at", { referencedTable: "test_sessions", ascending: false })
-    .order("session_id", { ascending: false })
-    .order("trial_number", { ascending: true })
-    .limit(5000);
+    .order("started_at", { ascending: false })
+    .order("trial_number", { referencedTable: "trials", ascending: true })
+    .limit(500);
 
   if (taskFilter !== "all") {
     query = query.eq("task_type", taskFilter);
@@ -74,21 +75,28 @@ export async function fetchRawDataRows(taskFilter: EFDomain | "all"): Promise<Ra
     return [];
   }
 
-  return (data as unknown as TrialWithSession[]).map((trial) => ({
-    participantId: trial.test_sessions?.participant_id ?? "unknown",
-    participantName: trial.test_sessions?.participant_name ?? null,
-    ageYears: trial.test_sessions?.age_years ?? null,
-    ageMonths: trial.test_sessions?.age_months ?? null,
-    task: trial.task_type,
-    trialNumber: trial.trial_number,
-    condition: trial.condition,
-    stimulus: trial.stimulus,
-    answer: trial.user_answer,
-    isCorrect: trial.is_correct,
-    reactionTime: trial.reaction_time,
-    errorType: toErrorType(trial),
-    date: trial.test_sessions?.started_at?.slice(0, 10) ?? "",
-  }));
+  const rows: RawDataRow[] = [];
+  (data as unknown as SessionWithTrials[]).forEach((session) => {
+    session.trials.forEach((trial) => {
+      rows.push({
+        participantId: session.participant_id,
+        participantName: session.participant_name,
+        ageYears: session.age_years,
+        ageMonths: session.age_months,
+        task: trial.task_type,
+        trialNumber: trial.trial_number,
+        condition: trial.condition,
+        stimulus: trial.stimulus,
+        answer: trial.user_answer,
+        isCorrect: trial.is_correct,
+        reactionTime: trial.reaction_time,
+        errorType: toErrorType(trial),
+        date: session.started_at?.slice(0, 10) ?? "",
+      });
+    });
+  });
+
+  return rows;
 }
 
 // CSV 한 셀에 쉼표/줄바꿈/따옴표가 있으면 안전하게 감싸줍니다.
