@@ -45,33 +45,34 @@ async function syncResultToSupabase(
   try {
     const participantId = getParticipantId();
     const firstTrial = summary.trials[0];
+    // 검사 결과 조회는 로그인한 관리자만 가능하도록 제한되어 있어서(phase10_schema.sql),
+    // 저장 직후 .select()로 다시 읽어오면 RLS에 막혀 insert 자체가 실패로 처리됩니다.
+    // 그래서 세션 id를 미리 만들어 다시 읽지 않고도 trials와 바로 연결합니다.
+    const sessionId = crypto.randomUUID();
 
-    const { data: sessionRow, error: sessionError } = await supabase
-      .from("test_sessions")
-      .insert({
-        participant_id: participantId,
-        participant_name: participant?.name ?? null,
-        age_years: participant?.ageYears ?? null,
-        age_months: participant?.ageMonths ?? null,
-        task_type: domain,
-        started_at: new Date(summary.startedAt).toISOString(),
-        finished_at: new Date(summary.finishedAt).toISOString(),
-        device_type: firstTrial.deviceType,
-        browser: firstTrial.browser,
-        screen_width: firstTrial.screenWidth,
-        screen_height: firstTrial.screenHeight,
-        summary: buildSessionSummary(domain, summary.trials),
-      })
-      .select("id")
-      .single();
+    const { error: sessionError } = await supabase.from("test_sessions").insert({
+      id: sessionId,
+      participant_id: participantId,
+      participant_name: participant?.name ?? null,
+      age_years: participant?.ageYears ?? null,
+      age_months: participant?.ageMonths ?? null,
+      task_type: domain,
+      started_at: new Date(summary.startedAt).toISOString(),
+      finished_at: new Date(summary.finishedAt).toISOString(),
+      device_type: firstTrial.deviceType,
+      browser: firstTrial.browser,
+      screen_width: firstTrial.screenWidth,
+      screen_height: firstTrial.screenHeight,
+      summary: buildSessionSummary(domain, summary.trials),
+    });
 
-    if (sessionError || !sessionRow) {
-      console.warn("Supabase 세션 저장 실패 (localStorage 결과는 정상 저장됨):", sessionError?.message);
+    if (sessionError) {
+      console.warn("Supabase 세션 저장 실패 (localStorage 결과는 정상 저장됨):", sessionError.message);
       return;
     }
 
     const trialRows = summary.trials.map((trial) => ({
-      session_id: sessionRow.id,
+      session_id: sessionId,
       trial_number: trial.trialNumber,
       task_type: trial.taskType,
       stimulus: trial.stimulus,
