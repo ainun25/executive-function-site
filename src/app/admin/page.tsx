@@ -6,6 +6,7 @@ import { useAdminSession } from "@/lib/useAdminSession";
 import ContentManager from "@/components/admin/ContentManager";
 import TrainingManager from "@/components/admin/TrainingManager";
 import RawDataViewer from "@/components/admin/RawDataViewer";
+import SessionSummaryViewer from "@/components/admin/SessionSummaryViewer";
 
 export default function AdminPage() {
   const { session, isLoading, isLoggedIn } = useAdminSession();
@@ -90,7 +91,7 @@ function AdminLoginForm() {
 }
 
 function AdminDashboard({ email }: { email: string }) {
-  const [activeTab, setActiveTab] = useState<"content" | "training" | "rawData">("content");
+  const [activeTab, setActiveTab] = useState<"summary" | "content" | "training" | "rawData">("summary");
 
   const handleLogout = async () => {
     await supabase?.auth.signOut();
@@ -113,11 +114,17 @@ function AdminDashboard({ email }: { email: string }) {
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
+        <TabButton label="검사 결과 요약" isActive={activeTab === "summary"} onClick={() => setActiveTab("summary")} />
         <TabButton label="실행기능 자료 관리" isActive={activeTab === "content"} onClick={() => setActiveTab("content")} />
         <TabButton label="훈련자료 관리" isActive={activeTab === "training"} onClick={() => setActiveTab("training")} />
-        <TabButton label="검사 원자료 조회" isActive={activeTab === "rawData"} onClick={() => setActiveTab("rawData")} />
+        <TabButton
+          label="문항별 상세 원자료"
+          isActive={activeTab === "rawData"}
+          onClick={() => setActiveTab("rawData")}
+        />
       </div>
 
+      {activeTab === "summary" && <SessionSummaryViewer />}
       {activeTab === "content" && <ContentManager />}
       {activeTab === "training" && <TrainingManager />}
       {activeTab === "rawData" && <RawDataViewer />}

@@ -3,6 +3,7 @@
 import { EFDomain, ParticipantInfo, TestSessionSummary, TrialRecord } from "@/types";
 import { supabase, isSupabaseConfigured } from "./supabaseClient";
 import { getParticipantId } from "./participant";
+import { buildSessionSummary } from "./sessionSummaryRepository";
 
 // 결과 저장 방식:
 // 1) 항상 이 브라우저의 localStorage에 저장합니다 (데모 모드, 섹션 17 - 서버 없이도 결과 확인 가능).
@@ -59,6 +60,7 @@ async function syncResultToSupabase(
         browser: firstTrial.browser,
         screen_width: firstTrial.screenWidth,
         screen_height: firstTrial.screenHeight,
+        summary: buildSessionSummary(domain, summary.trials),
       })
       .select("id")
       .single();
