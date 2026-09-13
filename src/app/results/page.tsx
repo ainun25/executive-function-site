@@ -63,7 +63,7 @@ export default function ResultsPage() {
           <p className="text-slate-500">아직 완료한 검사가 없어요. 검사를 먼저 진행해보세요!</p>
           <Link
             href="/tests"
-            className="mt-4 inline-block rounded-full bg-teal-500 px-6 py-3 text-sm font-semibold text-white hover:bg-teal-600"
+            className="mt-4 inline-block rounded-full bg-indigo-500 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-600"
           >
             실행기능 검사 하러 가기
           </Link>
@@ -80,7 +80,6 @@ export default function ResultsPage() {
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
             <DomainResultCard
               title="억제통제"
-              color="rose"
               href={testRoutes.inhibition}
               analysis={
                 inhibitionAnalysis
@@ -98,7 +97,6 @@ export default function ResultsPage() {
             />
             <DomainResultCard
               title="작업기억"
-              color="sky"
               href={testRoutes.workingMemory}
               analysis={
                 workingMemoryAnalysis
@@ -118,7 +116,6 @@ export default function ResultsPage() {
             />
             <DomainResultCard
               title="인지적 유연성"
-              color="amber"
               href={testRoutes.flexibility}
               analysis={
                 flexibilityAnalysis
@@ -137,7 +134,7 @@ export default function ResultsPage() {
             />
           </div>
 
-          <p className="mt-8 rounded-xl bg-amber-50 p-4 text-center text-xs text-amber-800">
+          <p className="mt-8 rounded-xl bg-indigo-50 p-4 text-center text-xs text-indigo-800">
             이 결과들은 각 실행기능의 일부 특성을 살펴본 수행과제 결과이며, 세 가지 검사만으로
             실행기능 전체를 판단하거나 진단할 수는 없습니다.
           </p>
@@ -169,23 +166,15 @@ interface AnalysisItem {
 
 function DomainResultCard({
   title,
-  color,
   href,
   analysis,
 }: {
   title: string;
-  color: "rose" | "sky" | "amber";
   href: string;
   analysis: AnalysisItem[] | null;
 }) {
-  const ringColor = {
-    rose: "ring-rose-200",
-    sky: "ring-sky-200",
-    amber: "ring-amber-200",
-  }[color];
-
   return (
-    <div className={`rounded-2xl bg-white p-5 ring-1 ${ringColor}`}>
+    <div className="rounded-2xl bg-white p-5 ring-1 ring-indigo-200">
       <h3 className="font-bold text-slate-900">{title}</h3>
       {analysis ? (
         <ul className="mt-3 space-y-2">
@@ -199,7 +188,7 @@ function DomainResultCard({
       ) : (
         <>
           <p className="mt-3 text-sm text-slate-400">아직 완료하지 않았어요.</p>
-          <Link href={href} className="mt-3 inline-block text-sm font-semibold text-teal-600 hover:underline">
+          <Link href={href} className="mt-3 inline-block text-sm font-semibold text-indigo-600 hover:underline">
             검사하러 가기 →
           </Link>
         </>

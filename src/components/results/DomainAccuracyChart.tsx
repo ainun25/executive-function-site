@@ -16,7 +16,7 @@ export default function DomainAccuracyChart({ data }: { data: DomainAccuracyDatu
         <XAxis dataKey="domain" tick={{ fontSize: 12 }} tickLine={false} />
         <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} tickLine={false} width={36} unit="%" />
         <Tooltip formatter={(value) => [`${value}%`, "정확도"]} />
-        <Bar dataKey="accuracy" fill="#14b8a6" radius={[6, 6, 0, 0]} />
+        <Bar dataKey="accuracy" fill="#4f46e5" radius={[6, 6, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

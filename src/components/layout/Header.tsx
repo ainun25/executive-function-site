@@ -31,7 +31,7 @@ export default function Header() {
           className="flex items-center gap-2 text-lg font-bold text-slate-800"
           onClick={() => setIsMenuOpen(false)}
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500 text-white">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500 text-white">
             EF
           </span>
           <span className="hidden sm:inline">실행기능 놀이터</span>
@@ -47,7 +47,7 @@ export default function Header() {
                 href={item.href}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-teal-500 text-white"
+                    ? "bg-indigo-500 text-white"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
@@ -88,7 +88,7 @@ export default function Header() {
                 href={item.href}
                 onClick={() => setIsMenuOpen(false)}
                 className={`rounded-lg px-4 py-3 text-base font-medium ${
-                  isActive ? "bg-teal-500 text-white" : "text-slate-700 hover:bg-slate-100"
+                  isActive ? "bg-indigo-500 text-white" : "text-slate-700 hover:bg-slate-100"
                 }`}
               >
                 {item.label}

@@ -3,7 +3,7 @@
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import type { TrialRecord } from "@/types";
 
-const COLORS = ["#14b8a6", "#f43f5e"];
+const COLORS = ["#4f46e5", "#cbd5e1"]; // 정답: indigo, 오답: 중립 회색
 
 // 정답/오답 비율을 한눈에 보여주는 그래프 (섹션 13, 쉬운 결과 보기용)
 export default function AccuracyPieChart({ trials }: { trials: TrialRecord[] }) {

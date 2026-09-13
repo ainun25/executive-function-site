@@ -66,15 +66,15 @@ export default function ReactionTimeDemo() {
   const boxColor: Record<DemoStatus, string> = {
     idle: "bg-slate-100 text-slate-600",
     waiting: "bg-slate-200 text-slate-500",
-    go: "bg-teal-500 text-white",
-    tooSoon: "bg-rose-100 text-rose-600",
-    done: "bg-teal-50 text-teal-700",
+    go: "bg-indigo-500 text-white",
+    tooSoon: "bg-indigo-100 text-indigo-600",
+    done: "bg-indigo-50 text-indigo-700",
   };
 
   return (
     <div className="text-center">
       <p className="mb-3 text-sm text-slate-500">
-        아래 상자가 초록색(teal)으로 바뀌는 순간 최대한 빠르게 눌러보세요.
+        아래 상자가 보라색(indigo)으로 바뀌는 순간 최대한 빠르게 눌러보세요.
       </p>
       <button
         type="button"

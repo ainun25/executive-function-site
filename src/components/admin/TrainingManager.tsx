@@ -208,13 +208,13 @@ export default function TrainingManager() {
           />
         </div>
 
-        {errorMessage && <p className="text-sm text-rose-600">{errorMessage}</p>}
+        {errorMessage && <p className="text-sm text-indigo-600">{errorMessage}</p>}
 
         <div className="flex gap-2">
           <button
             type="submit"
             disabled={isSaving}
-            className="rounded-full bg-teal-500 px-5 py-2 text-sm font-semibold text-white hover:bg-teal-600 disabled:opacity-50"
+            className="rounded-full bg-indigo-500 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-600 disabled:opacity-50"
           >
             {isSaving ? "저장 중..." : editingId ? "수정 저장" : "등록"}
           </button>
@@ -251,14 +251,14 @@ export default function TrainingManager() {
                   <button
                     type="button"
                     onClick={() => startEdit(material)}
-                    className="text-xs font-semibold text-teal-600 hover:underline"
+                    className="text-xs font-semibold text-indigo-600 hover:underline"
                   >
                     수정
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(material.id)}
-                    className="text-xs font-semibold text-rose-500 hover:underline"
+                    className="text-xs font-semibold text-indigo-500 hover:underline"
                   >
                     삭제
                   </button>

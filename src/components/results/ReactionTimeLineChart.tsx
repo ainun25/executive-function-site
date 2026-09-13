@@ -23,7 +23,7 @@ export default function ReactionTimeLineChart({ trials }: { trials: TrialRecord[
           formatter={(value) => [`${value}ms`, "반응시간"]}
           labelFormatter={(label) => `${label}번째 문항`}
         />
-        <Line type="monotone" dataKey="rt" stroke="#0ea5e9" strokeWidth={2} dot={{ r: 3 }} />
+        <Line type="monotone" dataKey="rt" stroke="#4f46e5" strokeWidth={2} dot={{ r: 3 }} />
       </LineChart>
     </ResponsiveContainer>
   );

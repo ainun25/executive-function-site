@@ -12,10 +12,10 @@ const categoryLabels: Record<TrainingCategory, string> = {
 };
 
 const categoryColors: Record<TrainingCategory, string> = {
-  inhibition: "bg-rose-100 text-rose-700",
-  workingMemory: "bg-sky-100 text-sky-700",
-  flexibility: "bg-amber-100 text-amber-700",
-  combined: "bg-violet-100 text-violet-700",
+  inhibition: "bg-indigo-100 text-indigo-700",
+  workingMemory: "bg-indigo-100 text-indigo-700",
+  flexibility: "bg-indigo-100 text-indigo-700",
+  combined: "bg-indigo-100 text-indigo-700",
 };
 
 export default function TrainingPage() {
@@ -75,7 +75,7 @@ export default function TrainingPage() {
                     <button
                       type="button"
                       onClick={() => setExpandedId(isExpanded ? null : material.id)}
-                      className="mt-4 text-left text-xs font-semibold text-teal-600 hover:underline"
+                      className="mt-4 text-left text-xs font-semibold text-indigo-600 hover:underline"
                     >
                       {isExpanded ? "간단히 보기 ▲" : "자세히 보기 ▼"}
                     </button>

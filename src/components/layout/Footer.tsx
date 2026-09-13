@@ -10,7 +10,7 @@ export default function Footer() {
           의학적 또는 심리학적 진단을 목적으로 하지 않습니다.
         </p>
         <p className="mt-3">© {new Date().getFullYear()} 실행기능 놀이터. 교육 및 연구 목적의 프로토타입입니다.</p>
-        <Link href="/privacy" className="mt-2 inline-block text-teal-600 hover:underline">
+        <Link href="/privacy" className="mt-2 inline-block text-indigo-600 hover:underline">
           개인정보 보호 안내
         </Link>
       </div>

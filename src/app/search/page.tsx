@@ -13,10 +13,10 @@ const CATEGORY_LABELS: Record<ContentCategory, string> = {
 };
 
 const CATEGORY_COLORS: Record<ContentCategory, string> = {
-  concept: "bg-teal-100 text-teal-700",
+  concept: "bg-indigo-100 text-indigo-700",
   research: "bg-indigo-100 text-indigo-700",
-  education: "bg-sky-100 text-sky-700",
-  training: "bg-amber-100 text-amber-700",
+  education: "bg-indigo-100 text-indigo-700",
+  training: "bg-indigo-100 text-indigo-700",
   webResource: "bg-slate-200 text-slate-700",
 };
 
@@ -71,7 +71,7 @@ export default function SearchPage() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="예: 억제통제, 작업기억, 주의집중..."
-          className="w-full rounded-full border border-slate-300 px-5 py-3 text-base outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200"
+          className="w-full rounded-full border border-slate-300 px-5 py-3 text-base outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
         />
         <div className="mt-3 flex flex-wrap justify-center gap-2">
           {SUGGESTED_KEYWORDS.map((keyword) => (
@@ -138,7 +138,7 @@ export default function SearchPage() {
                 {item.year && <span>{item.year}년</span>}
                 {item.source && <span>출처: {item.source}</span>}
                 {item.url && (
-                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">
+                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
                     원문 보기 →
                   </a>
                 )}

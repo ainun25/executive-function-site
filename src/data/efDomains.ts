@@ -20,7 +20,7 @@ export const efDomains: EFDomainInfo[] = [
       "생각 없이 즉각 행동하거나 말함",
       "주변 자극에 쉽게 산만해짐",
     ],
-    color: "rose",
+    color: "indigo",
   },
   {
     id: "workingMemory",
@@ -36,7 +36,7 @@ export const efDomains: EFDomainInfo[] = [
       "방금 들은 내용을 금방 잊어버림",
       "긴 문제 풀이 중간에 앞부분을 잊음",
     ],
-    color: "sky",
+    color: "indigo",
   },
   {
     id: "flexibility",
@@ -55,7 +55,7 @@ export const efDomains: EFDomainInfo[] = [
       "규칙이 바뀌면 크게 혼란스러워함",
       "다른 사람의 관점을 받아들이기 어려워함",
     ],
-    color: "amber",
+    color: "indigo",
   },
 ];
 
@@ -73,20 +73,20 @@ export const testInfos: TestInfo[] = [
     title: "억제통제 검사",
     shortDescription: "화면에 나오는 동물 그림을 보고, 규칙에 따라 반응하거나 멈추는 과제예요.",
     estimatedMinutes: 8,
-    color: "rose",
+    color: "indigo",
   },
   {
     id: "workingMemory",
     title: "작업기억 검사",
     shortDescription: "순서대로 나타나는 그림을 잘 기억했다가 똑같은 순서로 골라보는 과제예요.",
     estimatedMinutes: 8,
-    color: "sky",
+    color: "indigo",
   },
   {
     id: "flexibility",
     title: "인지적 유연성 검사",
     shortDescription: "바뀌는 규칙에 맞춰 도형을 분류하는 과제예요.",
     estimatedMinutes: 8,
-    color: "amber",
+    color: "indigo",
   },
 ];

@@ -164,9 +164,9 @@ export default function SpanTask({ config, onComplete }: SpanTaskProps) {
               onClick={() => handleCellClick(cellIndex)}
               className={`flex h-20 w-20 items-center justify-center rounded-2xl text-lg font-bold ring-1 ring-slate-200 transition-colors sm:h-24 sm:w-24 ${
                 isHighlighted
-                  ? "bg-sky-500 text-white"
+                  ? "bg-indigo-500 text-white"
                   : isClicked
-                    ? "bg-sky-100 text-sky-700"
+                    ? "bg-indigo-100 text-indigo-700"
                     : "bg-slate-50 text-slate-300"
               }`}
             >

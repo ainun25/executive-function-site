@@ -5,12 +5,6 @@ export const metadata: Metadata = {
   title: "실행기능 알아보기 | 실행기능 놀이터",
 };
 
-const colorClasses: Record<string, { ring: string; badge: string }> = {
-  rose: { ring: "ring-rose-200", badge: "bg-rose-100 text-rose-700" },
-  sky: { ring: "ring-sky-200", badge: "bg-sky-100 text-sky-700" },
-  amber: { ring: "ring-amber-200", badge: "bg-amber-100 text-amber-700" },
-};
-
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
@@ -24,15 +18,14 @@ export default function AboutPage() {
 
       <div className="mt-12 space-y-8">
         {efDomains.map((domain) => {
-          const colors = colorClasses[domain.color];
           return (
             <section
               key={domain.id}
-              className={`rounded-2xl border border-slate-200 p-6 ring-1 sm:p-8 ${colors.ring}`}
+              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
             >
               <div className="flex flex-wrap items-baseline gap-2">
                 <h2 className="text-2xl font-bold text-slate-900">{domain.nameKo}</h2>
-                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${colors.badge}`}>
+                <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
                   {domain.nameEn}
                 </span>
               </div>

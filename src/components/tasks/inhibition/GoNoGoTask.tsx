@@ -165,7 +165,7 @@ export default function GoNoGoTask({ config, onComplete }: GoNoGoTaskProps) {
       <button
         type="button"
         onClick={handleResponse}
-        className="w-full max-w-xs rounded-full bg-rose-500 px-6 py-4 text-lg font-bold text-white transition-colors hover:bg-rose-600"
+        className="w-full max-w-xs rounded-full bg-indigo-500 px-6 py-4 text-lg font-bold text-white transition-colors hover:bg-indigo-600"
       >
         누르기 (스페이스바 가능)
       </button>

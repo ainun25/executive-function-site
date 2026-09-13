@@ -47,7 +47,7 @@ export default function RawDataViewer() {
           type="button"
           onClick={handleDownload}
           disabled={rows.length === 0}
-          className="rounded-full bg-teal-500 px-5 py-2 text-sm font-semibold text-white hover:bg-teal-600 disabled:opacity-40"
+          className="rounded-full bg-indigo-500 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-600 disabled:opacity-40"
         >
           CSV 다운로드 ({rows.length}행)
         </button>

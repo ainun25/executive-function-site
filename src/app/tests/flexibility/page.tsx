@@ -57,7 +57,7 @@ function PhaseContent({
     case "intro":
       return (
         <div className="space-y-6">
-          <div className="rounded-2xl bg-amber-50 p-6 ring-1 ring-amber-200">
+          <div className="rounded-2xl bg-indigo-50 p-6 ring-1 ring-indigo-200">
             <h2 className="text-lg font-bold text-slate-900">이런 검사예요</h2>
             <p className="mt-3 leading-relaxed text-slate-700">
               화면에 도형이 나타나요. 처음에는 <strong>색깔</strong> 규칙(빨강 → 왼쪽, 파랑 →
@@ -73,7 +73,7 @@ function PhaseContent({
           <button
             type="button"
             onClick={goToNext}
-            className="w-full rounded-full bg-amber-500 px-6 py-3 text-base font-semibold text-white hover:bg-amber-600"
+            className="w-full rounded-full bg-indigo-500 px-6 py-3 text-base font-semibold text-white hover:bg-indigo-600"
           >
             연습 문제 시작하기
           </button>
@@ -110,7 +110,7 @@ function PhaseContent({
           <button
             type="button"
             onClick={goToNext}
-            className="w-full rounded-full bg-amber-500 px-6 py-3 text-base font-semibold text-white hover:bg-amber-600"
+            className="w-full rounded-full bg-indigo-500 px-6 py-3 text-base font-semibold text-white hover:bg-indigo-600"
           >
             준비됐어요
           </button>
@@ -128,7 +128,7 @@ function PhaseContent({
           <button
             type="button"
             onClick={goToNext}
-            className="w-full rounded-full bg-amber-500 px-6 py-3 text-base font-semibold text-white hover:bg-amber-600"
+            className="w-full rounded-full bg-indigo-500 px-6 py-3 text-base font-semibold text-white hover:bg-indigo-600"
           >
             본 검사 시작
           </button>
@@ -155,7 +155,7 @@ function PhaseContent({
           <button
             type="button"
             onClick={goToNext}
-            className="w-full rounded-full bg-amber-500 px-6 py-3 text-base font-semibold text-white hover:bg-amber-600"
+            className="w-full rounded-full bg-indigo-500 px-6 py-3 text-base font-semibold text-white hover:bg-indigo-600"
           >
             결과 보기
           </button>
@@ -216,14 +216,14 @@ function PhaseContent({
             </>
           )}
 
-          <p className="rounded-xl bg-amber-50 p-4 text-center text-xs text-amber-800">
+          <p className="rounded-xl bg-indigo-50 p-4 text-center text-xs text-indigo-800">
             이 결과는 실행기능의 일부 특성을 살펴본 수행과제 결과이며, 실행기능 전체나 진단을
             의미하지 않습니다.
           </p>
 
           <Link
             href="/tests"
-            className="block w-full rounded-full border border-amber-300 px-6 py-3 text-center text-base font-semibold text-amber-600 hover:bg-amber-50"
+            className="block w-full rounded-full border border-indigo-300 px-6 py-3 text-center text-base font-semibold text-indigo-600 hover:bg-indigo-50"
           >
             검사 목록으로 돌아가기
           </Link>

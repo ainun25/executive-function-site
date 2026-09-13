@@ -152,7 +152,7 @@ export default function FlexibilitySwitchTask({ config, onComplete }: Flexibilit
 
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <div className="rounded-full bg-amber-100 px-4 py-2 text-sm font-bold text-amber-700">
+      <div className="rounded-full bg-indigo-100 px-4 py-2 text-sm font-bold text-indigo-700">
         지금 규칙: {RULE_LABEL[spec.rule]}
       </div>
       <p className="text-xs font-medium text-slate-400">
@@ -167,14 +167,14 @@ export default function FlexibilitySwitchTask({ config, onComplete }: Flexibilit
         <button
           type="button"
           onClick={() => handleResponse("left")}
-          className="rounded-full bg-amber-500 px-6 py-4 text-lg font-bold text-white hover:bg-amber-600"
+          className="rounded-full bg-indigo-500 px-6 py-4 text-lg font-bold text-white hover:bg-indigo-600"
         >
           ← 왼쪽
         </button>
         <button
           type="button"
           onClick={() => handleResponse("right")}
-          className="rounded-full bg-amber-500 px-6 py-4 text-lg font-bold text-white hover:bg-amber-600"
+          className="rounded-full bg-indigo-500 px-6 py-4 text-lg font-bold text-white hover:bg-indigo-600"
         >
           오른쪽 →
         </button>
