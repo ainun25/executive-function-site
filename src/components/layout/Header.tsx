@@ -16,10 +16,10 @@ const navItems = [
 export default function Header() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isLoggedIn } = useAdminSession();
+  const { isAdmin } = useAdminSession();
 
-  // 관리자 메뉴는 로그인한 사람에게만 보입니다 (섹션 3).
-  const visibleNavItems = isLoggedIn
+  // 관리자 메뉴는 관리자로 등록된 계정에게만 보입니다 (섹션 3).
+  const visibleNavItems = isAdmin
     ? [...navItems, { href: "/admin", label: "관리자" }]
     : navItems;
 

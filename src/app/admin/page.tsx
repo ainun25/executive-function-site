@@ -11,7 +11,7 @@ import KnowledgeManager from "@/components/admin/KnowledgeManager";
 import SettingsManager from "@/components/admin/SettingsManager";
 
 export default function AdminPage() {
-  const { session, isLoading, isLoggedIn } = useAdminSession();
+  const { session, isLoading, isLoggedIn, isAdmin } = useAdminSession();
 
   if (!isSupabaseConfigured) {
     return (
@@ -32,7 +32,31 @@ export default function AdminPage() {
     return <AdminLoginForm />;
   }
 
+  if (!isAdmin) {
+    return <NotAdminNotice email={session?.user.email ?? ""} />;
+  }
+
   return <AdminDashboard email={session?.user.email ?? ""} />;
+}
+
+// 로그인은 했지만 관리자 목록에 없는 계정에게 보여주는 화면입니다.
+function NotAdminNotice({ email }: { email: string }) {
+  return (
+    <div className="mx-auto max-w-md px-4 py-20 text-center">
+      <h1 className="text-xl font-bold text-slate-900">관리자 권한이 없는 계정이에요</h1>
+      <p className="mt-3 text-sm leading-relaxed text-slate-500">
+        {email}은(는) 로그인은 되었지만 관리자로 등록되어 있지 않아요. 관리자 권한이 필요하면 사이트
+        운영자에게 문의해주세요.
+      </p>
+      <button
+        type="button"
+        onClick={() => supabase?.auth.signOut()}
+        className="mt-6 rounded-full border border-slate-300 px-5 py-2 text-sm text-slate-600 hover:bg-slate-50"
+      >
+        로그아웃
+      </button>
+    </div>
+  );
 }
 
 function AdminLoginForm() {
