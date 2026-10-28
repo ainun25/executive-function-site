@@ -211,6 +211,11 @@ export default function SessionSummaryViewer() {
                     </td>
                     <td className="whitespace-nowrap px-3 py-2">
                       {row.ageYears !== null ? `${row.ageYears}세 ${row.ageMonths}개월` : "-"}
+                      {row.grade && (
+                        <span className="ml-1 text-slate-400">
+                          · {row.grade === "preschool" ? "유치원" : `초${row.grade}`}
+                        </span>
+                      )}
                     </td>
                     <td className="whitespace-nowrap px-3 py-2">{TASK_LABELS[row.task]}</td>
                     <td className="whitespace-nowrap px-3 py-2">{getAccuracy(row)}</td>

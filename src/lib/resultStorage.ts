@@ -58,6 +58,8 @@ async function syncResultToSupabase(
       participant_name: participant?.name ?? null,
       age_years: participant?.ageYears ?? null,
       age_months: participant?.ageMonths ?? null,
+      grade: participant?.grade ?? null,
+      age_group: participant?.ageGroup ?? null,
       task_type: domain,
       started_at: new Date(summary.startedAt).toISOString(),
       finished_at: new Date(summary.finishedAt).toISOString(),

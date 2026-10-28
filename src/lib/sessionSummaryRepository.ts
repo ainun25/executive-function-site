@@ -35,6 +35,8 @@ export interface SessionSummaryRow {
   participantName: string | null;
   ageYears: number | null;
   ageMonths: number | null;
+  grade: string | null; // preschool | "1"~"6"
+  ageGroup: string | null; // preschool | lower | upper
   task: EFDomain;
   date: string; // YYYY-MM-DD
   summary: Record<string, unknown> | null;
@@ -46,6 +48,8 @@ interface SessionSummaryDbRow {
   participant_name: string | null;
   age_years: number | null;
   age_months: number | null;
+  grade: string | null;
+  age_group: string | null;
   task_type: EFDomain;
   started_at: string;
   summary: Record<string, unknown> | null;
@@ -59,7 +63,7 @@ export async function fetchSessionSummaries(taskFilter: EFDomain | "all"): Promi
 
   let query = supabase
     .from("test_sessions")
-    .select("id, participant_id, participant_name, age_years, age_months, task_type, started_at, summary")
+    .select("id, participant_id, participant_name, age_years, age_months, grade, age_group, task_type, started_at, summary")
     .order("started_at", { ascending: false })
     .limit(2000);
 
@@ -80,6 +84,8 @@ export async function fetchSessionSummaries(taskFilter: EFDomain | "all"): Promi
     participantName: row.participant_name,
     ageYears: row.age_years,
     ageMonths: row.age_months,
+    grade: row.grade,
+    ageGroup: row.age_group,
     task: row.task_type,
     date: row.started_at?.slice(0, 10) ?? "",
     summary: row.summary,
@@ -116,7 +122,17 @@ export function buildSessionSummaryCsv(rows: SessionSummaryRow[]): string {
   });
   const orderedSummaryKeys = Array.from(summaryKeys).sort();
 
-  const header = ["participantId", "name", "ageYears", "ageMonths", "grade", "task", "date", ...orderedSummaryKeys];
+  const header = [
+    "participantId",
+    "name",
+    "ageYears",
+    "ageMonths",
+    "grade",
+    "ageGroup",
+    "task",
+    "date",
+    ...orderedSummaryKeys,
+  ];
 
   const lines = rows.map((row) => {
     const baseCells = [
@@ -124,7 +140,8 @@ export function buildSessionSummaryCsv(rows: SessionSummaryRow[]): string {
       row.participantName ?? "",
       row.ageYears ?? "",
       row.ageMonths ?? "",
-      "",
+      row.grade ?? "",
+      row.ageGroup ?? "",
       row.task,
       row.date,
     ];

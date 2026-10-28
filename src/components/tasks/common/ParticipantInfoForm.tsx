@@ -2,16 +2,18 @@
 
 import { useState } from "react";
 import { getParticipantProfile, saveParticipantProfile } from "@/lib/participantProfile";
-import type { ParticipantInfo } from "@/types";
+import { GRADE_OPTIONS, gradeToAgeGroup } from "@/lib/ageGroup";
+import type { GradeCode, ParticipantInfo } from "@/types";
 
 interface ParticipantInfoFormProps {
   onSubmit: (info: ParticipantInfo) => void;
 }
 
 /**
- * 검사를 시작하기 전에 이름과 나이를 입력받는 화면입니다.
+ * 검사를 시작하기 전에 이름, 나이, 학년을 입력받는 화면입니다.
  * - 이름은 이 브라우저에 저장되어 다음 검사부터 자동으로 채워집니다.
- * - 나이는 시간이 지나면 달라지므로 검사할 때마다 다시 선택합니다.
+ * - 나이와 학년은 시간이 지나면 달라지므로 검사할 때마다 다시 선택합니다.
+ * - 학년으로 연령군(예비초등/저학년/고학년)이 정해져, 연령에 맞는 검사 설정이 적용됩니다.
  * - 이름/나이는 실제 개인정보이므로, 보호자 동의 없이는 진행할 수 없습니다.
  */
 export default function ParticipantInfoForm({ onSubmit }: ParticipantInfoFormProps) {
@@ -19,6 +21,7 @@ export default function ParticipantInfoForm({ onSubmit }: ParticipantInfoFormPro
   const [name, setName] = useState(existingProfile?.name ?? "");
   const [ageYears, setAgeYears] = useState<number | "">("");
   const [ageMonths, setAgeMonths] = useState<number | "">("");
+  const [grade, setGrade] = useState<GradeCode | "">("");
   const [hasConsented, setHasConsented] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -33,13 +36,23 @@ export default function ParticipantInfoForm({ onSubmit }: ParticipantInfoFormPro
       setErrorMessage("나이를 선택해주세요.");
       return;
     }
+    if (grade === "") {
+      setErrorMessage("학년을 선택해주세요.");
+      return;
+    }
     if (!hasConsented) {
       setErrorMessage("보호자 동의 항목에 체크해주세요.");
       return;
     }
 
     saveParticipantProfile({ name: name.trim(), consentedAt: new Date().toISOString() });
-    onSubmit({ name: name.trim(), ageYears: Number(ageYears), ageMonths: Number(ageMonths) });
+    onSubmit({
+      name: name.trim(),
+      ageYears: Number(ageYears),
+      ageMonths: Number(ageMonths),
+      grade,
+      ageGroup: gradeToAgeGroup(grade),
+    });
   };
 
   return (
@@ -91,6 +104,22 @@ export default function ParticipantInfoForm({ onSubmit }: ParticipantInfoFormPro
           </div>
         </div>
 
+        <div>
+          <label className="mb-1 block text-sm font-medium text-slate-700">학년</label>
+          <select
+            value={grade}
+            onChange={(event) => setGrade(event.target.value as GradeCode | "")}
+            className="w-full rounded-lg border border-slate-300 px-3 py-3 text-sm"
+          >
+            <option value="">학년을 선택하세요</option>
+            {GRADE_OPTIONS.map((option) => (
+              <option key={option.code} value={option.code}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <label className="flex items-start gap-2 text-xs leading-relaxed text-slate-500">
           <input
             type="checkbox"
@@ -99,7 +128,7 @@ export default function ParticipantInfoForm({ onSubmit }: ParticipantInfoFormPro
             className="mt-0.5"
           />
           <span>
-            보호자로서 아이의 이름과 나이 정보가 검사 결과 분석 목적으로 저장되는 것에 동의합니다.
+            보호자로서 아이의 이름, 나이, 학년 정보가 검사 결과 분석 목적으로 저장되는 것에 동의합니다.
             자세한 내용은{" "}
             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-indigo-600 underline">
               개인정보 보호 안내

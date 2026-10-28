@@ -17,34 +17,37 @@ import ResultViewToggle, { ResultViewMode } from "@/components/results/ResultVie
 import type { ParticipantInfo, TestPhase, TrialRecord } from "@/types";
 
 export default function InhibitionTestPage() {
+  return (
+    <ParticipantGate>{(participant) => <InhibitionTestFlow participant={participant} />}</ParticipantGate>
+  );
+}
+
+// 이름/나이/학년 입력이 끝나 연령군이 정해진 뒤, 그 연령군의 설정을 불러와 검사를 진행합니다.
+function InhibitionTestFlow({ participant }: { participant: ParticipantInfo }) {
   const [practiceTrials, setPracticeTrials] = useState<TrialRecord[]>([]);
   const [mainTrials, setMainTrials] = useState<TrialRecord[]>([]);
-  const { config, isReady } = useTestConfig<InhibitionConfig>("inhibition");
+  const { config, isReady } = useTestConfig<InhibitionConfig>("inhibition", participant.ageGroup);
 
   if (!isReady) {
     return <p className="py-20 text-center text-slate-400">불러오는 중...</p>;
   }
 
   return (
-    <ParticipantGate>
-      {(participant) => (
-        <TestSessionShell
-          title="억제통제 검사"
-          renderPhase={(phase, goToNext) => (
-            <PhaseContent
-              phase={phase}
-              goToNext={goToNext}
-              config={config}
-              participant={participant}
-              practiceTrials={practiceTrials}
-              setPracticeTrials={setPracticeTrials}
-              mainTrials={mainTrials}
-              setMainTrials={setMainTrials}
-            />
-          )}
+    <TestSessionShell
+      title="억제통제 검사"
+      renderPhase={(phase, goToNext) => (
+        <PhaseContent
+          phase={phase}
+          goToNext={goToNext}
+          config={config}
+          participant={participant}
+          practiceTrials={practiceTrials}
+          setPracticeTrials={setPracticeTrials}
+          mainTrials={mainTrials}
+          setMainTrials={setMainTrials}
         />
       )}
-    </ParticipantGate>
+    />
   );
 }
 

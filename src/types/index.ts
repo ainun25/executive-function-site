@@ -81,7 +81,13 @@ export interface ParticipantInfo {
   name: string;
   ageYears: number;
   ageMonths: number;
+  grade: GradeCode;
+  ageGroup: AgeGroup; // 학년으로 정해지는 연령군 (검사 설정을 연령군별로 다르게 적용)
 }
+
+// 입력 화면에서 선택하는 학년과, 그로부터 정해지는 연령군
+export type GradeCode = "preschool" | "1" | "2" | "3" | "4" | "5" | "6";
+export type AgeGroup = "preschool" | "lower" | "upper";
 
 // ---------------------------------------------------------------------------
 // PHASE 2: 검사 공통 구조 (모든 검사가 공유하는 흐름과 데이터 구조)

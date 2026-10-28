@@ -55,7 +55,7 @@ export default function RawDataViewer() {
 
       <p className="text-xs text-indigo-600">
         ⚠️ 이 화면과 CSV에는 참여자 실명이 포함되어 있어요. 관리자만 볼 수 있도록 계정 정보를
-        안전하게 관리해주세요. grade(학년)는 아직 수집하지 않아 빈 값으로 표시됩니다.
+        안전하게 관리해주세요. CSV에는 학년(grade)과 연령군(ageGroup)도 포함돼요.
       </p>
 
       {isLoading ? (

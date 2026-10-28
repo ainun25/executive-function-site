@@ -9,6 +9,8 @@ export interface RawDataRow {
   participantName: string | null;
   ageYears: number | null;
   ageMonths: number | null;
+  grade: string | null;
+  ageGroup: string | null;
   task: EFDomain;
   trialNumber: number;
   condition: string | null;
@@ -39,6 +41,8 @@ interface SessionWithTrials {
   participant_name: string | null;
   age_years: number | null;
   age_months: number | null;
+  grade: string | null;
+  age_group: string | null;
   started_at: string;
   trials: TrialRow[];
 }
@@ -58,7 +62,7 @@ export async function fetchRawDataRows(taskFilter: EFDomain | "all"): Promise<Ra
   let query = supabase
     .from("test_sessions")
     .select(
-      "participant_id, participant_name, age_years, age_months, started_at, task_type, trials(trial_number, task_type, condition, stimulus, user_answer, is_correct, reaction_time, is_omission, is_commission_error, valid_trial, invalid_reason)"
+      "participant_id, participant_name, age_years, age_months, grade, age_group, started_at, task_type, trials(trial_number, task_type, condition, stimulus, user_answer, is_correct, reaction_time, is_omission, is_commission_error, valid_trial, invalid_reason)"
     )
     .order("started_at", { ascending: false })
     .order("trial_number", { referencedTable: "trials", ascending: true })
@@ -83,6 +87,8 @@ export async function fetchRawDataRows(taskFilter: EFDomain | "all"): Promise<Ra
         participantName: session.participant_name,
         ageYears: session.age_years,
         ageMonths: session.age_months,
+        grade: session.grade,
+        ageGroup: session.age_group,
         task: trial.task_type,
         trialNumber: trial.trial_number,
         condition: trial.condition,
@@ -109,8 +115,7 @@ function escapeCsvCell(value: string | number | boolean | null): string {
   return text;
 }
 
-// 섹션 14의 CSV 컬럼 형식에 name/ageYears/ageMonths를 추가로 포함합니다.
-// grade(학년)는 아직 수집하지 않으므로 빈 값으로 둡니다.
+// 섹션 14의 CSV 컬럼 형식에 name/ageYears/ageMonths/grade/ageGroup을 추가로 포함합니다.
 // ⚠️ 이 CSV에는 실명이 포함되므로, 다운로드한 파일은 안전하게 보관/관리해야 합니다.
 export function buildRawDataCsv(rows: RawDataRow[]): string {
   const header = [
@@ -119,6 +124,7 @@ export function buildRawDataCsv(rows: RawDataRow[]): string {
     "ageYears",
     "ageMonths",
     "grade",
+    "ageGroup",
     "task",
     "trial",
     "condition",
@@ -136,7 +142,8 @@ export function buildRawDataCsv(rows: RawDataRow[]): string {
       row.participantName ?? "",
       row.ageYears ?? "",
       row.ageMonths ?? "",
-      "",
+      row.grade ?? "",
+      row.ageGroup ?? "",
       row.task,
       row.trialNumber,
       row.condition,
