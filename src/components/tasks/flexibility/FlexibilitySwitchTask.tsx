@@ -17,10 +17,13 @@ import type { TrialRecord } from "@/types";
 
 interface FlexibilitySwitchTaskProps {
   config: FlexibilityConfig;
+  /** story: 스토리형 검사(지구 수호대 작전)의 어두운 우주 배경용 모양과 문구. 문항 규칙은 같습니다. */
+  theme?: "standard" | "story";
   onComplete: (trials: TrialRecord[]) => void;
 }
 
 const RULE_LABEL: Record<RuleType, string> = { color: "색깔 규칙", shape: "모양 규칙" };
+const STORY_RULE_LABEL: Record<RuleType, string> = { color: "색깔 암호", shape: "모양 암호" };
 const SHAPE_LABEL: Record<ShapeType, string> = { circle: "원", triangle: "세모" };
 const COLOR_LABEL: Record<ColorType, string> = { red: "빨강", blue: "파랑" };
 const COLOR_HEX: Record<ColorType, string> = { red: "#f43f5e", blue: "#0ea5e9" };
@@ -30,7 +33,8 @@ const COLOR_HEX: Record<ColorType, string> = { red: "#f43f5e", blue: "#0ea5e9" }
  * 색깔 규칙 블록 → 모양 규칙 블록 → 혼합 블록(규칙이 무작위로 바뀜) 순서로 진행되며,
  * 색상뿐 아니라 모양과 텍스트 라벨을 함께 보여줘 색맹/색약 학생도 구분할 수 있게 합니다 (섹션 20).
  */
-export default function FlexibilitySwitchTask({ config, onComplete }: FlexibilitySwitchTaskProps) {
+export default function FlexibilitySwitchTask({ config, theme = "standard", onComplete }: FlexibilitySwitchTaskProps) {
+  const isStory = theme === "story";
   const sequenceRef = useRef<FlexibilityTrialSpec[]>([]);
   if (sequenceRef.current.length === 0) {
     sequenceRef.current = generateTrialSequence(config);
@@ -152,15 +156,25 @@ export default function FlexibilitySwitchTask({ config, onComplete }: Flexibilit
 
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <div className="rounded-full bg-indigo-100 px-4 py-2 text-sm font-bold text-indigo-700">
-        지금 규칙: {RULE_LABEL[spec.rule]}
+      <div
+        className={`rounded-full px-4 py-2 text-sm font-bold ${
+          isStory ? "bg-[#00ff88] text-[#050a18]" : "bg-indigo-100 text-indigo-700"
+        }`}
+      >
+        {isStory ? `지금 암호: ${STORY_RULE_LABEL[spec.rule]}` : `지금 규칙: ${RULE_LABEL[spec.rule]}`}
       </div>
       <p className="text-xs font-medium text-slate-400">
         {trialIndex + 1} / {totalTrials}
       </p>
 
-      <div className="flex h-56 w-56 items-center justify-center rounded-3xl bg-slate-50">
-        {isStimulusVisible && <ShapeGraphic shape={spec.stimulus.shape} color={spec.stimulus.color} />}
+      <div
+        className={`flex h-56 w-56 items-center justify-center rounded-3xl ${
+          isStory ? "bg-white/10 ring-1 ring-white/20" : "bg-slate-50"
+        }`}
+      >
+        {isStimulusVisible && (
+          <ShapeGraphic shape={spec.stimulus.shape} color={spec.stimulus.color} dark={isStory} />
+        )}
       </div>
 
       <div className="grid w-full max-w-xs grid-cols-2 gap-3">
@@ -180,14 +194,14 @@ export default function FlexibilitySwitchTask({ config, onComplete }: Flexibilit
         </button>
       </div>
 
-      <p className="text-xs text-slate-400">
+      <p className={`text-xs ${isStory ? "text-slate-300" : "text-slate-400"}`}>
         {spec.rule === "color" ? "빨강 → 왼쪽, 파랑 → 오른쪽" : "원 → 왼쪽, 세모 → 오른쪽"}
       </p>
     </div>
   );
 }
 
-function ShapeGraphic({ shape, color }: { shape: ShapeType; color: ColorType }) {
+function ShapeGraphic({ shape, color, dark }: { shape: ShapeType; color: ColorType; dark?: boolean }) {
   const hex = COLOR_HEX[color];
   const label = `${COLOR_LABEL[color]} ${SHAPE_LABEL[shape]}`;
   return (
@@ -206,7 +220,7 @@ function ShapeGraphic({ shape, color }: { shape: ShapeType; color: ColorType }) 
           aria-label={label}
         />
       )}
-      <span className="text-sm font-semibold text-slate-500">{label}</span>
+      <span className={`text-sm font-semibold ${dark ? "text-slate-200" : "text-slate-500"}`}>{label}</span>
     </div>
   );
 }

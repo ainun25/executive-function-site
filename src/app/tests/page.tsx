@@ -9,19 +9,6 @@ export const metadata: Metadata = {
 const cardClass = "bg-indigo-50 ring-indigo-200 text-indigo-700";
 const buttonClass = "bg-indigo-500 hover:bg-indigo-600";
 
-function ComingSoonStoryCard({ part, title, domain }: { part: string; title: string; domain: string }) {
-  return (
-    <div className="flex flex-col rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6">
-      <p className="text-xs font-semibold text-slate-400">지구 수호대 작전 · {part}</p>
-      <h3 className="mt-1 text-xl font-bold text-slate-500">{title}</h3>
-      <p className="mt-3 flex-1 text-sm text-slate-400">{domain} 검사가 이야기로 이어질 예정이에요.</p>
-      <span className="mt-5 block w-full rounded-full bg-slate-200 px-4 py-3 text-center text-sm font-semibold text-slate-400">
-        준비 중
-      </span>
-    </div>
-  );
-}
-
 export default function TestsPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
@@ -84,7 +71,20 @@ export default function TestsPage() {
               검사 소개 보러가기
             </Link>
           </div>
-          <ComingSoonStoryCard part="3부" title="규칙 변경" domain="인지적 유연성" />
+          <div className="flex flex-col rounded-2xl bg-gradient-to-b from-[#1a1f3c] to-[#050a18] p-6 text-white">
+            <p className="text-xs font-semibold text-[#a2ffcf]">지구 수호대 작전 · 3부</p>
+            <h3 className="mt-1 text-xl font-bold text-[#00ff88]">규칙 변경</h3>
+            <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-200">
+              통신 암호가 색깔에서 모양으로 바뀌어요! 바뀐 규칙에 맞게 신호를 분류하는 인지적 유연성 검사예요.
+            </p>
+            <p className="mt-4 text-xs text-slate-400">인지적 유연성 · 예상 소요시간 약 6분</p>
+            <Link
+              href="/tests/story/flexibility"
+              className="mt-5 block w-full rounded-full bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-600"
+            >
+              검사 소개 보러가기
+            </Link>
+          </div>
         </div>
       </section>
 

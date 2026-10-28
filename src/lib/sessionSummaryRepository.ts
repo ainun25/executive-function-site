@@ -2,6 +2,7 @@ import { supabase } from "./supabaseClient";
 import type { EFDomain, TestVersion, TrialRecord } from "@/types";
 import { summarizeByStage } from "./storyInhibition";
 import { analyzeCapacityTrials } from "./storyCapacity";
+import { summarizeByBlock } from "./storyFlexibility";
 import { analyzeInhibitionTrials } from "./inhibitionAnalysis";
 import { analyzeWorkingMemoryTrials } from "./workingMemoryAnalysis";
 import { analyzeFlexibilityTrials } from "./flexibilityAnalysis";
@@ -36,6 +37,10 @@ export function buildSessionSummary(
   // 스토리형 작업기억은 보급품 확인(기억 용량) 요약도 함께 저장합니다.
   if (version === "story" && domain === "workingMemory") {
     analysis = { ...analysis, capacitySummary: analyzeCapacityTrials(trials) };
+  }
+  // 스토리형 인지적 유연성은 단계(색깔/모양/혼합)별 요약도 함께 저장합니다.
+  if (version === "story" && domain === "flexibility") {
+    analysis = { ...analysis, blockSummary: summarizeByBlock(trials) };
   }
   return settings ? { ...analysis, testSettings: settings } : analysis;
 }
