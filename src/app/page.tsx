@@ -9,14 +9,11 @@ export default function Home() {
       {/* 히어로 섹션 */}
       <section className="bg-gradient-to-b from-indigo-50 to-white">
         <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-24">
-          <p className="text-sm font-semibold text-indigo-600">초등학생을 위한 실행기능 통합 플랫폼</p>
+          <p className="text-sm font-semibold text-indigo-600">유초등을 위한 실행기능 통합 플랫폼</p>
           <h1 className="mt-4 text-3xl font-extrabold text-slate-900 sm:text-5xl">
             생각을 조절하는 힘, <br className="sm:hidden" />
-            <span className="text-indigo-600">실행기능</span>을 함께 알아봐요
+            <span className="text-indigo-600">실행기능</span>
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base text-slate-600 sm:text-lg">
-            실행기능이 무엇인지 이해하고, 간단한 수행과제로 살펴보고, 재미있는 활동으로 훈련해 보세요.
-          </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href="/about"
