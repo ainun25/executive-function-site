@@ -13,7 +13,7 @@ import {
   type GameLevel,
 } from "@/lib/trainingGames";
 import { CommanderSay, StoryScene } from "@/components/tasks/story/StoryParts";
-import { isFxMuted, setFxMuted } from "./feedbackFx";
+import { isFxMuted, setFxMuted, unlockAudio } from "./feedbackFx";
 import BrakeGame from "./games/BrakeGame";
 import PianoGame from "./games/PianoGame";
 import CaveGame from "./games/CaveGame";
@@ -83,6 +83,7 @@ export default function GameShell({ gameId }: { gameId: GameId }) {
   }, [gameId, screen]);
 
   const start = (next: GameLevel) => {
+    unlockAudio(); // 버튼을 누르는 순간 소리 장치를 깨워서 모바일에서도 소리가 나게 합니다
     setLevel(next);
     setRunKey((k) => k + 1);
     setScreen("play");

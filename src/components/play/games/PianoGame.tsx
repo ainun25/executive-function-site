@@ -2,7 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
-import { FxHint, FxOverlay, canSpeak, cancelSpeech, isFxMuted, playNote, shakeClass, speakText, useFx } from "../feedbackFx";
+import {
+  FxHint,
+  FxOverlay,
+  canSpeak,
+  cancelSpeech,
+  isFxMuted,
+  playClip,
+  playNote,
+  preloadClips,
+  shakeClass,
+  speakText,
+  useFx,
+} from "../feedbackFx";
 
 /**
  * 마법 피아노 (작업기억 - 순서 기억 놀이).
@@ -10,7 +22,8 @@ import { FxHint, FxOverlay, canSpeak, cancelSpeech, isFxMuted, playNote, shakeCl
  *  1) 위치 기억(position): 반짝이는 위치(글자 없음)를 기억해서 똑같이 칩니다 (공간 위치 기억).
  *  2) 글자 보고 치기(text): "솔 → 미 → 도"를 글자로 보고, 글자에 맞는 건반을 찾아 칩니다.
  *  3) 소리 기억(sound): 불빛 없이 "도, 레, 미"처럼 건반 이름을 말로만 들려주고, 듣고 기억해서 칩니다 (청각 기억).
- *     말소리는 브라우저의 한국어 음성 읽기를 사용하고, 지원하지 않는 기기에서는 음(소리)으로 대신 들려줍니다.
+ *     말소리는 미리 만든 음성 파일(public/audio/solfege)을 재생합니다. 파일을 못 읽으면 브라우저 음성 읽기,
+ *     그것도 안 되면 음(소리)으로 대신 들려줍니다.
  *  4) 거꾸로 따라 치기(backward): 불빛과 소리를 보고 마지막 소리부터 거꾸로 칩니다 (기억 + 조작).
  * 틀리면 같은 순서를 한 번 더 보여주고 다시 도전할 수 있어요(두 번째 시도는 점수에 넣지 않고 격려만 해요).
  * ⚠️ 놀이이므로 정답을 바로 알려줍니다. 결과는 별 개수 외에 저장하지 않습니다.
@@ -19,11 +32,11 @@ import { FxHint, FxOverlay, canSpeak, cancelSpeech, isFxMuted, playNote, shakeCl
 type Mode = "text" | "position" | "sound" | "backward";
 
 const KEYS = [
-  { label: "도", color: "#f43f5e", freq: 262 },
-  { label: "레", color: "#f59e0b", freq: 294 },
-  { label: "미", color: "#10b981", freq: 330 },
-  { label: "파", color: "#0ea5e9", freq: 349 },
-  { label: "솔", color: "#8b5cf6", freq: 392 },
+  { label: "도", color: "#f43f5e", freq: 262, voice: "/audio/solfege/do.wav" },
+  { label: "레", color: "#f59e0b", freq: 294, voice: "/audio/solfege/re.wav" },
+  { label: "미", color: "#10b981", freq: 330, voice: "/audio/solfege/mi.wav" },
+  { label: "파", color: "#0ea5e9", freq: 349, voice: "/audio/solfege/fa.wav" },
+  { label: "솔", color: "#8b5cf6", freq: 392, voice: "/audio/solfege/sol.wav" },
 ];
 
 const MODE_INFO: Record<Mode, { icon: string; title: string; howto: string; playMsg: string }> = {
@@ -133,6 +146,7 @@ export default function PianoGame({ level, onFinish }: GameProps) {
 
   useEffect(() => {
     setMuted(isFxMuted());
+    preloadClips(KEYS.map((key) => key.voice));
     beginRound(0);
     return () => {
       listenTokenRef.current += 1;
@@ -163,7 +177,7 @@ export default function PianoGame({ level, onFinish }: GameProps) {
     cancelSpeech();
 
     // 소리 기억: "도, 레, 미"를 말로 들려줍니다 (불빛 없음). 말하기를 지원하지 않으면 음으로 대신 들려줍니다.
-    if (r.mode === "sound" && canSpeak()) {
+    if (r.mode === "sound") {
       setSpeechFallback(false);
       setMessage("🎧 말소리를 잘 들어요!");
       const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -171,8 +185,18 @@ export default function PianoGame({ level, onFinish }: GameProps) {
         await wait(700);
         for (const key of r.seq) {
           if (token !== listenTokenRef.current) return;
-          await speakText(KEYS[key].label);
-          await wait(450);
+          // 1순위: 미리 만든 음성 파일 → 2순위: 브라우저 음성 읽기 → 3순위: 음(띵)
+          const played = await playClip(KEYS[key].voice);
+          if (token !== listenTokenRef.current) return;
+          if (!played) {
+            if (canSpeak()) await speakText(KEYS[key].label, 0.9);
+            else {
+              setSpeechFallback(true);
+              playNote(KEYS[key].freq);
+              await wait(600);
+            }
+          }
+          await wait(500);
         }
         if (token !== listenTokenRef.current) return;
         setPhase("play");
@@ -180,12 +204,11 @@ export default function PianoGame({ level, onFinish }: GameProps) {
       })();
       return;
     }
-    if (r.mode === "sound") setSpeechFallback(true);
-    setMessage(r.mode === "sound" ? "🎧 소리를 잘 들어요!" : "👀 잘 보고 기억해요!");
+    setMessage("👀 잘 보고 기억해요!");
     let t = 700;
     r.seq.forEach((key) => {
       schedule(() => {
-        if (r.mode !== "sound") setLit(key); // 소리 기억 방식에서는 불빛을 켜지 않습니다
+        setLit(key);
         playNote(KEYS[key].freq);
       }, t);
       schedule(() => setLit(null), t + timing.showMs);

@@ -211,7 +211,7 @@ export function speakText(text: string, rate = 0.8): Promise<void> {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "ko-KR";
       utterance.rate = rate;
-      utterance.pitch = 1.1;
+      utterance.pitch = 1;
       const voice = window.speechSynthesis.getVoices().find((v) => v.lang.toLowerCase().startsWith("ko"));
       if (voice) utterance.voice = voice;
       let done = false;
@@ -237,4 +237,82 @@ export function cancelSpeech(): void {
   } catch {
     // 지원하지 않는 기기에서는 무시합니다.
   }
+}
+
+// ---- 미리 만든 음성 파일 재생 (도·레·미·파·솔 말소리) ----
+// 브라우저 음성 읽기는 한 글자를 문장처럼 읽어 억양이 어색하고 기기마다 다르므로,
+// 짧게 다듬은 음성 파일(public/audio/solfege/*.wav)을 WebAudio로 재생합니다.
+// 같은 이름의 파일을 다른 목소리(예: 부모님 녹음)로 바꿔 넣으면 그대로 사용됩니다.
+
+const clipCache = new Map<string, AudioBuffer | null>();
+const clipLoading = new Map<string, Promise<AudioBuffer | null>>();
+
+async function loadClip(url: string): Promise<AudioBuffer | null> {
+  if (clipCache.has(url)) return clipCache.get(url) ?? null;
+  const pending = clipLoading.get(url);
+  if (pending) return pending;
+  const task = (async () => {
+    const ctx = getCtx();
+    if (!ctx) return null;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) return null;
+      const buffer = await ctx.decodeAudioData(await response.arrayBuffer());
+      clipCache.set(url, buffer);
+      return buffer;
+    } catch {
+      return null;
+    }
+  })();
+  clipLoading.set(url, task);
+  const result = await task;
+  clipLoading.delete(url);
+  if (!result) clipCache.set(url, null);
+  return result;
+}
+
+export function preloadClips(urls: string[]): void {
+  urls.forEach((url) => void loadClip(url));
+}
+
+/** 모바일 브라우저는 사용자가 누를 때 소리 장치를 "깨워" 줘야 이후 자동 재생 소리가 나옵니다. 버튼을 누르는 순간 부르세요. */
+export function unlockAudio(): void {
+  const ctx = getCtx();
+  if (!ctx) return;
+  try {
+    const buffer = ctx.createBuffer(1, 1, 22050);
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx.destination);
+    source.start(0);
+  } catch {
+    // 지원하지 않으면 무시합니다.
+  }
+}
+
+/** 음성 파일을 재생하고 끝나면 true를 돌려줍니다. 파일을 읽지 못하면 false(호출한 쪽에서 대신할 방법을 쓰세요). */
+export async function playClip(url: string): Promise<boolean> {
+  const buffer = await loadClip(url);
+  const ctx = getCtx();
+  if (!buffer || !ctx) return false;
+  if (isFxMuted()) return true;
+  return new Promise<boolean>((resolve) => {
+    try {
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      let done = false;
+      const finish = () => {
+        if (!done) {
+          done = true;
+          resolve(true);
+        }
+      };
+      source.onended = finish;
+      setTimeout(finish, buffer.duration * 1000 + 400);
+      source.start();
+    } catch {
+      resolve(false);
+    }
+  });
 }
