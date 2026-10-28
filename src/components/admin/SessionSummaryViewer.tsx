@@ -9,6 +9,7 @@ import {
   type SessionSummaryRow,
 } from "@/lib/sessionSummaryRepository";
 import type { EFDomain } from "@/types";
+import ConfirmBar from "./ConfirmBar";
 
 const TASK_LABELS: Record<EFDomain, string> = {
   inhibition: "억제통제",
@@ -55,6 +56,8 @@ export default function SessionSummaryViewer() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const loadRows = () => {
     setIsLoading(true);
@@ -83,23 +86,26 @@ export default function SessionSummaryViewer() {
     setSelectedIds(selectedIds.size === rows.length ? new Set() : new Set(rows.map((row) => row.id)));
   };
 
-  const handleDeleteSelected = async () => {
+  // 팝업(window.confirm)은 브라우저가 막을 수 있어서, 화면 안의 확인 영역(ConfirmBar)을 사용합니다.
+  const handleConfirmDelete = async () => {
     const count = selectedIds.size;
     if (count === 0) return;
-    if (!window.confirm(`선택한 ${count}건의 검사 결과를 삭제할까요?\n문항별 원자료도 함께 지워지며, 되돌릴 수 없어요.`)) return;
 
     setIsDeleting(true);
     const result = await deleteSessions(Array.from(selectedIds));
     setIsDeleting(false);
+    setIsConfirmingDelete(false);
 
     if (result.error) {
-      window.alert(`삭제 실패: ${result.error}`);
+      setNotice(`삭제 실패: ${result.error}`);
       return;
     }
     if (result.deletedCount < count) {
-      window.alert(
+      setNotice(
         `${count}건 중 ${result.deletedCount}건만 삭제되었어요. 삭제 권한 설정(phase12_schema.sql)이 적용되었는지 확인해주세요.`
       );
+    } else {
+      setNotice(`${result.deletedCount}건을 삭제했어요.`);
     }
     loadRows();
   };
@@ -127,11 +133,14 @@ export default function SessionSummaryViewer() {
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={handleDeleteSelected}
+            onClick={() => {
+              setNotice(null);
+              setIsConfirmingDelete(true);
+            }}
             disabled={selectedIds.size === 0 || isDeleting}
             className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
           >
-            {isDeleting ? "삭제 중..." : `선택 삭제 (${selectedIds.size}건)`}
+            {`선택 삭제 (${selectedIds.size}건)`}
           </button>
           <button
             type="button"
@@ -147,6 +156,17 @@ export default function SessionSummaryViewer() {
       <p className="text-xs text-indigo-600">
         ⚠️ 검사 1회당 1줄로 요약된 결과예요. 실명이 포함되어 있으니 안전하게 관리해주세요.
       </p>
+
+      {isConfirmingDelete && selectedIds.size > 0 && (
+        <ConfirmBar
+          message={`선택한 ${selectedIds.size}건의 검사 결과를 삭제할까요?\n문항별 원자료도 함께 지워지며, 되돌릴 수 없어요.`}
+          confirmLabel="삭제하기"
+          isBusy={isDeleting}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setIsConfirmingDelete(false)}
+        />
+      )}
+      {notice && <p className="rounded-xl bg-slate-50 p-3 text-sm text-slate-700">{notice}</p>}
 
       {isLoading ? (
         <p className="text-sm text-slate-400">불러오는 중...</p>

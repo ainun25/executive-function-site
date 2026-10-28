@@ -9,6 +9,7 @@ import {
   type ContentItemInput,
 } from "@/lib/contentRepository";
 import type { ContentCategory, ContentItem } from "@/types";
+import ConfirmBar from "./ConfirmBar";
 
 const CATEGORY_LABELS: Record<ContentCategory, string> = {
   concept: "기본 개념",
@@ -105,14 +106,19 @@ export default function ContentManager() {
     loadItems();
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("이 자료를 삭제할까요?")) return;
-    const result = await deleteContentItem(id);
-    if (result.error) {
-      window.alert(`삭제 실패: ${result.error}`);
-      return;
-    }
-    loadItems();
+  // 팝업(window.confirm)은 브라우저가 막을 수 있어서, 화면 안의 확인 영역(ConfirmBar)을 사용합니다.
+  const [pendingDelete, setPendingDelete] = useState<ContentItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
+    setIsDeleting(true);
+    const result = await deleteContentItem(pendingDelete.id);
+    setIsDeleting(false);
+    setPendingDelete(null);
+    setNotice(result.error ? `삭제 실패: ${result.error}` : "자료를 삭제했어요.");
+    if (!result.error) loadItems();
   };
 
   return (
@@ -210,6 +216,17 @@ export default function ContentManager() {
 
       <div>
         <h3 className="mb-3 font-bold text-slate-800">등록된 자료 ({items.length}개)</h3>
+        {pendingDelete && (
+          <div className="mb-3">
+            <ConfirmBar
+              message={`"${pendingDelete.title}" 자료를 삭제할까요?`}
+              isBusy={isDeleting}
+              onConfirm={handleConfirmDelete}
+              onCancel={() => setPendingDelete(null)}
+            />
+          </div>
+        )}
+        {notice && <p className="mb-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-700">{notice}</p>}
         {isLoading ? (
           <p className="text-sm text-slate-400">불러오는 중...</p>
         ) : (
@@ -233,7 +250,10 @@ export default function ContentManager() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(item.id)}
+                    onClick={() => {
+                      setNotice(null);
+                      setPendingDelete(item);
+                    }}
                     className="text-xs font-semibold text-indigo-500 hover:underline"
                   >
                     삭제

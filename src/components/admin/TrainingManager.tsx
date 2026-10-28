@@ -9,6 +9,7 @@ import {
   type TrainingMaterialInput,
 } from "@/lib/trainingRepository";
 import type { TrainingCategory, TrainingMaterial } from "@/types";
+import ConfirmBar from "./ConfirmBar";
 
 const CATEGORY_LABELS: Record<TrainingCategory, string> = {
   inhibition: "억제통제",
@@ -99,14 +100,19 @@ export default function TrainingManager() {
     loadMaterials();
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("이 훈련자료를 삭제할까요?")) return;
-    const result = await deleteTrainingMaterial(id);
-    if (result.error) {
-      window.alert(`삭제 실패: ${result.error}`);
-      return;
-    }
-    loadMaterials();
+  // 팝업(window.confirm)은 브라우저가 막을 수 있어서, 화면 안의 확인 영역(ConfirmBar)을 사용합니다.
+  const [pendingDelete, setPendingDelete] = useState<TrainingMaterial | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
+    setIsDeleting(true);
+    const result = await deleteTrainingMaterial(pendingDelete.id);
+    setIsDeleting(false);
+    setPendingDelete(null);
+    setNotice(result.error ? `삭제 실패: ${result.error}` : "훈련자료를 삭제했어요.");
+    if (!result.error) loadMaterials();
   };
 
   return (
@@ -232,6 +238,17 @@ export default function TrainingManager() {
 
       <div>
         <h3 className="mb-3 font-bold text-slate-800">등록된 훈련자료 ({materials.length}개)</h3>
+        {pendingDelete && (
+          <div className="mb-3">
+            <ConfirmBar
+              message={`"${pendingDelete.title}" 훈련자료를 삭제할까요?`}
+              isBusy={isDeleting}
+              onConfirm={handleConfirmDelete}
+              onCancel={() => setPendingDelete(null)}
+            />
+          </div>
+        )}
+        {notice && <p className="mb-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-700">{notice}</p>}
         {isLoading ? (
           <p className="text-sm text-slate-400">불러오는 중...</p>
         ) : (
@@ -257,7 +274,10 @@ export default function TrainingManager() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(material.id)}
+                    onClick={() => {
+                      setNotice(null);
+                      setPendingDelete(material);
+                    }}
                     className="text-xs font-semibold text-indigo-500 hover:underline"
                   >
                     삭제

@@ -19,6 +19,7 @@ interface LoadedResults {
 
 export default function ResultsPage() {
   const [results, setResults] = useState<LoadedResults | null>(null);
+  const [isConfirmingClear, setIsConfirmingClear] = useState(false);
 
   useEffect(() => {
     setResults(loadAllTestResults());
@@ -140,18 +141,37 @@ export default function ResultsPage() {
           </p>
 
           <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                if (window.confirm("저장된 검사 결과를 모두 지울까요? 되돌릴 수 없어요.")) {
-                  clearAllResults();
-                  setResults(loadAllTestResults());
-                }
-              }}
-              className="text-sm text-slate-400 hover:underline"
-            >
-              결과 모두 지우기
-            </button>
+            {isConfirmingClear ? (
+              <div className="inline-flex flex-wrap items-center justify-center gap-3 text-sm text-slate-600">
+                <span>이 브라우저에 저장된 결과를 모두 지울까요? 되돌릴 수 없어요.</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearAllResults();
+                    setResults(loadAllTestResults());
+                    setIsConfirmingClear(false);
+                  }}
+                  className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white hover:bg-indigo-700"
+                >
+                  지우기
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmingClear(false)}
+                  className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600"
+                >
+                  취소
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsConfirmingClear(true)}
+                className="text-sm text-slate-400 hover:underline"
+              >
+                결과 모두 지우기
+              </button>
+            )}
           </div>
         </>
       )}
