@@ -31,16 +31,35 @@ const FOODS: Food[] = [
   { emoji: "🥒", name: "오이", red: false, fruit: false },
 ];
 
-const RULE_TEXT: Record<Rule, { title: string; left: string; right: string; icon: string }> = {
-  color: { title: "색", left: "🔴 빨간 것", right: "🟢 초록 것", icon: "" },
-  kind: { title: "종류", left: "🍎 과일", right: "🥦 채소", icon: "" },
+// 바구니 버튼: 색깔 있는 큰 버튼에 글자만 적습니다. 종류는 왼쪽 파랑 "채소" / 오른쪽 빨강 "과일",
+// 색은 왼쪽 초록 "초록" / 오른쪽 빨강 "빨강"입니다.
+const RULE_TEXT: Record<
+  Rule,
+  { title: string; left: string; right: string; leftBg: string; rightBg: string }
+> = {
+  color: {
+    title: "색",
+    left: "초록",
+    right: "빨강",
+    leftBg: "bg-emerald-500 hover:bg-emerald-400",
+    rightBg: "bg-rose-500 hover:bg-rose-400",
+  },
+  kind: {
+    title: "종류",
+    left: "채소",
+    right: "과일",
+    leftBg: "bg-sky-500 hover:bg-sky-400",
+    rightBg: "bg-rose-500 hover:bg-rose-400",
+  },
 };
 
 // 단계별 설정: 규칙이 이어지는 길이(run) 목록, 규칙 글자를 계속 보여줄지
 const CONFIG = {
+  // 1단계: 주문이 한 번 바뀌고, 바구니 글자가 보여요.
   1: { runs: [4, 4] as number[], alwaysShowCue: true, frameCue: false },
-  2: { runs: [4, 4, 2, 2] as number[], alwaysShowCue: true, frameCue: false },
-  // 3단계: 바구니 글자를 보여주지 않고, 재료에 금빛 액자가 있으면 "종류", 없으면 "색"으로 나눕니다(액자 단서를 보고 기준을 떠올려요).
+  // 2단계: 재료에 금빛 액자가 있으면 "종류", 없으면 "색"으로 나눠요. 바구니 글자가 보여서 도와줘요.
+  2: { runs: [4, 4, 2, 2] as number[], alwaysShowCue: true, frameCue: true },
+  // 3단계: 2단계와 같지만 바구니 글자를 보여주지 않아요(액자 단서를 보고 기준을 떠올려요).
   3: { runs: [3, 3, 2, 2, 2, 2] as number[], alwaysShowCue: false, frameCue: true },
 } as const;
 
@@ -70,7 +89,8 @@ function makeTrials(level: 1 | 2 | 3): Trial[] {
 
 // 정답 바구니: 색깔은 빨강=왼쪽/초록=오른쪽, 종류는 과일=왼쪽/채소=오른쪽
 function correctSide(rule: Rule, food: Food): "left" | "right" {
-  return (rule === "color" ? food.red : food.fruit) ? "left" : "right";
+  // 빨강/과일은 오른쪽(빨간 버튼), 초록/채소는 왼쪽
+  return (rule === "color" ? food.red : food.fruit) ? "right" : "left";
 }
 
 export default function ChefGame({ level, onFinish }: GameProps) {
@@ -107,7 +127,7 @@ export default function ChefGame({ level, onFinish }: GameProps) {
   const isChange = index > 0;
   // 3단계는 규칙이 바뀐 직후 첫 재료에서만 바구니 글자를 보여줍니다.
   // 액자 단서 단계는 바구니 글자를 숨기고, 2번 연속 틀렸을 때만 다시 보여줍니다(힌트).
-  const showCue = cfg.frameCue ? fx.misses >= 2 : cfg.alwaysShowCue || trial.runPosition === 0 || fx.misses >= 2;
+  const showCue = cfg.alwaysShowCue || fx.misses >= 2;
   const framed = cfg.frameCue && trial.rule === "kind"; // 액자가 있으면 종류, 없으면 색
 
   const choose = (side: "left" | "right") => {
@@ -159,7 +179,10 @@ export default function ChefGame({ level, onFinish }: GameProps) {
                 </div>
                 <p className="mt-2 text-xs text-slate-300">액자 있음</p>
                 <p className="mt-1 inline-block rounded-xl bg-white px-4 py-1 text-2xl font-extrabold text-slate-900">종류</p>
-                <p className="mt-2 text-xs font-bold text-white">← 🍎 과일 · 🥦 채소 →</p>
+                <p className="mt-2 flex justify-center gap-1 text-xs font-extrabold text-white">
+                  <span className="rounded-md bg-sky-500 px-2 py-0.5">채소</span>
+                  <span className="rounded-md bg-rose-500 px-2 py-0.5">과일</span>
+                </p>
               </div>
               <div className="rounded-xl bg-white/10 p-3">
                 <div className="mx-auto flex h-20 w-24 items-center justify-center rounded-lg border-8 border-transparent bg-white/5 text-4xl">
@@ -167,7 +190,10 @@ export default function ChefGame({ level, onFinish }: GameProps) {
                 </div>
                 <p className="mt-2 text-xs text-slate-300">액자 없음</p>
                 <p className="mt-1 inline-block rounded-xl bg-white px-4 py-1 text-2xl font-extrabold text-slate-900">색</p>
-                <p className="mt-2 text-xs font-bold text-white">← 🔴 빨간 것 · 🟢 초록 것 →</p>
+                <p className="mt-2 flex justify-center gap-1 text-xs font-extrabold text-white">
+                  <span className="rounded-md bg-emerald-500 px-2 py-0.5">초록</span>
+                  <span className="rounded-md bg-rose-500 px-2 py-0.5">빨강</span>
+                </p>
               </div>
             </div>
             <p className="mt-4 text-base font-bold leading-relaxed text-white">
@@ -180,20 +206,18 @@ export default function ChefGame({ level, onFinish }: GameProps) {
           <p className="mt-3 inline-block rounded-2xl bg-white px-10 py-3 text-5xl font-extrabold text-slate-900">
             {text.title}
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-3 text-sm font-bold">
-            <div className="rounded-xl bg-white/10 p-3">
-              <p className="text-xs text-slate-300">← 왼쪽 바구니</p>
-              <p className="mt-1 text-white">{text.left}</p>
-            </div>
-            <div className="rounded-xl bg-white/10 p-3">
-              <p className="text-xs text-slate-300">오른쪽 바구니 →</p>
-              <p className="mt-1 text-white">{text.right}</p>
-            </div>
+          <div className="mt-4 grid grid-cols-2 gap-3 text-lg font-extrabold text-white">
+            <div className={`rounded-xl px-3 py-4 ${text.leftBg}`}>{text.left}</div>
+            <div className={`rounded-xl px-3 py-4 ${text.rightBg}`}>{text.right}</div>
           </div>
         </div>
         )}
         {cfg.frameCue ? (
-          <p className="text-xs text-amber-300">이번 단계는 바구니 글자가 없어요. 액자를 보고 비밀을 기억해요!</p>
+          <p className="text-xs text-amber-300">
+            {cfg.alwaysShowCue
+              ? "액자가 있는지 보고 기준을 정해요. 바구니 글자가 도와줘요!"
+              : "이번 단계는 바구니 글자가 없어요. 액자를 보고 비밀을 기억해요!"}
+          </p>
         ) : (
           !cfg.alwaysShowCue && <p className="text-xs text-amber-300">이번 단계는 바구니 글자가 곧 사라져요. 잘 기억해요!</p>
         )}
@@ -241,17 +265,21 @@ export default function ChefGame({ level, onFinish }: GameProps) {
           type="button"
           disabled={!!feedback}
           onClick={() => choose("left")}
-          className="rounded-2xl bg-indigo-500 px-4 py-6 text-lg font-extrabold text-white hover:bg-indigo-600 disabled:opacity-70"
+          className={`rounded-2xl px-4 py-7 text-2xl font-extrabold text-white disabled:opacity-70 ${
+            showCue ? text.leftBg : "bg-indigo-500 hover:bg-indigo-600"
+          }`}
         >
-          ← {showCue ? text.left : "왼쪽 바구니"}
+          {showCue ? text.left : "왼쪽 바구니"}
         </button>
         <button
           type="button"
           disabled={!!feedback}
           onClick={() => choose("right")}
-          className="rounded-2xl bg-indigo-500 px-4 py-6 text-lg font-extrabold text-white hover:bg-indigo-600 disabled:opacity-70"
+          className={`rounded-2xl px-4 py-7 text-2xl font-extrabold text-white disabled:opacity-70 ${
+            showCue ? text.rightBg : "bg-indigo-500 hover:bg-indigo-600"
+          }`}
         >
-          {showCue ? text.right : "오른쪽 바구니"} →
+          {showCue ? text.right : "오른쪽 바구니"}
         </button>
       </div>
     </div>
