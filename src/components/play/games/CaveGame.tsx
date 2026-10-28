@@ -38,9 +38,10 @@ const DIM_SUBJ: Record<Dim, string> = { color: "이", shape: "이", count: "가"
 
 // 단계별 설정: 규칙이 이어지는 길이(run) 목록, 동굴 수, 쓰는 규칙, 규칙 표시를 계속 보여줄지
 const CONFIG = {
-  1: { runs: [4, 4] as number[], dims: ["color", "shape"] as Dim[], options: 2, alwaysShowRule: true },
-  2: { runs: [4, 4, 2, 2] as number[], dims: ["color", "shape"] as Dim[], options: 3, alwaysShowRule: true },
-  3: { runs: [3, 3, 3, 2, 2, 2] as number[], dims: ["color", "shape", "count"] as Dim[], options: 3, alwaysShowRule: false },
+  1: { runs: [4, 4] as number[], dims: ["color", "shape"] as Dim[], options: 2, alwaysShowRule: true, frameCue: false },
+  2: { runs: [4, 4, 2, 2] as number[], dims: ["color", "shape", "count"] as Dim[], options: 3, alwaysShowRule: true, frameCue: false },
+  // 3단계: 기준 글자를 보여주지 않고, 지도에 금빛 액자가 있으면 "모양", 없으면 "색"으로 고릅니다(액자 단서를 보고 기준을 떠올려요).
+  3: { runs: [3, 3, 2, 2, 2, 2] as number[], dims: ["color", "shape"] as Dim[], options: 3, alwaysShowRule: false, frameCue: true },
 } as const;
 
 interface TrialSpec {
@@ -159,7 +160,8 @@ export default function CaveGame({ level, onFinish }: GameProps) {
 
   // 규칙이 시작되거나 바뀔 때 안내를 보여줍니다 (잠깐 기다린 뒤 "알겠어요" 활성화).
   useEffect(() => {
-    if (trials[index].firstOfRun) {
+    // 3단계(액자 단서)는 처음에 한 번만 설명하고, 이후에는 액자 모양을 보고 스스로 기준을 정해요.
+    if (cfg.frameCue ? index === 0 : trials[index].firstOfRun) {
       setAnnouncing(true);
       setAnnounceReady(false);
       schedule(() => setAnnounceReady(true), 1000);
@@ -170,7 +172,8 @@ export default function CaveGame({ level, onFinish }: GameProps) {
   const trial = trials[index];
   const prevRule = index > 0 ? trials[index - 1].rule : null;
   // 2번 연속 틀리면 규칙을 다시 보여줍니다(힌트).
-  const showRule = cfg.alwaysShowRule || trial.firstOfRun || fx.misses >= 2;
+  const showRule = !cfg.frameCue && (cfg.alwaysShowRule || trial.firstOfRun || fx.misses >= 2);
+  const framed = cfg.frameCue && trial.rule === "shape"; // 액자가 있으면 모양, 없으면 색
 
   const choose = (optionIndex: number) => {
     if (feedback || announcing) return;
@@ -181,7 +184,9 @@ export default function CaveGame({ level, onFinish }: GameProps) {
     setFeedback(
       ok
         ? { ok: true, text: "🎉 통과! 딱 맞는 동굴이에요" }
-        : { ok: false, text: `쿵! 지금은 ${DIM_NAME[trial.rule]}${DIM_SUBJ[trial.rule]} 같은 동굴이에요` }
+        : { ok: false, text: cfg.frameCue
+          ? `쿵! 액자가 ${framed ? "있으면 모양" : "없으면 색"}이 같은 동굴이에요`
+          : `쿵! 지금은 ${DIM_NAME[trial.rule]}${DIM_SUBJ[trial.rule]} 같은 동굴이에요` }
     );
     schedule(() => {
       setFeedback(null);
@@ -203,8 +208,36 @@ export default function CaveGame({ level, onFinish }: GameProps) {
           {prevRule ? "🌪️" : "🗺️"}
         </p>
         <p className="text-lg font-extrabold text-[#00ff88]">
-          {prevRule ? "폭풍이 왔어요! 지도가 바뀌었어요" : "항해 지도를 펼쳐요"}
+          {prevRule && !cfg.frameCue ? "폭풍이 왔어요! 지도가 바뀌었어요" : "항해 지도를 펼쳐요"}
         </p>
+        {cfg.frameCue ? (
+          <div className="w-full rounded-2xl bg-white/10 p-5 ring-1 ring-white/20">
+            <p className="text-sm text-slate-300">보물 지도의 비밀</p>
+            <p className="mt-1 text-xl font-extrabold text-white">금빛 액자가 있으면 모양, 없으면 색!</p>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-white/10 p-3">
+                <div className="mx-auto flex h-20 w-24 items-center justify-center rounded-lg border-8 border-amber-400 bg-white/5">
+                  <span className="inline-block h-9 w-9 rounded-full bg-sky-500" />
+                </div>
+                <p className="mt-2 text-xs text-slate-300">액자 있음</p>
+                <p className="mt-1 inline-block rounded-xl bg-white px-4 py-1 text-2xl font-extrabold text-slate-900">모양</p>
+              </div>
+              <div className="rounded-xl bg-white/10 p-3">
+                <div className="mx-auto flex h-20 w-24 items-center justify-center rounded-lg border-8 border-transparent bg-white/5">
+                  <span className="inline-block h-9 w-9 rounded-full bg-sky-500" />
+                </div>
+                <p className="mt-2 text-xs text-slate-300">액자 없음</p>
+                <p className="mt-1 inline-block rounded-xl bg-white px-4 py-1 text-2xl font-extrabold text-slate-900">색</p>
+              </div>
+            </div>
+            <p className="mt-4 text-base font-bold leading-relaxed text-white">
+              지도 그림에 액자가 있는지 보고, 위의 비밀대로 같은 동굴을 눌러요.
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-slate-300">
+              예) 액자가 있고 지도가 동그라미면 동그라미 동굴을, 액자가 없고 지도가 빨강이면 빨강 동굴을 눌러요.
+            </p>
+          </div>
+        ) : (
         <div className="w-full rounded-2xl bg-white/10 p-5 ring-1 ring-white/20">
           <p className="text-sm text-slate-300">지금부터 이것이 같은 동굴을 골라요</p>
           <p className="mt-3 inline-block rounded-2xl bg-white px-10 py-3 text-5xl font-extrabold text-slate-900">
@@ -216,8 +249,11 @@ export default function CaveGame({ level, onFinish }: GameProps) {
           </p>
           <p className="mt-2 text-sm leading-relaxed text-slate-300">{DIM_EXAMPLE[trial.rule]}</p>
         </div>
-        {!cfg.alwaysShowRule && (
-          <p className="text-xs text-amber-300">이번 단계는 기준을 잠깐만 보여줘요. 잘 기억해요!</p>
+        )}
+        {cfg.frameCue ? (
+          <p className="text-xs text-amber-300">이번 단계는 액자만 보여줘요. 비밀을 잘 기억해요!</p>
+        ) : (
+          !cfg.alwaysShowRule && <p className="text-xs text-amber-300">이번 단계는 기준을 잠깐만 보여줘요. 잘 기억해요!</p>
         )}
         <button
           type="button"
@@ -240,13 +276,17 @@ export default function CaveGame({ level, onFinish }: GameProps) {
 
       <div className="w-full rounded-2xl bg-white/10 p-4 ring-1 ring-white/20">
         <div className="flex min-h-[5rem] items-center justify-center">
-          <CaveCard cave={trial.target} large />
+          <div className={framed ? "rounded-xl border-8 border-amber-400 px-4 py-2" : cfg.frameCue ? "rounded-xl border-8 border-transparent px-4 py-2" : ""}>
+            <CaveCard cave={trial.target} large />
+          </div>
         </div>
         <p className="mt-3 text-lg font-extrabold text-white">
           {showRule ? (
             <span className="rounded-xl bg-white px-6 py-1.5 text-3xl text-slate-900">{DIM_NAME[trial.rule]}</span>
+          ) : fx.misses >= 2 && cfg.frameCue ? (
+            <span className="text-base text-amber-200">🖼️ 액자가 있으면 모양, 없으면 색!</span>
           ) : (
-            <span className="text-slate-400">🙈 기억해서 골라요</span>
+            <span className="text-slate-400">{cfg.frameCue ? "🖼️ 액자를 보고 골라요" : "🙈 기억해서 골라요"}</span>
           )}
         </p>
       </div>
@@ -254,7 +294,11 @@ export default function CaveGame({ level, onFinish }: GameProps) {
       <MessageBar tone={feedback ? (feedback.ok ? "good" : "bad") : "info"}>
         {feedback ? feedback.text : "⛵ 어느 동굴로 들어갈까요?"}
       </MessageBar>
-      <FxHint fx={fx}>지도 그림과 {DIM_NAME[trial.rule]}{DIM_SUBJ[trial.rule]} 같은 동굴을 골라요!</FxHint>
+      <FxHint fx={fx}>{cfg.frameCue ? (
+          "액자가 있으면 모양, 없으면 색이 같은 동굴을 골라요!"
+        ) : (
+          <>지도 그림과 {DIM_NAME[trial.rule]}{DIM_SUBJ[trial.rule]} 같은 동굴을 골라요!</>
+        )}</FxHint>
 
       <div className={`grid w-full gap-3 ${cfg.options === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
         {trial.options.map((option, i) => (
