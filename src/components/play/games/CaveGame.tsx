@@ -28,6 +28,12 @@ const SHAPES = ["원", "세모", "네모"];
 const COUNT_NAMES = ["", "하나", "둘", "셋"];
 // 기준은 "색", "모양", "개수" 단어로 분명하게 보여줍니다. (뒤에 붙는 말: 색이 / 모양이 / 개수가)
 const DIM_NAME: Record<Dim, string> = { color: "색", shape: "모양", count: "개수" };
+// 처음과 기준이 바뀔 때 보여주는 짧은 예시 설명
+const DIM_EXAMPLE: Record<Dim, string> = {
+  color: "예) 지도가 빨강이면 빨강 동굴을 눌러요. 모양과 개수는 달라도 괜찮아요.",
+  shape: "예) 지도가 동그라미면 동그라미가 있는 동굴을 눌러요. 색과 개수는 달라도 괜찮아요.",
+  count: "예) 지도에 도형이 2개면 도형이 2개 있는 동굴을 눌러요. 색과 모양은 달라도 괜찮아요.",
+};
 const DIM_SUBJ: Record<Dim, string> = { color: "이", shape: "이", count: "가" };
 
 // 단계별 설정: 규칙이 이어지는 길이(run) 목록, 동굴 수, 쓰는 규칙, 규칙 표시를 계속 보여줄지
@@ -204,6 +210,11 @@ export default function CaveGame({ level, onFinish }: GameProps) {
           <p className="mt-3 inline-block rounded-2xl bg-white px-10 py-3 text-5xl font-extrabold text-slate-900">
             {DIM_NAME[trial.rule]}
           </p>
+          <p className="mt-4 text-base font-bold leading-relaxed text-white">
+            위의 큰 그림과 <span className="text-[#00ff88]">{DIM_NAME[trial.rule]}</span>
+            {DIM_SUBJ[trial.rule]} 같은 동굴을 눌러요.
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-300">{DIM_EXAMPLE[trial.rule]}</p>
         </div>
         {!cfg.alwaysShowRule && (
           <p className="text-xs text-amber-300">이번 단계는 기준을 잠깐만 보여줘요. 잘 기억해요!</p>
@@ -233,10 +244,7 @@ export default function CaveGame({ level, onFinish }: GameProps) {
         </div>
         <p className="mt-3 text-lg font-extrabold text-white">
           {showRule ? (
-            <>
-              <span className="rounded-xl bg-white px-3 py-1 text-slate-900">{DIM_NAME[trial.rule]}</span>
-              {DIM_SUBJ[trial.rule]} 같은 동굴
-            </>
+            <span className="rounded-xl bg-white px-6 py-1.5 text-3xl text-slate-900">{DIM_NAME[trial.rule]}</span>
           ) : (
             <span className="text-slate-400">🙈 기억해서 골라요</span>
           )}
