@@ -9,21 +9,26 @@ import { FxHint, FxOverlay, shakeClass, useFx } from "../feedbackFx";
  * 깃발 대장의 말은 그대로 따라 하고, 도깨비의 말은 따라 하지 않고 참습니다(Simon says 방식의 반응 억제).
  * 3단계에는 "반대 대장"이 나와 말한 것과 반대로 눌러야 해서, 습관적인 반응을 누르고 다른 반응을 하는 연습도 합니다.
  *
- * 지시는 문항이 시작될 때 "지금 깃발 상태"를 보고 만듭니다.
- *  - 내려가 있는 깃발에는 "올려", 올라가 있는 깃발에는 "내려"만 말합니다 (이미 올라간 깃발에 "올려"라고 하지 않도록).
- *  - 1단계는 "올려"만 나오므로 문항마다 깃발을 먼저 내려 둡니다.
+ * 깃발은 문항마다 "가운데"에서 시작합니다. 그래서 올리기와 내리기가 언제나 둘 다 가능하고,
+ * 깃발의 현재 모양으로 답을 짐작할 수 없어 지시를 정확히 들어야 합니다.
+ * 응답이 끝나면 깃발은 다시 가운데로 돌아옵니다.
  * ⚠️ 놀이이므로 정답을 바로 알려줍니다. 결과는 별 개수 외에 저장하지 않습니다.
  */
 
 type Kind = "normal" | "ghost" | "reverse";
 type Flag = "blue" | "white";
 type Action = "up" | "down";
+type Pos = "up" | "mid" | "down";
 
 interface Spec {
   flag: Flag;
   spoken: Action; // 말하는 사람이 한 말 ("올려"/"내려")
   expected: Action; // 실제로 눌러야 하는 동작 (반대 대장이면 말한 것의 반대)
 }
+
+const MID: Record<Flag, Pos> = { blue: "mid", white: "mid" };
+const POS_LABEL: Record<Pos, string> = { up: "올라감 ⬆️", mid: "가운데", down: "내려감 ⬇️" };
+const POS_BOTTOM: Record<Pos, number> = { down: 0, mid: 28, up: 56 };
 
 // 단계별 설정: 문항 수, 도깨비 비율, 반대 대장 비율, 반응 시간(ms), "내려" 지시를 쓰는지
 const CONFIG = {
@@ -84,12 +89,11 @@ export default function FlagGame({ level, onFinish }: GameProps) {
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<"wait" | "command" | "feedback">("wait");
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
-  const [up, setUp] = useState<Record<Flag, boolean>>({ blue: false, white: false });
+  const [pos, setPos] = useState<Record<Flag, Pos>>(MID);
   const [spec, setSpec] = useState<Spec | null>(null);
 
   const phaseRef = useRef<"wait" | "command" | "feedback">("wait");
   const indexRef = useRef(0);
-  const upRef = useRef<Record<Flag, boolean>>({ blue: false, white: false });
   const specRef = useRef<Spec | null>(null);
   const correctRef = useRef(0);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -102,29 +106,20 @@ export default function FlagGame({ level, onFinish }: GameProps) {
   const schedule = (fn: () => void, ms: number) => {
     timeoutsRef.current.push(setTimeout(fn, ms));
   };
-  const setFlags = (next: Record<Flag, boolean>) => {
-    upRef.current = next;
-    setUp(next);
-  };
-
-  // 문항 시작: 깃발의 "지금 상태"를 보고 지시를 만듭니다.
+  // 문항 시작: 깃발을 가운데로 돌려놓고, 어떤 깃발을 올릴지/내릴지 지시를 만듭니다.
   const beginTrial = () => {
     setFeedback(null);
     changePhase("wait");
     setSpec(null);
     specRef.current = null;
-    // 1단계는 "올려"만 나오므로 먼저 깃발을 모두 내려 둡니다.
-    if (!cfg.useDown) setFlags({ blue: false, white: false });
+    setPos(MID);
 
     schedule(() => {
       const kind = kinds[indexRef.current];
       const flag: Flag = Math.random() < 0.5 ? "blue" : "white";
-      // 이 깃발이 실제로 할 수 있는 동작: 내려가 있으면 올리기, 올라가 있으면 내리기
-      const doable: Action = upRef.current[flag] ? "down" : "up";
-      const next: Spec =
-        kind === "reverse"
-          ? { flag, spoken: opposite(doable), expected: doable }
-          : { flag, spoken: doable, expected: doable };
+      const spoken: Action = cfg.useDown ? (Math.random() < 0.5 ? "up" : "down") : "up";
+      // 반대 대장은 말한 것과 반대로 해야 합니다.
+      const next: Spec = { flag, spoken, expected: kind === "reverse" ? opposite(spoken) : spoken };
       specRef.current = next;
       setSpec(next);
       changePhase("command");
@@ -177,7 +172,7 @@ export default function FlagGame({ level, onFinish }: GameProps) {
       return;
     }
     if (flag === current.flag && action === current.expected) {
-      setFlags({ ...upRef.current, [flag]: action === "up" });
+      setPos({ ...MID, [flag]: action });
       endTrial(true, "딱 맞아요! 👍");
     } else if (kind === "reverse" && flag === current.flag && action === current.spoken) {
       endTrial(false, "반대 대장은 말한 것과 반대로 해야 해요!");
@@ -229,13 +224,13 @@ export default function FlagGame({ level, onFinish }: GameProps) {
                 className={`absolute left-1/2 flex h-10 w-16 items-center justify-center rounded-sm text-sm font-extrabold transition-all duration-300 ${
                   flag === "blue" ? "bg-sky-500 text-white" : "bg-white text-slate-700"
                 }`}
-                style={{ bottom: up[flag] ? 52 : 0 }}
+                style={{ bottom: POS_BOTTOM[pos[flag]] }}
               >
                 {FLAG_NAME[flag]}
               </div>
             </div>
             <p className="mt-1 text-xs font-bold text-slate-200">
-              {FLAG_NAME[flag]} {up[flag] ? "올라감 ⬆️" : "내려감 ⬇️"}
+              {FLAG_NAME[flag]} {POS_LABEL[pos[flag]]}
             </p>
           </div>
         ))}
