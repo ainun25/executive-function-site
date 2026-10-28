@@ -1,5 +1,6 @@
 "use client";
 
+import { privacyConfig } from "@/data/privacyConfig";
 import { useState } from "react";
 import { getParticipantProfile, saveParticipantProfile } from "@/lib/participantProfile";
 import { GRADE_OPTIONS, gradeToAgeGroup } from "@/lib/ageGroup";
@@ -120,7 +121,26 @@ export default function ParticipantInfoForm({ onSubmit }: ParticipantInfoFormPro
           </select>
         </div>
 
-        <label className="flex items-start gap-2 text-xs leading-relaxed text-slate-500">
+        {/* 보호자 동의: 무엇을, 왜, 얼마나, 거부하면 어떻게 되는지를 동의 전에 보여줍니다 */}
+        <div className="rounded-xl bg-slate-50 p-4 text-xs leading-relaxed text-slate-600">
+          <p className="font-bold text-slate-700">보호자(법정대리인) 동의 안내</p>
+          <ul className="mt-2 space-y-1">
+            {[
+              "받는 정보: 아이의 이름, 만 나이, 학년, 검사 응답과 반응시간",
+              "이용 목적: 검사 결과서 제공, 연령·학년군별 분석으로 검사 개선",
+              `보관 기간: ${privacyConfig.retentionPeriod} (이후 파기, 요청하시면 바로 삭제)`,
+              "동의하지 않으셔도 놀이 게임은 이용할 수 있어요. 이름이 필요한 검사만 진행할 수 없어요.",
+              "동의는 언제든지 철회하고, 열람·정정·삭제를 요청할 수 있어요.",
+            ].map((line) => (
+              <li key={line} className="flex gap-2">
+                <span aria-hidden="true">·</span>
+                <span>{line}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <label className="flex items-start gap-2 text-xs leading-relaxed text-slate-600">
           <input
             type="checkbox"
             checked={hasConsented}
@@ -128,12 +148,11 @@ export default function ParticipantInfoForm({ onSubmit }: ParticipantInfoFormPro
             className="mt-0.5"
           />
           <span>
-            보호자로서 아이의 이름, 나이, 학년 정보가 검사 결과 분석 목적으로 저장되는 것에 동의합니다.
-            자세한 내용은{" "}
+            보호자로서 위 내용을 읽었으며, 아이의 이름, 나이, 학년 정보를 위 목적으로 수집·이용하는 것에 동의합니다.{" "}
             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-indigo-600 underline">
-              개인정보 보호 안내
+              개인정보처리방침
             </a>
-            를 참고해주세요.
+            에서 자세한 내용을 볼 수 있어요.
           </span>
         </label>
 

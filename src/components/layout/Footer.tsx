@@ -12,7 +12,7 @@ export default function Footer() {
         <p className="mt-3">© {new Date().getFullYear()} 실행기능 놀이터. 교육 및 연구 목적의 프로토타입입니다.</p>
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
           <Link href="/privacy" className="inline-block text-indigo-600 hover:underline">
-            개인정보 보호 안내
+            개인정보처리방침
           </Link>
           <Link href="/share" className="inline-block text-indigo-600 hover:underline">
             앱처럼 쓰기 · QR 안내
