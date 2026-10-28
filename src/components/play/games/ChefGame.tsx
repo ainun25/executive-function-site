@@ -38,9 +38,10 @@ const RULE_TEXT: Record<Rule, { title: string; left: string; right: string; icon
 
 // 단계별 설정: 규칙이 이어지는 길이(run) 목록, 규칙 글자를 계속 보여줄지
 const CONFIG = {
-  1: { runs: [4, 4] as number[], alwaysShowCue: true },
-  2: { runs: [4, 4, 2, 2] as number[], alwaysShowCue: true },
-  3: { runs: [3, 3, 2, 2, 2, 2, 2] as number[], alwaysShowCue: false },
+  1: { runs: [4, 4] as number[], alwaysShowCue: true, frameCue: false },
+  2: { runs: [4, 4, 2, 2] as number[], alwaysShowCue: true, frameCue: false },
+  // 3단계: 바구니 글자를 보여주지 않고, 재료에 금빛 액자가 있으면 "종류", 없으면 "색"으로 나눕니다(액자 단서를 보고 기준을 떠올려요).
+  3: { runs: [3, 3, 2, 2, 2, 2] as number[], alwaysShowCue: false, frameCue: true },
 } as const;
 
 interface Trial {
@@ -92,7 +93,8 @@ export default function ChefGame({ level, onFinish }: GameProps) {
 
   // 규칙이 시작되거나 바뀔 때 알림을 보여줍니다 (잠깐 기다린 뒤 "알겠어요" 활성화).
   useEffect(() => {
-    if (trials[index].firstOfRun) {
+    // 3단계(액자 단서)는 처음에 한 번만 설명하고, 이후에는 액자 모양을 보고 스스로 기준을 정해요.
+    if (cfg.frameCue ? index === 0 : trials[index].firstOfRun) {
       setAnnouncing(true);
       setAnnounceReady(false);
       schedule(() => setAnnounceReady(true), 1000);
@@ -104,7 +106,9 @@ export default function ChefGame({ level, onFinish }: GameProps) {
   const text = RULE_TEXT[trial.rule];
   const isChange = index > 0;
   // 3단계는 규칙이 바뀐 직후 첫 재료에서만 바구니 글자를 보여줍니다.
-  const showCue = cfg.alwaysShowCue || trial.runPosition === 0 || fx.misses >= 2;
+  // 액자 단서 단계는 바구니 글자를 숨기고, 2번 연속 틀렸을 때만 다시 보여줍니다(힌트).
+  const showCue = cfg.frameCue ? fx.misses >= 2 : cfg.alwaysShowCue || trial.runPosition === 0 || fx.misses >= 2;
+  const framed = cfg.frameCue && trial.rule === "kind"; // 액자가 있으면 종류, 없으면 색
 
   const choose = (side: "left" | "right") => {
     if (feedback || announcing) return;
@@ -116,7 +120,12 @@ export default function ChefGame({ level, onFinish }: GameProps) {
     setFeedback(
       ok
         ? { ok: true, text: "👍 맛있게 담겼어요!" }
-        : { ok: false, text: `지금은 ${text.title} 기준! ${trial.food.name}은(는) "${answer}" 바구니예요` }
+        : {
+            ok: false,
+            text: cfg.frameCue
+              ? `액자가 ${framed ? "있으면 종류" : "없으면 색"} 기준! ${trial.food.name}은(는) "${answer}" 바구니예요`
+              : `지금은 ${text.title} 기준! ${trial.food.name}은(는) "${answer}" 바구니예요`,
+          }
     );
     schedule(() => {
       setFeedback(null);
@@ -135,11 +144,37 @@ export default function ChefGame({ level, onFinish }: GameProps) {
     return (
       <div className="flex flex-col items-center gap-4 text-center">
         <p className="text-5xl" aria-hidden="true">
-          {isChange ? "🔔" : "📝"}
+          {isChange && !cfg.frameCue ? "🔔" : "📝"}
         </p>
         <p className="text-lg font-extrabold text-[#00ff88]">
-          {isChange ? "손님이 주문을 바꿨어요!" : "첫 번째 주문이에요"}
+          {cfg.frameCue ? "식당의 비밀 주문" : isChange ? "손님이 주문을 바꿨어요!" : "첫 번째 주문이에요"}
         </p>
+        {cfg.frameCue ? (
+          <div className="w-full rounded-2xl bg-white/10 p-5 ring-1 ring-white/20">
+            <p className="text-xl font-extrabold text-white">금빛 액자가 있으면 종류, 없으면 색!</p>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-white/10 p-3">
+                <div className="mx-auto flex h-20 w-24 items-center justify-center rounded-lg border-8 border-amber-400 bg-white/5 text-4xl">
+                  🍎
+                </div>
+                <p className="mt-2 text-xs text-slate-300">액자 있음</p>
+                <p className="mt-1 inline-block rounded-xl bg-white px-4 py-1 text-2xl font-extrabold text-slate-900">종류</p>
+                <p className="mt-2 text-xs font-bold text-white">← 🍎 과일 · 🥦 채소 →</p>
+              </div>
+              <div className="rounded-xl bg-white/10 p-3">
+                <div className="mx-auto flex h-20 w-24 items-center justify-center rounded-lg border-8 border-transparent bg-white/5 text-4xl">
+                  🍎
+                </div>
+                <p className="mt-2 text-xs text-slate-300">액자 없음</p>
+                <p className="mt-1 inline-block rounded-xl bg-white px-4 py-1 text-2xl font-extrabold text-slate-900">색</p>
+                <p className="mt-2 text-xs font-bold text-white">← 🔴 빨간 것 · 🟢 초록 것 →</p>
+              </div>
+            </div>
+            <p className="mt-4 text-base font-bold leading-relaxed text-white">
+              재료에 액자가 있는지 보고, 위의 비밀대로 바구니에 넣어요.
+            </p>
+          </div>
+        ) : (
         <div className="w-full rounded-2xl bg-white/10 p-5 ring-1 ring-white/20">
           <p className="text-sm text-slate-300">지금부터 이것으로 나눠요</p>
           <p className="mt-3 inline-block rounded-2xl bg-white px-10 py-3 text-5xl font-extrabold text-slate-900">
@@ -156,8 +191,11 @@ export default function ChefGame({ level, onFinish }: GameProps) {
             </div>
           </div>
         </div>
-        {!cfg.alwaysShowCue && (
-          <p className="text-xs text-amber-300">이번 단계는 바구니 글자가 곧 사라져요. 잘 기억해요!</p>
+        )}
+        {cfg.frameCue ? (
+          <p className="text-xs text-amber-300">이번 단계는 바구니 글자가 없어요. 액자를 보고 비밀을 기억해요!</p>
+        ) : (
+          !cfg.alwaysShowCue && <p className="text-xs text-amber-300">이번 단계는 바구니 글자가 곧 사라져요. 잘 기억해요!</p>
         )}
         <button
           type="button"
@@ -178,7 +216,11 @@ export default function ChefGame({ level, onFinish }: GameProps) {
         {index + 1} / {trials.length}
       </p>
 
-      <div className="flex h-44 w-full flex-col items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20">
+      <div
+        className={`flex h-44 w-full flex-col items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20 ${
+          framed ? "border-8 border-amber-400" : cfg.frameCue ? "border-8 border-transparent" : ""
+        }`}
+      >
         <p className="text-8xl leading-none" role="img" aria-label={trial.food.name}>
           {trial.food.emoji}
         </p>
@@ -188,7 +230,11 @@ export default function ChefGame({ level, onFinish }: GameProps) {
       <MessageBar tone={feedback ? (feedback.ok ? "good" : "bad") : "info"}>
         {feedback ? feedback.text : "🧺 어느 바구니에 넣을까요?"}
       </MessageBar>
-      <FxHint fx={fx}>지금은 "{text.title}" 기준이에요! 바구니 글자를 다시 보여줄게요.</FxHint>
+      <FxHint fx={fx}>
+        {cfg.frameCue
+          ? "액자가 있으면 종류, 없으면 색! 바구니 글자를 다시 보여줄게요."
+          : `지금은 "${text.title}" 기준이에요! 바구니 글자를 다시 보여줄게요.`}
+      </FxHint>
 
       <div className="grid w-full grid-cols-2 gap-3">
         <button
