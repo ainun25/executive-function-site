@@ -1,5 +1,6 @@
 "use client";
 
+import { CommanderSay } from "@/components/tasks/story/StoryParts";
 import { useState } from "react";
 import Link from "next/link";
 import TestSessionShell from "@/components/tasks/common/TestSessionShell";
@@ -82,6 +83,9 @@ function PhaseContent({
           <div className="rounded-2xl bg-gradient-to-b from-[#1a1f3c] to-[#050a18] p-6 text-white">
             <p className="text-sm font-semibold text-[#a2ffcf]">지구 수호대 작전 · 1부</p>
             <h2 className="mt-1 text-2xl font-extrabold text-[#00ff88]">요원 선별</h2>
+            <div className="mt-4">
+              <CommanderSay>요원 후보, 잘 왔네! 지구를 지킬 요원을 뽑는 선별 임무를 시작하겠네.</CommanderSay>
+            </div>
             <p className="mt-3 leading-relaxed text-slate-200">
               멋진 요원이 되려면 미션을 해내야 해요! 행성, UFO, 변장한 요원이 하나씩 나타나요.
               <br />

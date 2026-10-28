@@ -15,6 +15,10 @@ import {
 } from "@/lib/flexibilityEngine";
 import type { TrialRecord } from "@/types";
 import { RULE_NAME, STORY_RULE_NAME, RuleCard } from "./RuleCard";
+import { CommanderSay, StoryProgress } from "../story/StoryParts";
+
+// 규칙 안내 화면이 뜬 뒤 "알겠어요"를 누를 수 있기까지 잠깐 기다립니다 (실수로 바로 넘기는 것을 막기 위함).
+const ANNOUNCE_READ_MS = 1200;
 
 interface FlexibilitySwitchTaskProps {
   config: FlexibilityConfig;
@@ -49,6 +53,7 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
   const [trialIndex, setTrialIndex] = useState(0);
   const [isStimulusVisible, setIsStimulusVisible] = useState(false);
   const [announcing, setAnnouncing] = useState(false);
+  const [announceReady, setAnnounceReady] = useState(false);
   const trialsRef = useRef<TrialRecord[]>([]);
   const tabHiddenRef = useRef(false);
   const timeoutIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -139,6 +144,8 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
     if (sequenceRef.current[trialIndex].announce) {
       setIsStimulusVisible(false);
       setAnnouncing(true); // "알겠어요"를 누르면 startTrial
+      setAnnounceReady(false);
+      timeoutIdsRef.current.push(setTimeout(() => setAnnounceReady(true), ANNOUNCE_READ_MS));
     } else {
       startTrial();
     }
@@ -160,7 +167,7 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.repeat) return;
       if (announcing) {
-        if (event.key === "Enter" || event.key === " ") {
+        if (announceReady && (event.key === "Enter" || event.key === " ")) {
           event.preventDefault();
           startTrial();
         }
@@ -176,7 +183,7 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleResponse, announcing, startTrial]);
+  }, [handleResponse, announcing, announceReady, startTrial]);
 
   const spec = sequenceRef.current[trialIndex];
   const totalTrials = sequenceRef.current.length;
@@ -186,9 +193,17 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
   if (announcing) {
     return (
       <div className="mx-auto flex max-w-sm flex-col items-center gap-4 text-center">
-        <p className={`text-sm font-bold ${isStory ? "text-[#a2ffcf]" : "text-indigo-600"}`}>
-          {isFirstTrial ? "첫 번째 규칙이에요" : isChange ? "🔄 규칙이 바뀌었어요!" : "이 규칙으로 계속해요"}
-        </p>
+        {isStory ? (
+          <CommanderSay radio={!isFirstTrial}>
+            {isFirstTrial
+              ? "요원, 마지막 임무는 비밀 암호 해독이다! 먼저 이 암호로 신호를 나누게."
+              : "🔄 본부에서 무전이다! 암호가 바뀌었다! 지금부터는 새 암호로 신호를 나누게."}
+          </CommanderSay>
+        ) : (
+          <p className="text-sm font-bold text-indigo-600">
+            {isFirstTrial ? "첫 번째 규칙이에요" : isChange ? "🔄 규칙이 바뀌었어요!" : "이 규칙으로 계속해요"}
+          </p>
+        )}
         <div className="w-full">
           <RuleCard rule={spec.rule} title={names[spec.rule]} dark={isStory} />
         </div>
@@ -200,9 +215,10 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
         <button
           type="button"
           onClick={startTrial}
-          className="w-full rounded-full bg-indigo-500 px-6 py-4 text-lg font-bold text-white hover:bg-indigo-600"
+          disabled={!announceReady}
+          className="w-full rounded-full bg-indigo-500 px-6 py-4 text-lg font-bold text-white hover:bg-indigo-600 disabled:opacity-50"
         >
-          알겠어요
+          {announceReady ? "알겠어요" : "읽는 중..."}
         </button>
       </div>
     );
@@ -210,9 +226,13 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
 
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <p className="text-xs font-medium text-slate-400">
-        {trialIndex + 1} / {totalTrials}
-      </p>
+      {isStory ? (
+        <StoryProgress current={trialIndex + 1} total={totalTrials} />
+      ) : (
+        <p className="text-xs font-medium text-slate-400">
+          {trialIndex + 1} / {totalTrials}
+        </p>
+      )}
 
       <div
         className={`flex h-56 w-56 items-center justify-center rounded-3xl ${

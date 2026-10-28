@@ -5,6 +5,7 @@ import { getBrowserUserAgent, getDeviceType, getScreenSize } from "@/lib/deviceI
 import { useTrialTimer } from "@/lib/reactionTimer";
 import { capacityShowMs, generateCapacityPlan, type CapacityPlanItem } from "@/lib/storyCapacity";
 import type { TrialRecord } from "@/types";
+import { StoryProgress } from "./StoryParts";
 
 interface StoryCapacityTaskProps {
   mode: "practice" | "main";
@@ -110,9 +111,7 @@ export default function StoryCapacityTask({ mode, onComplete }: StoryCapacityTas
 
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <p className="text-xs font-medium text-slate-400">
-        보급품 확인 {Math.min(index + 1, plan.length)} / {plan.length}
-      </p>
+      <StoryProgress current={Math.min(index + 1, plan.length)} total={plan.length} />
 
       {step === "show" && (
         <>

@@ -11,6 +11,7 @@ import {
 import { useTrialTimer } from "@/lib/reactionTimer";
 import { STORY_STAGES, makeStimulusLabel, splitTrialCounts, type StoryStage } from "@/lib/storyInhibition";
 import type { TrialRecord } from "@/types";
+import { CommanderSay, StoryProgress } from "./StoryParts";
 
 type Phase = "fixation" | "stimulus" | "gap";
 
@@ -214,9 +215,9 @@ export default function StoryInhibitionTask({ config, mode, onComplete }: StoryI
           <h2 className="text-2xl font-extrabold text-[#ffcc00]">
             {mode === "practice" ? "연습 단계" : currentStage.title}
           </h2>
-          <p className="mt-1 text-[#a2ffcf]">
-            {mode === "practice" ? "작전 준비를 해볼까요?" : currentStage.story}
-          </p>
+          <div className="mt-3 w-full">
+            <CommanderSay>{mode === "practice" ? "요원, 작전 준비 훈련부터 시작하겠네!" : currentStage.story}</CommanderSay>
+          </div>
           <div className="my-4 flex w-full justify-evenly">
             <GuideExample stage={currentStage} isAlly />
             <GuideExample stage={currentStage} isAlly={false} />
@@ -238,9 +239,7 @@ export default function StoryInhibitionTask({ config, mode, onComplete }: StoryI
 
       {screen === "trials" && (
         <div className="flex w-full flex-col items-center">
-          <p className="text-lg text-slate-400">
-            {overallNumber} / {totalTrials}
-          </p>
+          <StoryProgress current={overallNumber} total={totalTrials} />
           <div className="my-6 flex h-52 w-full items-center justify-center">
             {phase === "stimulus" && (
               <EarthGuardStimulus level={currentStage.visual} isAlly={condition === "go"} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { CommanderSay } from "@/components/tasks/story/StoryParts";
 import { useState } from "react";
 import Link from "next/link";
 import TestSessionShell from "@/components/tasks/common/TestSessionShell";
@@ -83,6 +84,9 @@ function PhaseContent({
           <div className="rounded-2xl bg-gradient-to-b from-[#1a1f3c] to-[#050a18] p-6 text-white">
             <p className="text-sm font-semibold text-[#a2ffcf]">지구 수호대 작전 · 2부</p>
             <h2 className="mt-1 text-2xl font-extrabold text-[#00ff88]">신호 기억</h2>
+            <div className="mt-4">
+              <CommanderSay>선별을 통과했군! 이번엔 기지에서 오는 비밀 신호를 기억해 전달하는 임무일세.</CommanderSay>
+            </div>
             <p className="mt-3 leading-relaxed text-slate-200">
               선별된 요원에게 우주 기지의 비밀 신호가 도착해요! 두 가지 임무가 있어요.
               <br />

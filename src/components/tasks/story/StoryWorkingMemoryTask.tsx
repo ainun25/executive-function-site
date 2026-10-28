@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import SpanTask from "@/components/tasks/working-memory/SpanTask";
 import StoryCapacityTask from "./StoryCapacityTask";
+import { CommanderSay } from "./StoryParts";
 import type { WorkingMemoryConfig } from "@/lib/workingMemoryEngine";
 import type { TrialRecord } from "@/types";
 
@@ -39,11 +40,10 @@ export default function StoryWorkingMemoryTask({ mode, config, onComplete }: Sto
       <div className="space-y-5 text-center text-white">
         <p className="text-sm font-semibold text-[#a2ffcf]">2-A 보급품 확인 끝!</p>
         <h2 className="text-2xl font-extrabold text-[#00ff88]">이제 2-B 신호 기억</h2>
-        <p className="leading-relaxed text-slate-200">
-          이번에는 기지가 하나씩 차례로 반짝여요.
-          <br />
-          <strong className="text-white">반짝인 순서 그대로</strong> 기지를 눌러 신호를 보내세요!
-        </p>
+        <CommanderSay>
+          보급품을 잘 챙겼군! 이제 기지에서 신호가 하나씩 차례로 반짝일 걸세.{" "}
+          <strong className="text-white">반짝인 순서 그대로</strong> 기지를 눌러 신호를 보내게!
+        </CommanderSay>
         <button
           type="button"
           onClick={() => setStage("sequence")}
