@@ -10,12 +10,14 @@ import { FxHint, FxOverlay, playNote, shakeClass, useFx } from "../feedbackFx";
  *  1) 위치 기억(position): 반짝이는 위치(글자 없음)를 기억해서 똑같이 칩니다 (공간 위치 기억).
  *  2) 글자 보고 치기(text): "솔 → 미 → 도"를 글자로 보고, 글자에 맞는 건반을 찾아 칩니다.
  *  3) 글자 기억(recall): "솔 → 미 → 도"를 글자로 한꺼번에 보여준 뒤 글자를 없애고, 기억해서 같은 순서로 칩니다.
- *  4) 거꾸로 따라 치기(backward): 불빛과 소리를 보고 마지막 소리부터 거꾸로 칩니다 (기억 + 조작).
+ *  4) 거꾸로 · 위치(backward): 반짝이는 위치를 기억해서 마지막 위치부터 거꾸로 칩니다 (기억 + 조작).
+ *  5) 거꾸로 · 글자(backwardLetters): 글자가 나왔다 사라지면, 기억해서 마지막 글자부터 거꾸로 칩니다 (기억 + 조작).
+ * 단계 구성: 1단계 위치 기억 / 2단계 글자(글자 보고 치기 → 글자 기억) / 3단계 거꾸로(위치 → 글자).
  * 틀리면 같은 순서를 한 번 더 보여주고 다시 도전할 수 있어요(두 번째 시도는 점수에 넣지 않고 격려만 해요).
  * ⚠️ 놀이이므로 정답을 바로 알려줍니다. 결과는 별 개수 외에 저장하지 않습니다.
  */
 
-type Mode = "text" | "position" | "recall" | "backward";
+type Mode = "text" | "position" | "recall" | "backward" | "backwardLetters";
 
 const KEYS = [
   { label: "도", color: "#f43f5e", freq: 262 },
@@ -46,37 +48,46 @@ const MODE_INFO: Record<Mode, { icon: string; title: string; howto: string; play
   },
   backward: {
     icon: "⬅️",
-    title: "거꾸로 따라 치기",
-    howto: "반짝이고 소리 나는 순서를 기억해서, 마지막 소리부터 거꾸로 쳐요!",
-    playMsg: "⬅️ 거꾸로! 마지막 소리부터 쳐요",
+    title: "거꾸로 · 위치",
+    howto: "반짝이는 위치를 기억해서, 마지막 위치부터 거꾸로 쳐요! 건반에 글자가 없어요.",
+    playMsg: "⬅️ 거꾸로! 마지막 위치부터 쳐요",
+  },
+  backwardLetters: {
+    icon: "⬅️",
+    title: "거꾸로 · 글자",
+    howto: "글자가 나왔다 사라지면, 기억해서 마지막 글자부터 거꾸로 쳐요!",
+    playMsg: "⬅️ 글자가 사라졌어요! 마지막 글자부터 거꾸로 쳐요",
   },
 };
 
 // 단계별 판 구성: 방식과 순서 길이
 const PLAN: Record<1 | 2 | 3, { mode: Mode; len: number }[]> = {
+  // 1단계: 위치 기억만 (글자 없이 반짝이는 위치를 기억해요)
   1: [
-    { mode: "text", len: 2 },
-    { mode: "text", len: 3 },
     { mode: "position", len: 2 },
     { mode: "position", len: 2 },
     { mode: "position", len: 3 },
     { mode: "position", len: 3 },
-  ],
-  2: [
     { mode: "position", len: 3 },
     { mode: "position", len: 4 },
-    { mode: "recall", len: 2 },
+  ],
+  // 2단계: 글자 — 글자를 보면서 치는 연습 → 글자가 사라진 뒤 기억해서 치기
+  2: [
+    { mode: "text", len: 3 },
+    { mode: "text", len: 4 },
     { mode: "recall", len: 3 },
     { mode: "recall", len: 3 },
+    { mode: "recall", len: 4 },
     { mode: "recall", len: 4 },
   ],
+  // 3단계: 거꾸로 — 위치를 거꾸로 → 글자를 거꾸로
   3: [
-    { mode: "recall", len: 3 },
-    { mode: "recall", len: 4 },
     { mode: "backward", len: 2 },
     { mode: "backward", len: 3 },
     { mode: "backward", len: 3 },
-    { mode: "backward", len: 4 },
+    { mode: "backwardLetters", len: 3 },
+    { mode: "backwardLetters", len: 3 },
+    { mode: "backwardLetters", len: 4 },
   ],
 };
 
@@ -140,7 +151,9 @@ export default function PianoGame({ level, onFinish }: GameProps) {
 
   const round = rounds[roundIndex];
   const info = MODE_INFO[round.mode];
-  const expectedOf = (r: Round) => (r.mode === "backward" ? [...r.seq].reverse() : r.seq);
+  const isBackward = (mode: Mode) => mode === "backward" || mode === "backwardLetters";
+  const isLetterRecall = (mode: Mode) => mode === "recall" || mode === "backwardLetters";
+  const expectedOf = (r: Round) => (isBackward(r.mode) ? [...r.seq].reverse() : r.seq);
 
   // 순서를 보여주고 건반 치기 단계로 넘어갑니다.
   const startListen = (idx: number) => {
@@ -156,11 +169,11 @@ export default function PianoGame({ level, onFinish }: GameProps) {
     setPhase("listen");
 
     // 글자 기억: 글자를 한꺼번에 보여주고, 시간이 지나면 글자를 없애고 건반 치기 단계로 넘어갑니다.
-    if (r.mode === "recall") {
+    if (isLetterRecall(r.mode)) {
       setMessage("👀 글자를 한꺼번에 잘 보고 기억해요!");
       schedule(() => {
         setPhase("play");
-        setMessage(MODE_INFO.recall.playMsg);
+        setMessage(MODE_INFO[r.mode].playMsg);
       }, recallShowMs(r.seq.length));
       return;
     }
@@ -233,7 +246,7 @@ export default function PianoGame({ level, onFinish }: GameProps) {
         setMessage(
           round.mode === "text"
             ? `앗, ${KEYS[key].label}이(가) 아니에요. 글자를 다시 보고 쳐 봐요!`
-            : round.mode === "recall"
+            : isLetterRecall(round.mode)
               ? "앗, 다른 건반이에요. 글자를 다시 보여줄게요! 👀"
               : "앗, 다른 건반이에요. 다시 한 번 보여줄게요! 👀"
         );
@@ -257,14 +270,14 @@ export default function PianoGame({ level, onFinish }: GameProps) {
 
   // 글자 기억 방식에서는 글자를 한 번 더 볼 수 있어요(힌트를 쓰면 첫 시도 점수에는 넣지 않아요).
   const replay = () => {
-    if (phase !== "play" || round.mode !== "recall") return;
+    if (phase !== "play" || !isLetterRecall(round.mode)) return;
     attemptRef.current = 1;
     setReplayUsed(true);
     startListen(roundRef.current);
   };
 
   const expected = expectedOf(round);
-  const hideLabels = round.mode === "position";
+  const hideLabels = round.mode === "position" || round.mode === "backward";
 
   return (
     <div className={`relative flex flex-col items-center gap-4 text-center ${shakeClass(fx)}`}>
@@ -303,7 +316,7 @@ export default function PianoGame({ level, onFinish }: GameProps) {
       )}
 
       {/* 글자 기억: 글자를 한꺼번에 보여줬다가 없애요 (없어진 뒤에는 물음표 칸만 남아요) */}
-      {round.mode === "recall" && phase !== "intro" && (
+      {isLetterRecall(round.mode) && phase !== "intro" && (
         <div className="flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/20">
           {round.seq.map((key, i) => (
             <span key={i} className="flex items-center gap-2">
@@ -331,7 +344,7 @@ export default function PianoGame({ level, onFinish }: GameProps) {
 
       <FxHint fx={fx}>
         글자나 위치를 마음속으로 "도-미-솔"처럼 따라 말하면서 기억해 봐요!
-        {round.mode === "backward" && " 거꾸로는 마지막 음부터 쳐요."}
+        {isBackward(round.mode) && " 거꾸로는 마지막 것부터 쳐요."}
       </FxHint>
 
       <div className="flex w-full justify-center gap-2">
@@ -384,7 +397,7 @@ export default function PianoGame({ level, onFinish }: GameProps) {
         })}
       </div>
 
-      {round.mode === "recall" && phase === "play" && !replayUsed && (
+      {isLetterRecall(round.mode) && phase === "play" && !replayUsed && (
         <button
           type="button"
           onClick={replay}
