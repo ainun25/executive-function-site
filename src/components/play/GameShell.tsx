@@ -193,7 +193,9 @@ export default function GameShell({ gameId }: { gameId: GameId }) {
           </p>
           <CommanderSay>
             {result.stars === 3
-              ? "대단해요! 다음 단계에 도전해 볼까요?"
+              ? level < 3
+                ? "대단해요! 다음 단계에 도전해 볼까요?"
+                : "대단해요! 마지막 단계까지 멋지게 해냈어요! 다른 게임도 놀러 가 볼까요?"
               : result.stars === 2
                 ? "좋아요! 한 번 더 하면 더 멋져질 거예요."
                 : "끝까지 해낸 게 멋져요! 다시 하면 점점 쉬워져요."}
@@ -210,6 +212,14 @@ export default function GameShell({ gameId }: { gameId: GameId }) {
               >
                 다음 단계로 →
               </button>
+            )}
+            {level === 3 && (
+              <Link
+                href="/training"
+                className="block w-full rounded-full border border-[#00ff88] px-6 py-4 text-center text-lg font-bold text-[#00ff88] hover:bg-white/5"
+              >
+                다른 게임 하러 가기 →
+              </Link>
             )}
             <button
               type="button"
