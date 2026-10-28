@@ -42,6 +42,14 @@ const GAME_COMPONENTS: Record<GameId, (props: GameProps) => React.ReactElement> 
 
 type Screen = "intro" | "levels" | "play" | "result";
 
+// 활동 방법 줄에서는 이모티콘을 빼고 글자만 보여줍니다 (제목 앞에만 이모티콘을 씁니다).
+function plainText(line: string): string {
+  return line
+    .replace(/[\p{Extended_Pictographic}️‍]/gu, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
 const primaryButton =
   "w-full rounded-full bg-indigo-500 px-6 py-4 text-lg font-bold text-white hover:bg-indigo-600";
 
@@ -142,7 +150,10 @@ export default function GameShell({ gameId }: { gameId: GameId }) {
             <p className="text-sm font-extrabold text-indigo-600">🎯 이렇게 놀아요</p>
             <ul className="mt-2 space-y-2 text-base font-semibold leading-relaxed">
               {game.howTo.map((line) => (
-                <li key={line}>{line}</li>
+                <li key={line} className="flex gap-2">
+                  <span aria-hidden="true">·</span>
+                  <span>{plainText(line)}</span>
+                </li>
               ))}
             </ul>
           </div>
