@@ -2,14 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
-import { FxHint, FxOverlay, isFxMuted, playNote, shakeClass, useFx } from "../feedbackFx";
+import { FxHint, FxOverlay, canSpeak, cancelSpeech, isFxMuted, playNote, shakeClass, speakText, useFx } from "../feedbackFx";
 
 /**
  * 마법 피아노 (작업기억 - 순서 기억 놀이).
  * 건반을 칠 때마다 건반이 반짝이고 그 음("도레미파솔")이 소리 납니다. 네 가지 방식이 있어요.
  *  1) 위치 기억(position): 반짝이는 위치(글자 없음)를 기억해서 똑같이 칩니다 (공간 위치 기억).
  *  2) 글자 보고 치기(text): "솔 → 미 → 도"를 글자로 보고, 글자에 맞는 건반을 찾아 칩니다.
- *  3) 소리 기억(sound): 불빛 없이 소리만 듣고 기억해서 칩니다 (청각 기억).
+ *  3) 소리 기억(sound): 불빛 없이 "도, 레, 미"처럼 건반 이름을 말로만 들려주고, 듣고 기억해서 칩니다 (청각 기억).
+ *     말소리는 브라우저의 한국어 음성 읽기를 사용하고, 지원하지 않는 기기에서는 음(소리)으로 대신 들려줍니다.
  *  4) 거꾸로 따라 치기(backward): 불빛과 소리를 보고 마지막 소리부터 거꾸로 칩니다 (기억 + 조작).
  * 틀리면 같은 순서를 한 번 더 보여주고 다시 도전할 수 있어요(두 번째 시도는 점수에 넣지 않고 격려만 해요).
  * ⚠️ 놀이이므로 정답을 바로 알려줍니다. 결과는 별 개수 외에 저장하지 않습니다.
@@ -41,8 +42,8 @@ const MODE_INFO: Record<Mode, { icon: string; title: string; howto: string; play
   sound: {
     icon: "🎧",
     title: "소리 기억",
-    howto: "불빛 없이 소리만 나와요. 잘 듣고 기억해서 같은 소리의 건반을 쳐요!",
-    playMsg: "🎧 들은 소리 순서대로 쳐요",
+    howto: "불빛 없이 \"도, 레, 미\"처럼 건반 이름을 말로만 들려줘요. 잘 듣고 기억해서 같은 건반을 쳐요!",
+    playMsg: "🎧 들은 말 순서대로 건반을 쳐요",
   },
   backward: {
     icon: "⬅️",
@@ -117,12 +118,14 @@ export default function PianoGame({ level, onFinish }: GameProps) {
   const [lastOk, setLastOk] = useState<boolean | null>(null);
   const [replayUsed, setReplayUsed] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [speechFallback, setSpeechFallback] = useState(false);
 
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const attemptRef = useRef(0); // 이번 판의 시도 횟수 (0: 첫 시도)
   const correctFirstTryRef = useRef(0);
   const roundRef = useRef(0);
   const finishedRef = useRef(false);
+  const listenTokenRef = useRef(0); // 말소리 듣기 도중에 판이 바뀌면 이전 듣기를 멈추기 위한 표시
 
   const schedule = (fn: () => void, ms: number) => {
     timeoutsRef.current.push(setTimeout(fn, ms));
@@ -131,7 +134,11 @@ export default function PianoGame({ level, onFinish }: GameProps) {
   useEffect(() => {
     setMuted(isFxMuted());
     beginRound(0);
-    return () => timeoutsRef.current.forEach(clearTimeout);
+    return () => {
+      listenTokenRef.current += 1;
+      cancelSpeech();
+      timeoutsRef.current.forEach(clearTimeout);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -151,6 +158,29 @@ export default function PianoGame({ level, onFinish }: GameProps) {
       return;
     }
     setPhase("listen");
+    listenTokenRef.current += 1;
+    const token = listenTokenRef.current;
+    cancelSpeech();
+
+    // 소리 기억: "도, 레, 미"를 말로 들려줍니다 (불빛 없음). 말하기를 지원하지 않으면 음으로 대신 들려줍니다.
+    if (r.mode === "sound" && canSpeak()) {
+      setSpeechFallback(false);
+      setMessage("🎧 말소리를 잘 들어요!");
+      const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+      void (async () => {
+        await wait(700);
+        for (const key of r.seq) {
+          if (token !== listenTokenRef.current) return;
+          await speakText(KEYS[key].label);
+          await wait(450);
+        }
+        if (token !== listenTokenRef.current) return;
+        setPhase("play");
+        setMessage(MODE_INFO.sound.playMsg);
+      })();
+      return;
+    }
+    if (r.mode === "sound") setSpeechFallback(true);
     setMessage(r.mode === "sound" ? "🎧 소리를 잘 들어요!" : "👀 잘 보고 기억해요!");
     let t = 700;
     r.seq.forEach((key) => {
@@ -305,6 +335,9 @@ export default function PianoGame({ level, onFinish }: GameProps) {
 
       {round.mode === "sound" && muted && (
         <p className="text-xs text-amber-300">🔇 소리가 꺼져 있어요. 위쪽 🔊 버튼을 눌러 소리를 켜 주세요!</p>
+      )}
+      {round.mode === "sound" && speechFallback && (
+        <p className="text-xs text-amber-300">이 기기는 말소리 읽기를 지원하지 않아서, 말 대신 음(띵)으로 들려줘요.</p>
       )}
 
       <FxHint fx={fx}>

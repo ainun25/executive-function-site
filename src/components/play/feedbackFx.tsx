@@ -194,3 +194,47 @@ export function playNote(freq: number): void {
   if (isFxMuted()) return;
   tone(freq, 0, 0.55, "sine", 0.22);
 }
+
+/** 이 기기(브라우저)가 말소리 읽기(음성 합성)를 지원하는지 확인합니다. */
+export function canSpeak(): boolean {
+  return typeof window !== "undefined" && "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
+}
+
+/** 한국어로 짧은 말을 소리 내어 읽고, 다 읽으면 끝납니다(최대 2.5초). 소리가 꺼져 있거나 지원하지 않으면 바로 끝납니다. */
+export function speakText(text: string, rate = 0.8): Promise<void> {
+  return new Promise((resolve) => {
+    if (isFxMuted() || !canSpeak()) {
+      resolve();
+      return;
+    }
+    try {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "ko-KR";
+      utterance.rate = rate;
+      utterance.pitch = 1.1;
+      const voice = window.speechSynthesis.getVoices().find((v) => v.lang.toLowerCase().startsWith("ko"));
+      if (voice) utterance.voice = voice;
+      let done = false;
+      const finish = () => {
+        if (!done) {
+          done = true;
+          resolve();
+        }
+      };
+      utterance.onend = finish;
+      utterance.onerror = finish;
+      setTimeout(finish, 2500);
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      resolve();
+    }
+  });
+}
+
+export function cancelSpeech(): void {
+  try {
+    window.speechSynthesis?.cancel();
+  } catch {
+    // 지원하지 않는 기기에서는 무시합니다.
+  }
+}
