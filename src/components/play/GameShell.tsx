@@ -100,7 +100,7 @@ export default function GameShell({ gameId }: { gameId: GameId }) {
     <div className="rounded-3xl bg-gradient-to-b from-[#1a1f3c] to-[#050a18] p-5 text-white sm:p-7">
       <div className="mb-4 flex items-center justify-between text-xs text-slate-300">
         <Link href="/training" className="hover:underline">
-          ← 놀이 목록
+          놀이 목록
         </Link>
         <span className="flex items-center gap-3">
           <button
@@ -224,7 +224,7 @@ export default function GameShell({ gameId }: { gameId: GameId }) {
                 onClick={() => start((level + 1) as GameLevel)}
                 className="w-full rounded-full border border-[#00ff88] px-6 py-4 text-lg font-bold text-[#00ff88] hover:bg-white/5"
               >
-                다음 단계로 →
+                다음 단계로
               </button>
             )}
             {level === 3 && (
@@ -232,7 +232,7 @@ export default function GameShell({ gameId }: { gameId: GameId }) {
                 href="/training"
                 className="block w-full rounded-full border border-[#00ff88] px-6 py-4 text-center text-lg font-bold text-[#00ff88] hover:bg-white/5"
               >
-                다른 게임 하러 가기 →
+                다른 게임 하러 가기
               </Link>
             )}
             <button

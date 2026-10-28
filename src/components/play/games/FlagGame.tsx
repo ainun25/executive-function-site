@@ -27,7 +27,7 @@ interface Spec {
 }
 
 const MID: Record<Flag, Pos> = { blue: "mid", white: "mid" };
-const POS_LABEL: Record<Pos, string> = { up: "올라감 ⬆️", mid: "가운데", down: "내려감 ⬇️" };
+const POS_LABEL: Record<Pos, string> = { up: "올라감", mid: "가운데", down: "내려감" };
 const POS_BOTTOM: Record<Pos, number> = { down: 0, mid: 28, up: 56 };
 
 // 단계별 설정: 문항 수, 도깨비 비율, 반대 대장 비율, 반응 시간(ms), "내려" 지시를 쓰는지

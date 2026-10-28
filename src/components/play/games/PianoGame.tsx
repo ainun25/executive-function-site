@@ -47,16 +47,16 @@ const MODE_INFO: Record<Mode, { icon: string; title: string; howto: string; play
     playMsg: "🧠 글자가 사라졌어요! 기억한 순서대로 쳐요",
   },
   backward: {
-    icon: "⬅️",
+    icon: "🔄",
     title: "거꾸로 · 위치",
     howto: "반짝이는 위치를 기억해서, 마지막 위치부터 거꾸로 쳐요! 건반에 글자가 없어요.",
-    playMsg: "⬅️ 거꾸로! 마지막 위치부터 쳐요",
+    playMsg: "🔄 거꾸로! 마지막 위치부터 쳐요",
   },
   backwardLetters: {
-    icon: "⬅️",
+    icon: "🔄",
     title: "거꾸로 · 글자",
     howto: "글자가 나왔다 사라지면, 기억해서 마지막 글자부터 거꾸로 쳐요!",
-    playMsg: "⬅️ 글자가 사라졌어요! 마지막 글자부터 거꾸로 쳐요",
+    playMsg: "🔄 글자가 사라졌어요! 마지막 글자부터 거꾸로 쳐요",
   },
 };
 
@@ -297,7 +297,6 @@ export default function PianoGame({ level, onFinish }: GameProps) {
             const current = i === input.length;
             return (
               <span key={i} className="flex items-center gap-2">
-                {i > 0 && <span className="text-slate-400">→</span>}
                 <span
                   className={`flex h-14 w-14 items-center justify-center rounded-xl text-3xl font-extrabold ${
                     done
@@ -320,7 +319,6 @@ export default function PianoGame({ level, onFinish }: GameProps) {
         <div className="flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/20">
           {round.seq.map((key, i) => (
             <span key={i} className="flex items-center gap-2">
-              {i > 0 && <span className="text-slate-400">→</span>}
               <span
                 className={`flex h-14 w-14 items-center justify-center rounded-xl text-3xl font-extrabold ${
                   phase === "listen" ? "bg-white/15 text-white" : "border-2 border-dashed border-white/30 text-slate-500"

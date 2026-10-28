@@ -34,7 +34,7 @@ function SideBox({ side, children, dark }: { side: "left" | "right"; children: R
   return (
     <div className={`flex flex-1 flex-col items-center gap-1 rounded-xl p-2 ${dark ? "bg-white/10" : "bg-white"}`}>
       <p className={`text-xs font-bold ${dark ? "text-slate-300" : "text-slate-500"}`}>
-        {side === "left" ? "← 왼쪽 버튼" : "오른쪽 버튼 →"}
+        {side === "left" ? "왼쪽 버튼" : "오른쪽 버튼"}
       </p>
       {children}
     </div>

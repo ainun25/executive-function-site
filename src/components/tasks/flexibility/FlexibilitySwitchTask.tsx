@@ -258,14 +258,14 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
           onClick={() => handleResponse("left")}
           className="rounded-full bg-indigo-500 px-4 py-4 text-lg font-bold text-white hover:bg-indigo-600"
         >
-          ← 왼쪽
+          왼쪽
         </button>
         <button
           type="button"
           onClick={() => handleResponse("right")}
           className="rounded-full bg-indigo-500 px-4 py-4 text-lg font-bold text-white hover:bg-indigo-600"
         >
-          오른쪽 →
+          오른쪽
         </button>
       </div>
     </div>
