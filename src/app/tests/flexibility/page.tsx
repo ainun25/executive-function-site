@@ -6,6 +6,7 @@ import TestSessionShell from "@/components/tasks/common/TestSessionShell";
 import DeviceRecommendationNotice from "@/components/tasks/common/DeviceRecommendationNotice";
 import ParticipantGate from "@/components/tasks/common/ParticipantGate";
 import FlexibilitySwitchTask from "@/components/tasks/flexibility/FlexibilitySwitchTask";
+import { RuleGuide } from "@/components/tasks/flexibility/RuleCard";
 import type { FlexibilityConfig } from "@/lib/flexibilityEngine";
 import { toPracticeConfig } from "@/lib/testConfig";
 import { useTestConfig } from "@/lib/useTestConfig";
@@ -82,11 +83,12 @@ function PhaseContent({
           <div className="rounded-2xl bg-indigo-50 p-6 ring-1 ring-indigo-200">
             <h2 className="text-lg font-bold text-slate-900">이런 검사예요</h2>
             <p className="mt-3 leading-relaxed text-slate-700">
-              화면에 도형이 나타나요. 처음에는 <strong>색깔</strong> 규칙(빨강 → 왼쪽, 파랑 →
-              오른쪽)으로 분류하다가, 중간에 <strong>모양</strong> 규칙(원 → 왼쪽, 세모 → 오른쪽)으로
-              바뀌어요. 화면 위쪽에 지금 규칙이 무엇인지 항상 보여줄 거예요.
+              화면에 도형이 나타나요. 규칙에 따라 왼쪽 또는 오른쪽 버튼을 눌러요. 도형 창에{" "}
+              <strong>노란 프레임이 없으면 색깔</strong>, <strong>노란 프레임이 있으면 모양</strong>으로
+              나눠요. 같은 규칙이 한동안 이어지다가 바뀌고, 바뀔 때마다 안내가 나와요.
             </p>
           </div>
+          <RuleGuide />
           <DeviceRecommendationNotice />
           <div className="rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
             본 검사는 실행기능의 일부 특성을 살펴보기 위한 교육·연구용 수행과제이며, 의학적 또는
