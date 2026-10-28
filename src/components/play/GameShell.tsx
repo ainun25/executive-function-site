@@ -13,6 +13,7 @@ import {
   type GameLevel,
 } from "@/lib/trainingGames";
 import { CommanderSay, StoryScene } from "@/components/tasks/story/StoryParts";
+import { isFxMuted, setFxMuted } from "./feedbackFx";
 import BrakeGame from "./games/BrakeGame";
 import PianoGame from "./games/PianoGame";
 import CaveGame from "./games/CaveGame";
@@ -71,6 +72,11 @@ export default function GameShell({ gameId }: { gameId: GameId }) {
   const [runKey, setRunKey] = useState(0);
   const [result, setResult] = useState<{ stars: 1 | 2 | 3; correct: number; total: number } | null>(null);
   const [saved, setSaved] = useState<Partial<Record<GameLevel, number>>>({});
+  const [muted, setMuted] = useState(false);
+
+  useEffect(() => {
+    setMuted(isFxMuted());
+  }, []);
 
   useEffect(() => {
     setSaved(loadStars(gameId));
@@ -95,7 +101,20 @@ export default function GameShell({ gameId }: { gameId: GameId }) {
         <Link href="/training" className="hover:underline">
           ← 놀이 목록
         </Link>
-        <span>{DOMAIN_NAMES[game.domain]}</span>
+        <span className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setFxMuted(!muted);
+              setMuted(!muted);
+            }}
+            aria-label={muted ? "소리 켜기" : "소리 끄기"}
+            className="rounded-full bg-white/10 px-2 py-1 text-sm"
+          >
+            {muted ? "🔇" : "🔊"}
+          </button>
+          {DOMAIN_NAMES[game.domain]}
+        </span>
       </div>
 
       {screen === "intro" && (

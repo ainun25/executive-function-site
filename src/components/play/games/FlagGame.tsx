@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
+import { FxHint, FxOverlay, shakeClass, useFx } from "../feedbackFx";
 
 /**
  * 청기백기 깃발 대장 (억제통제 놀이).
@@ -61,6 +62,7 @@ function makeTrials(level: 1 | 2 | 3): Trial[] {
 
 export default function FlagGame({ level, onFinish }: GameProps) {
   const cfg = CONFIG[level];
+  const fx = useFx();
   const [trials] = useState<Trial[]>(() => makeTrials(level));
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<"wait" | "command" | "feedback">("wait");
@@ -100,6 +102,9 @@ export default function FlagGame({ level, onFinish }: GameProps) {
     timeoutsRef.current.forEach(clearTimeout);
     timeoutsRef.current = [];
     if (ok) correctRef.current += 1;
+    const ghostPressed = text.includes("도깨비 말이에요");
+    if (ok) fx.hit("통과!");
+    else fx.miss(ghostPressed ? "쿵!" : "앗!", ghostPressed);
     setFeedback({ ok, text });
     changePhase("feedback");
     schedule(() => {
@@ -147,7 +152,8 @@ export default function FlagGame({ level, onFinish }: GameProps) {
   const buttons = cfg.actions.flatMap((action) => (["blue", "white"] as Flag[]).map((flag) => ({ flag, action })));
 
   return (
-    <div className="flex flex-col items-center gap-4 text-center">
+    <div className={`relative flex flex-col items-center gap-4 text-center ${shakeClass(fx)}`}>
+      <FxOverlay fx={fx} />
       <p className="text-xs text-slate-400">
         {Math.min(index + 1, trials.length)} / {trials.length}
       </p>
@@ -193,6 +199,8 @@ export default function FlagGame({ level, onFinish }: GameProps) {
       >
         {feedback ? feedback.text : phase === "command" ? "도깨비면 누르지 말고 참아요!" : ""}
       </p>
+
+      <FxHint fx={fx}>도깨비 말은 참기 · 깃발 대장은 말한 그대로 · 반대 대장은 반대로!</FxHint>
 
       <div className={`grid w-full gap-3 ${buttons.length === 2 ? "grid-cols-2" : "grid-cols-2"}`}>
         {buttons.map(({ flag, action }) => (

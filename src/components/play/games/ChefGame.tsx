@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
+import { FxHint, FxOverlay, shakeClass, useFx } from "../feedbackFx";
 
 /**
  * 변덕쟁이 요리사 (인지적 유연성 놀이).
@@ -73,6 +74,7 @@ function correctSide(rule: Rule, food: Food): "left" | "right" {
 
 export default function ChefGame({ level, onFinish }: GameProps) {
   const cfg = CONFIG[level];
+  const fx = useFx();
   const [trials] = useState<Trial[]>(() => makeTrials(level));
   const [index, setIndex] = useState(0);
   const [announcing, setAnnouncing] = useState(true);
@@ -102,12 +104,14 @@ export default function ChefGame({ level, onFinish }: GameProps) {
   const text = RULE_TEXT[trial.rule];
   const isChange = index > 0;
   // 3단계는 규칙이 바뀐 직후 첫 재료에서만 바구니 글자를 보여줍니다.
-  const showCue = cfg.alwaysShowCue || trial.runPosition === 0;
+  const showCue = cfg.alwaysShowCue || trial.runPosition === 0 || fx.misses >= 2;
 
   const choose = (side: "left" | "right") => {
     if (feedback || announcing) return;
     const ok = side === correctSide(trial.rule, trial.food);
     if (ok) correctRef.current += 1;
+    if (ok) fx.hit("통과!");
+    else fx.miss("앗!");
     const answer = correctSide(trial.rule, trial.food) === "left" ? text.left : text.right;
     setFeedback(
       ok
@@ -167,7 +171,8 @@ export default function ChefGame({ level, onFinish }: GameProps) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 text-center">
+    <div className={`relative flex flex-col items-center gap-4 text-center ${shakeClass(fx)}`}>
+      <FxOverlay fx={fx} />
       <p className="text-xs text-slate-400">
         {index + 1} / {trials.length}
       </p>
@@ -185,6 +190,7 @@ export default function ChefGame({ level, onFinish }: GameProps) {
       >
         {feedback ? feedback.text : "🧺 어느 바구니에 넣을까요?"}
       </p>
+      <FxHint fx={fx}>지금은 "{text.title}" 주문이에요! 바구니 글자를 다시 보여줄게요.</FxHint>
 
       <div className="grid w-full grid-cols-2 gap-3">
         <button

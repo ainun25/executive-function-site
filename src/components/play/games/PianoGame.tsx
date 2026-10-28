@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
+import { FxHint, FxOverlay, shakeClass, useFx } from "../feedbackFx";
 
 /**
  * 마법 피아노 (작업기억 놀이).
@@ -64,6 +65,7 @@ function playTone(ctx: AudioContext | null, freq: number) {
 
 export default function PianoGame({ level, onFinish }: GameProps) {
   const cfg = CONFIG[level];
+  const fx = useFx();
   const [rounds] = useState<number[][]>(() => makeRounds(level));
   const [roundIndex, setRoundIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("listen");
@@ -148,6 +150,7 @@ export default function PianoGame({ level, onFinish }: GameProps) {
     if (key !== expected[input.length]) {
       // 틀렸을 때: 순서를 한 번 더 들려주고 다시 도전해요.
       setLastOk(false);
+      fx.miss("앗!");
       setPhase("feedback");
       if (attemptRef.current === 0) {
         attemptRef.current = 1;
@@ -164,6 +167,7 @@ export default function PianoGame({ level, onFinish }: GameProps) {
     if (next.length === expected.length) {
       if (attemptRef.current === 0) correctFirstTryRef.current += 1;
       setLastOk(true);
+      fx.hit("딩동댕!");
       setPhase("feedback");
       setMessage("딩동댕! 잘 쳤어요 🎉");
       schedule(nextRound, 1300);
@@ -173,7 +177,8 @@ export default function PianoGame({ level, onFinish }: GameProps) {
   const seqLen = rounds[roundIndex].length;
 
   return (
-    <div className="flex flex-col items-center gap-4 text-center">
+    <div className={`relative flex flex-col items-center gap-4 text-center ${shakeClass(fx)}`}>
+      <FxOverlay fx={fx} />
       <p className="text-xs text-slate-400">
         {roundIndex + 1} / {rounds.length} · 순서 길이 {seqLen}개
       </p>
@@ -185,6 +190,10 @@ export default function PianoGame({ level, onFinish }: GameProps) {
       >
         {message}
       </p>
+
+      <FxHint fx={fx}>
+        소리를 마음속으로 "도-미-솔"처럼 따라 말하면서 기억해 봐요!{cfg.backward && " 거꾸로는 마지막 건반부터 눌러요."}
+      </FxHint>
 
       <div className="flex w-full justify-center gap-2">
         {KEYS.slice(0, cfg.keys).map((key, i) => {

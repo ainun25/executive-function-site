@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
+import { FxHint, FxOverlay, shakeClass, useFx } from "../feedbackFx";
 
 /**
  * 조건에 맞는 동굴 항해 (인지적 유연성 놀이).
@@ -136,6 +137,7 @@ function CaveCard({ cave, large }: { cave: Cave; large?: boolean }) {
 
 export default function CaveGame({ level, onFinish }: GameProps) {
   const cfg = CONFIG[level];
+  const fx = useFx();
   const [trials] = useState<TrialSpec[]>(() => makeTrials(level));
   const [index, setIndex] = useState(0);
   const [announcing, setAnnouncing] = useState(true);
@@ -163,12 +165,15 @@ export default function CaveGame({ level, onFinish }: GameProps) {
 
   const trial = trials[index];
   const prevRule = index > 0 ? trials[index - 1].rule : null;
-  const showRule = cfg.alwaysShowRule || trial.firstOfRun;
+  // 2번 연속 틀리면 규칙을 다시 보여줍니다(힌트).
+  const showRule = cfg.alwaysShowRule || trial.firstOfRun || fx.misses >= 2;
 
   const choose = (optionIndex: number) => {
     if (feedback || announcing) return;
     const ok = optionIndex === trial.correctIndex;
     if (ok) correctRef.current += 1;
+    if (ok) fx.hit("통과!");
+    else fx.miss("쿵!", true);
     setFeedback(
       ok
         ? { ok: true, text: "🎉 통과! 딱 맞는 동굴이에요" }
@@ -223,7 +228,8 @@ export default function CaveGame({ level, onFinish }: GameProps) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 text-center">
+    <div className={`relative flex flex-col items-center gap-4 text-center ${shakeClass(fx)}`}>
+      <FxOverlay fx={fx} />
       <p className="text-xs text-slate-400">
         {index + 1} / {trials.length}
       </p>
@@ -244,6 +250,7 @@ export default function CaveGame({ level, onFinish }: GameProps) {
       >
         {feedback ? feedback.text : "⛵ 어느 동굴로 들어갈까요?"}
       </p>
+      <FxHint fx={fx}>지도 그림과 "{DIM_NAME[trial.rule]}"이 같은 동굴을 골라요!</FxHint>
 
       <div className={`grid w-full gap-3 ${cfg.options === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
         {trial.options.map((option, i) => (

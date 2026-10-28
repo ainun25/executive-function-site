@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
+import { FxHint, FxOverlay, shakeClass, useFx } from "../feedbackFx";
 
 /**
  * 여행 가방 챙기기 (작업기억 - 기억 용량 놀이).
@@ -60,6 +61,7 @@ type Phase = "show" | "choose" | "feedback";
 
 export default function SuitcaseGame({ level, onFinish }: GameProps) {
   const cfg = CONFIG[level];
+  const fx = useFx();
   const [rounds] = useState<Round[]>(() => makeRounds(level));
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("show");
@@ -90,6 +92,8 @@ export default function SuitcaseGame({ level, onFinish }: GameProps) {
     const ok = picked.length === round.shown.length && round.shown.every((item) => picked.includes(item));
     const hits = picked.filter((item) => round.shown.includes(item)).length;
     if (ok) correctRef.current += 1;
+    if (ok) fx.hit("통과!");
+    else fx.miss("앗!");
     setResult({
       ok,
       text: ok
@@ -122,7 +126,8 @@ export default function SuitcaseGame({ level, onFinish }: GameProps) {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 text-center">
+    <div className={`relative flex flex-col items-center gap-4 text-center ${shakeClass(fx)}`}>
+      <FxOverlay fx={fx} />
       <p className="text-xs text-slate-400">
         {index + 1} / {rounds.length} · 물건 {round.shown.length}개
       </p>
@@ -188,6 +193,7 @@ export default function SuitcaseGame({ level, onFinish }: GameProps) {
       >
         {result?.text ?? ""}
       </p>
+      <FxHint fx={fx}>물건들로 짧은 이야기를 지어 보세요. (모자를 쓰고, 양말을 신고, 손전등을 들었어요)</FxHint>
     </div>
   );
 }

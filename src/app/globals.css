@@ -48,3 +48,53 @@ body {
     animation: none;
   }
 }
+
+/* 놀이 게임 피드백: 맞았을 때 팝업, 틀렸을 때 화면 흔들림 */
+@keyframes ef-pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.ef-pop {
+  animation: ef-pop 0.35s ease-out both;
+}
+
+@keyframes ef-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-9px);
+  }
+  40% {
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(-6px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+.ef-shake {
+  animation: ef-shake 0.45s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ef-pop,
+  .ef-shake {
+    animation: none;
+  }
+}

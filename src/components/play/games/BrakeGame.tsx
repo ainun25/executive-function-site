@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
+import { FxHint, FxOverlay, shakeClass, useFx } from "../feedbackFx";
 
 /**
  * 꼬마 자동차 브레이크 (억제통제 놀이).
@@ -52,6 +53,8 @@ function makeSigns(level: 1 | 2 | 3): Sign[] {
 
 export default function BrakeGame({ level, onFinish }: GameProps) {
   const cfg = CONFIG[level];
+  const fx = useFx();
+  const [crashed, setCrashed] = useState(false);
   const [signs] = useState<Sign[]>(() => makeSigns(level));
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("ready");
@@ -82,6 +85,7 @@ export default function BrakeGame({ level, onFinish }: GameProps) {
 
   const startDrive = useCallback(() => {
     changePhase("driving");
+    setCrashed(false);
     setMessage("달려요~ 🚗💨");
     setLastOk(null);
     // 신호가 나오기 전까지 잠깐 달립니다 (신호가 나오는 시점을 예측하기 어렵게 시간을 조금씩 다르게)
@@ -96,9 +100,12 @@ export default function BrakeGame({ level, onFinish }: GameProps) {
     schedule(onTimeout, cfg.windowMs);
   };
 
-  const finishEvent = (ok: boolean, text: string) => {
+  const finishEvent = (ok: boolean, text: string, crash = false) => {
     clearAll();
     if (ok) correctRef.current += 1;
+    if (ok) fx.hit("통과!");
+    else fx.miss(crash ? "쿵!" : "앗!", crash);
+    setCrashed(crash);
     setLastOk(ok);
     setMessage(text);
     changePhase("feedback");
@@ -131,15 +138,15 @@ export default function BrakeGame({ level, onFinish }: GameProps) {
     }
     if (phaseRef.current !== "signal") return;
     const sign = signs[indexRef.current];
-    if (sign.stop) finishEvent(true, "끼익~ 잘 멈췄어요! 👍");
-    else finishEvent(false, `${sign.label}에서는 계속 달려야 해요!`);
+    if (sign.stop) finishEvent(true, `🛑 통과! 끼익~ ${sign.label}에서 잘 멈췄어요 👍`);
+    else finishEvent(false, `앗, 지금은 달려도 돼요! ${sign.label}에서는 손을 떼지 않아도 돼요`);
   };
 
   const onTimeout = () => {
     if (phaseRef.current !== "signal") return;
     const sign = signs[indexRef.current];
-    if (sign.stop) finishEvent(false, `앗! ${sign.label}에서는 멈춰야 해요!`);
-    else finishEvent(true, "쌩쌩~ 잘 달렸어요! 👍");
+    if (sign.stop) finishEvent(false, `쿵! ${sign.label}에서 멈추지 못했어요. 멈춤 신호가 나오면 손을 떼요!`, true);
+    else finishEvent(true, `🟢 통과! ${sign.label}에서 계속 잘 달렸어요 👍`);
   };
 
   const press = () => {
@@ -180,7 +187,11 @@ export default function BrakeGame({ level, onFinish }: GameProps) {
   const isDriving = phase === "driving" || phase === "signal";
 
   return (
-    <div className="flex select-none flex-col items-center gap-4 text-center" style={{ touchAction: "none" }}>
+    <div
+      className={`relative flex select-none flex-col items-center gap-4 text-center ${shakeClass(fx)}`}
+      style={{ touchAction: "none" }}
+    >
+      <FxOverlay fx={fx} />
       <p className="text-xs text-slate-400">
         {Math.min(index + 1, signs.length)} / {signs.length}
       </p>
@@ -201,7 +212,7 @@ export default function BrakeGame({ level, onFinish }: GameProps) {
         </div>
         <div className="absolute left-1/2 top-0 h-full w-1 -translate-x-1/2 bg-[repeating-linear-gradient(to_bottom,#fde68a_0_14px,transparent_14px_28px)] opacity-40" />
         <p className={`relative text-6xl ${isDriving && holding ? "animate-bounce" : ""}`} aria-hidden="true">
-          🚗
+          {crashed ? "💥" : "🚗"}
         </p>
       </div>
 
@@ -213,6 +224,8 @@ export default function BrakeGame({ level, onFinish }: GameProps) {
       >
         {message}
       </p>
+
+      <FxHint fx={fx}>🛑·🚧가 나오면 손 떼기, 🟢·🌳·🟡가 나오면 계속 누르고 있기!</FxHint>
 
       {/* 페달 */}
       <button
