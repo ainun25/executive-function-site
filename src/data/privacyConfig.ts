@@ -3,9 +3,9 @@
 
 export const privacyConfig = {
   // 운영자: "개인(교사·연구자)"이면 이름이나 별칭, 기관이면 기관명 (예: "OO초등학교 OOO 교사")
-  operatorName: "",
+  operatorName: "아이눈",
   // 개인정보 문의·열람·삭제 요청을 받을 이메일 (공개되어도 되는 전용 주소를 권장)
-  contactEmail: "",
+  contactEmail: "ainunn@nate.com",
   // 보관 기간 (처리방침과 동의 화면에 같은 문구로 쓰입니다)
   retentionPeriod: "수집일로부터 1년",
   // 처리방침 시행일
