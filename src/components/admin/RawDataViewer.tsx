@@ -13,7 +13,11 @@ const TASK_LABELS: Record<EFDomain, string> = {
 
 export default function RawDataViewer() {
   const [taskFilter, setTaskFilter] = useState<EFDomain | "all">("all");
-  const [rows, setRows] = useState<RawDataRow[]>([]);
+  const [allRows, setRows] = useState<RawDataRow[]>([]);
+  const [versionFilter, setVersionFilter] = useState<"all" | "standard" | "story">("all");
+  const countByVersion = (value: "all" | "standard" | "story") =>
+    value === "all" ? allRows.length : allRows.filter((row) => row.testVersion === value).length;
+  const rows = versionFilter === "all" ? allRows : allRows.filter((row) => row.testVersion === versionFilter);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -27,7 +31,7 @@ export default function RawDataViewer() {
   const handleDownload = () => {
     const csv = buildRawDataCsv(rows);
     const dateStr = new Date().toISOString().slice(0, 10);
-    downloadCsv(`ef-raw-data_${taskFilter}_${dateStr}.csv`, csv);
+    downloadCsv(`ef-raw-data_${versionFilter}_${taskFilter}_${dateStr}.csv`, csv);
   };
 
   return (
@@ -52,6 +56,26 @@ export default function RawDataViewer() {
         >
           CSV 다운로드 ({rows.length}행)
         </button>
+      </div>
+
+
+      {/* 검사 유형: 표준형과 스토리형은 점수를 직접 비교할 수 없으므로 따로 볼 수 있게 합니다 */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-semibold text-slate-400">유형</span>
+        {(
+          [
+            ["all", "전체"],
+            ["standard", "표준형"],
+            ["story", "스토리형"],
+          ] as const
+        ).map(([value, label]) => (
+          <FilterButton
+            key={value}
+            label={`${label} (${countByVersion(value)})`}
+            isActive={versionFilter === value}
+            onClick={() => setVersionFilter(value)}
+          />
+        ))}
       </div>
 
       <p className="text-xs text-indigo-600">
