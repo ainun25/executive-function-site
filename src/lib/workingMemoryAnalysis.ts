@@ -29,7 +29,9 @@ function parseSequence(value: string | null): number[] {
     .map(Number);
 }
 
-export function analyzeWorkingMemoryTrials(trials: TrialRecord[]): WorkingMemoryAnalysis {
+export function analyzeWorkingMemoryTrials(allTrials: TrialRecord[]): WorkingMemoryAnalysis {
+  // 스토리형에는 "보급품 확인"(cap-) 문항이 함께 기록되므로, 순서 기억(span-) 문항만 분석합니다.
+  const trials = allTrials.filter((trial) => trial.condition.startsWith("span-"));
   const validTrials = trials.filter((trial) => trial.validTrial);
   const correctTrials = validTrials.filter((trial) => trial.isCorrect);
 

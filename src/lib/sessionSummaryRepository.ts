@@ -1,6 +1,7 @@
 import { supabase } from "./supabaseClient";
 import type { EFDomain, TestVersion, TrialRecord } from "@/types";
 import { summarizeByStage } from "./storyInhibition";
+import { analyzeCapacityTrials } from "./storyCapacity";
 import { analyzeInhibitionTrials } from "./inhibitionAnalysis";
 import { analyzeWorkingMemoryTrials } from "./workingMemoryAnalysis";
 import { analyzeFlexibilityTrials } from "./flexibilityAnalysis";
@@ -31,6 +32,10 @@ export function buildSessionSummary(
   // 스토리형 억제통제는 단계(행성/UFO/요원)별 요약도 함께 저장합니다.
   if (version === "story" && domain === "inhibition") {
     analysis = { ...analysis, stageSummary: summarizeByStage(trials) };
+  }
+  // 스토리형 작업기억은 보급품 확인(기억 용량) 요약도 함께 저장합니다.
+  if (version === "story" && domain === "workingMemory") {
+    analysis = { ...analysis, capacitySummary: analyzeCapacityTrials(trials) };
   }
   return settings ? { ...analysis, testSettings: settings } : analysis;
 }

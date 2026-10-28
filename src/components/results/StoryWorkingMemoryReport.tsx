@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { analyzeWorkingMemoryTrials } from "@/lib/workingMemoryAnalysis";
+import { analyzeCapacityTrials, type CapacityAnalysis } from "@/lib/storyCapacity";
 import { ageGroupLabel, gradeLabel } from "@/lib/ageGroup";
 import type { ParticipantInfo, TrialRecord } from "@/types";
 import ReactionTimeLineChart from "./ReactionTimeLineChart";
@@ -23,6 +24,7 @@ interface StoryWorkingMemoryReportProps {
 export default function StoryWorkingMemoryReport({ trials, participant }: StoryWorkingMemoryReportProps) {
   const [viewMode, setViewMode] = useState<ResultViewMode>("easy");
   const analysis = analyzeWorkingMemoryTrials(trials);
+  const capacity = analyzeCapacityTrials(trials);
 
   return (
     <div className="space-y-6">
@@ -39,7 +41,11 @@ export default function StoryWorkingMemoryReport({ trials, participant }: StoryW
         </p>
       </div>
 
-      {viewMode === "easy" ? <EasyView analysis={analysis} /> : <DetailView analysis={analysis} trials={trials} />}
+      {viewMode === "easy" ? (
+        <EasyView analysis={analysis} capacity={capacity} />
+      ) : (
+        <DetailView analysis={analysis} capacity={capacity} trials={trials} />
+      )}
 
       <p className="rounded-xl bg-indigo-50 p-4 text-center text-xs leading-relaxed text-indigo-800">
         이 결과는 작업기억의 일부 특성을 살펴본 수행과제 결과이며, 진단이 아니에요. 스토리형 검사는 표준형 검사와
@@ -59,7 +65,7 @@ export default function StoryWorkingMemoryReport({ trials, participant }: StoryW
 
 type Analysis = ReturnType<typeof analyzeWorkingMemoryTrials>;
 
-function EasyView({ analysis }: { analysis: Analysis }) {
+function EasyView({ analysis, capacity }: { analysis: Analysis; capacity: CapacityAnalysis }) {
   const levels = analysis.perSpanAccuracy;
   const reached = analysis.maxSpanAchieved;
 
@@ -80,9 +86,29 @@ function EasyView({ analysis }: { analysis: Analysis }) {
         )}
       </div>
 
+      {/* 2-A 보급품: 한꺼번에 보여준 개수별로 찾아낸 물건 수를 보여줍니다. */}
+      <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+        <p className="mb-3 text-center text-sm font-semibold text-slate-600">📦 2-A 보급품 확인</p>
+        <ul className="space-y-2 text-sm text-slate-600">
+          {capacity.perSize.map((row) => (
+            <li key={row.size} className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2">
+              <span>한꺼번에 {row.size}개 보여준 상자</span>
+              <strong className="text-slate-900">
+                찾은 물건 {row.hits} / {row.shown}
+              </strong>
+            </li>
+          ))}
+        </ul>
+        {capacity.maxSizeAllCorrect > 0 && (
+          <p className="mt-3 text-center text-sm text-slate-600">
+            한꺼번에 최대 {capacity.maxSizeAllCorrect}개까지 모두 찾았어요!
+          </p>
+        )}
+      </div>
+
       {/* 신호탑: 신호 길이마다 한 층씩. 순서대로 보낸 층은 켜지고, 아직 못 한 층은 꺼져 있어요. */}
       <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-        <p className="mb-3 text-center text-sm font-semibold text-slate-600">나의 신호탑</p>
+        <p className="mb-3 text-center text-sm font-semibold text-slate-600">📡 2-B 나의 신호탑</p>
         <div className="mx-auto flex max-w-xs flex-col-reverse gap-2">
           {levels.map((level) => {
             const lit = level.span <= reached;
@@ -111,11 +137,64 @@ function EasyView({ analysis }: { analysis: Analysis }) {
   );
 }
 
-function DetailView({ analysis, trials }: { analysis: Analysis; trials: TrialRecord[] }) {
+function DetailView({
+  analysis,
+  capacity,
+  trials,
+}: {
+  analysis: Analysis;
+  capacity: CapacityAnalysis;
+  trials: TrialRecord[];
+}) {
   const chartData = analysis.perSpanAccuracy.map((item) => ({ name: `${item.span}개`, 정답률: item.accuracy }));
 
   return (
     <div className="space-y-5">
+      <p className="text-sm font-bold text-slate-800">2-A 보급품 확인 (한꺼번에 기억하는 용량)</p>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat label="모두 맞게 찾은 비율" value={`${capacity.accuracy}%`} />
+        <Stat label="찾아낸 물건 비율" value={`${capacity.hitRate}%`} />
+        <Stat label="모두 찾은 최대 개수" value={`${capacity.maxSizeAllCorrect}개`} />
+        <Stat label="안 본 것을 고른 수" value={`${capacity.falsePicks}개`} />
+      </div>
+      <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <table className="min-w-full text-left text-xs">
+          <thead className="bg-slate-50 text-slate-500">
+            <tr>
+              {["보여준 개수", "문항", "모두 맞게", "찾은 물건", "안 본 것 선택"].map((column) => (
+                <th key={column} className="whitespace-nowrap px-3 py-2 font-semibold">
+                  {column}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {capacity.perSize.map((row) => (
+              <tr key={row.size} className="border-t border-slate-100">
+                <td className="px-3 py-2 font-medium text-slate-700">{row.size}개</td>
+                <td className="px-3 py-2">{row.trials}</td>
+                <td className="px-3 py-2">
+                  {row.allCorrect}/{row.trials}
+                </td>
+                <td className="px-3 py-2">
+                  {row.hits}/{row.shown}
+                </td>
+                <td className="px-3 py-2">{row.falsePicks}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <ul className="space-y-1 rounded-xl border border-slate-200 p-4 text-sm text-slate-600">
+        {capacity.perKind.map((item) => (
+          <li key={item.kind}>
+            {item.kind === "obj" ? "물건" : "숫자"} 문항: 모두 맞게 찾은 비율 {item.accuracy}% ({item.trials}문항)
+          </li>
+        ))}
+        <li>평균 응답시간: {capacity.meanResponseTime !== null ? `${capacity.meanResponseTime}ms` : "-"}</li>
+      </ul>
+
+      <p className="pt-2 text-sm font-bold text-slate-800">2-B 신호 기억 (순서 기억)</p>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="전체 정답률" value={`${analysis.overallAccuracy}%`} />
         <Stat label="최대 기억 신호 수" value={`${analysis.maxSpanAchieved}개`} />
@@ -123,7 +202,7 @@ function DetailView({ analysis, trials }: { analysis: Analysis; trials: TrialRec
           label="평균 응답시간"
           value={analysis.meanResponseTime !== null ? `${analysis.meanResponseTime}ms` : "-"}
         />
-        <Stat label="전체 시행 수" value={`${analysis.totalTrials}회`} />
+        <Stat label="신호 시행 수" value={`${analysis.totalTrials}회`} />
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-200">
@@ -163,8 +242,8 @@ function DetailView({ analysis, trials }: { analysis: Analysis; trials: TrialRec
       </div>
 
       <div className="rounded-xl bg-white p-4 ring-1 ring-slate-200">
-        <p className="mb-2 text-center text-sm font-semibold text-slate-600">문항별 응답시간</p>
-        <ReactionTimeLineChart trials={trials} />
+        <p className="mb-2 text-center text-sm font-semibold text-slate-600">신호 기억 문항별 응답시간</p>
+        <ReactionTimeLineChart trials={trials.filter((t) => t.condition.startsWith("span-"))} />
       </div>
 
       <ul className="space-y-1 rounded-xl border border-slate-200 p-4 text-sm text-slate-600">

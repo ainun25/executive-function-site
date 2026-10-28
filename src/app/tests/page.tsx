@@ -74,9 +74,9 @@ export default function TestsPage() {
             <p className="text-xs font-semibold text-[#a2ffcf]">지구 수호대 작전 · 2부</p>
             <h3 className="mt-1 text-xl font-bold text-[#00ff88]">신호 기억</h3>
             <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-200">
-              기지에서 반짝이는 신호의 순서를 기억해서 그대로 보내는 작업기억 검사예요.
+              보급품을 한꺼번에 기억해 찾고, 기지 신호의 순서를 기억해 보내는 작업기억 검사예요.
             </p>
-            <p className="mt-4 text-xs text-slate-400">작업기억 · 예상 소요시간 약 5분</p>
+            <p className="mt-4 text-xs text-slate-400">작업기억 · 예상 소요시간 약 7분</p>
             <Link
               href="/tests/story/working-memory"
               className="mt-5 block w-full rounded-full bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-600"

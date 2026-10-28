@@ -5,7 +5,8 @@ import Link from "next/link";
 import TestSessionShell from "@/components/tasks/common/TestSessionShell";
 import DeviceRecommendationNotice from "@/components/tasks/common/DeviceRecommendationNotice";
 import ParticipantGate from "@/components/tasks/common/ParticipantGate";
-import SpanTask from "@/components/tasks/working-memory/SpanTask";
+import StoryWorkingMemoryTask from "@/components/tasks/story/StoryWorkingMemoryTask";
+import { analyzeCapacityTrials } from "@/lib/storyCapacity";
 import StoryWorkingMemoryReport from "@/components/results/StoryWorkingMemoryReport";
 import type { WorkingMemoryConfig } from "@/lib/workingMemoryEngine";
 import { analyzeWorkingMemoryTrials } from "@/lib/workingMemoryAnalysis";
@@ -83,11 +84,13 @@ function PhaseContent({
             <p className="text-sm font-semibold text-[#a2ffcf]">지구 수호대 작전 · 2부</p>
             <h2 className="mt-1 text-2xl font-extrabold text-[#00ff88]">신호 기억</h2>
             <p className="mt-3 leading-relaxed text-slate-200">
-              선별된 요원에게 우주 기지의 비밀 신호가 도착해요! 9개의 기지 중 몇 곳이 순서대로 반짝여요.
+              선별된 요원에게 우주 기지의 비밀 신호가 도착해요! 두 가지 임무가 있어요.
               <br />
-              <strong className="text-white">반짝인 순서를 잘 기억했다가, 같은 순서로 기지를 눌러 신호를 보내세요!</strong>
+              <strong className="text-white">2-A 보급품 확인:</strong> 물건이나 숫자가 한꺼번에 잠깐 보여요. 사라지면 창고에서 본 것을 모두 찾아 담으세요.
               <br />
-              처음엔 2개로 시작하고, 잘 보내면 신호가 조금씩 길어져요. 본 미션 중에는 정답을 알려주지 않아요.
+              <strong className="text-white">2-B 신호 기억:</strong> 9개의 기지가 순서대로 반짝여요. 같은 순서로 눌러 신호를 보내세요.
+              <br />
+              본 미션 중에는 정답을 알려주지 않아요.
             </p>
           </div>
           <DeviceRecommendationNotice />
@@ -103,8 +106,8 @@ function PhaseContent({
 
     case "practice":
       return (
-        <SpanTask
-          theme="story"
+        <StoryWorkingMemoryTask
+          mode="practice"
           config={practiceConfig}
           onComplete={(trials) => {
             setPracticeTrials(trials);
@@ -115,15 +118,17 @@ function PhaseContent({
 
     case "practiceResult": {
       const analysis = analyzeWorkingMemoryTrials(practiceTrials);
+      const capacity = analyzeCapacityTrials(practiceTrials);
       return (
         <div className="space-y-6">
           <h2 className="text-xl font-bold text-slate-900">연습 결과 확인</h2>
-          <div className="grid grid-cols-2 gap-4 rounded-xl bg-slate-50 p-5 text-center">
-            <PracticeStat label="정답률" value={`${analysis.overallAccuracy}%`} />
+          <div className="grid grid-cols-3 gap-4 rounded-xl bg-slate-50 p-5 text-center">
+            <PracticeStat label="보급품 찾기" value={`${capacity.hitRate}%`} />
+            <PracticeStat label="신호 정답률" value={`${analysis.overallAccuracy}%`} />
             <PracticeStat label="보낸 최대 신호 수" value={`${analysis.maxSpanAchieved}개`} />
           </div>
           <p className="text-sm text-slate-500">
-            연습에서 감을 잡았다면 이제 본 미션을 시작해볼까요? 본 미션에서는 신호가 더 길어질 수 있어요.
+            연습에서 감을 잡았다면 이제 본 미션을 시작해볼까요? 본 미션에서는 보급품이 더 많아지고 신호가 더 길어질 수 있어요.
           </p>
           <button type="button" onClick={goToNext} className={primaryButton}>
             준비됐어요
@@ -145,8 +150,8 @@ function PhaseContent({
 
     case "main":
       return (
-        <SpanTask
-          theme="story"
+        <StoryWorkingMemoryTask
+          mode="main"
           config={config}
           onComplete={(trials) => {
             setMainTrials(trials);
