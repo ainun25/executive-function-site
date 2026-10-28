@@ -27,23 +27,14 @@ const SHAPE_LABEL: Record<ShapeType, string> = { circle: "원", triangle: "세�
 const COLOR_LABEL: Record<ColorType, string> = { red: "빨강", blue: "파랑" };
 const COLOR_HEX: Record<ColorType, string> = { red: "#f43f5e", blue: "#0ea5e9" };
 
-// 버튼에 적어주는 지금 규칙의 기준 (왼쪽/오른쪽이 무엇인지 기억하지 않아도 되도록)
-const BUTTON_LABEL: Record<RuleType, { left: string; right: string }> = {
-  color: { left: "← 🔴 빨강", right: "🔵 파랑 →" },
-  shape: { left: "← ● 원", right: "▲ 세모 →" },
-};
-
-const SHORT_ANNOUNCE_MS = 1500;
-
 /**
  * 인지적 유연성(규칙 전환/Task Switching) 문항을 실제로 진행하는 컴포넌트입니다.
  * 색깔 규칙 블록 → 모양 규칙 블록 → 혼합 블록 순서로 진행됩니다.
  * 혼합 블록은 같은 규칙이 한동안 이어지다 바뀌고, 마지막에만 짧게 자주 바뀝니다.
  *
- * 규칙을 알아보기 쉽도록:
- *  - 모양 규칙일 때는 자극 창에 노란 프레임이 나타납니다 (색깔 규칙은 프레임 없음).
- *  - 왼쪽/오른쪽 버튼에 지금 규칙의 기준(빨강/파랑, 원/세모)이 적혀 있습니다.
- *  - 규칙이 시작되거나 바뀔 때 그림 안내를 보여줍니다. 안내가 떠 있는 동안에는 반응시간을 재지 않습니다.
+ * 규칙은 시작될 때와 바뀔 때 안내 화면으로 "한 번" 분명히 알려줍니다. 안내가 떠 있는 동안에는 반응시간을 재지 않습니다.
+ * 문항이 진행되는 동안에는 규칙 배지나 버튼 글자 같은 단서를 계속 보여주지 않으므로,
+ * 학생은 안내받은 규칙을 기억해서 적용해야 합니다(규칙을 바꿔 적용하는 능력을 보기 위함).
  * 색상뿐 아니라 모양과 텍스트 라벨을 함께 보여줘 색맹/색약 학생도 구분할 수 있게 합니다 (섹션 20).
  */
 export default function FlexibilitySwitchTask({ config, theme = "standard", onComplete }: FlexibilitySwitchTaskProps) {
@@ -57,7 +48,7 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
 
   const [trialIndex, setTrialIndex] = useState(0);
   const [isStimulusVisible, setIsStimulusVisible] = useState(false);
-  const [announcing, setAnnouncing] = useState<"long" | "short" | null>(null);
+  const [announcing, setAnnouncing] = useState(false);
   const trialsRef = useRef<TrialRecord[]>([]);
   const tabHiddenRef = useRef(false);
   const timeoutIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -128,7 +119,7 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
 
   // 자극을 보여주고 응답을 기다립니다. (반응시간은 이 시점부터 잽니다)
   const startTrial = useCallback(() => {
-    setAnnouncing(null);
+    setAnnouncing(false);
     timer.reset();
     setIsStimulusVisible(true);
     timer.armStimulus();
@@ -145,14 +136,9 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
   // 문항이 바뀔 때: 규칙 안내가 필요하면 먼저 안내하고, 아니면 바로 자극을 보여줍니다.
   useEffect(() => {
     timer.reset();
-    const announce = sequenceRef.current[trialIndex].announce;
-    if (announce === "long") {
+    if (sequenceRef.current[trialIndex].announce) {
       setIsStimulusVisible(false);
-      setAnnouncing("long"); // "알겠어요"를 누르면 startTrial
-    } else if (announce === "short") {
-      setIsStimulusVisible(false);
-      setAnnouncing("short");
-      timeoutIdsRef.current.push(setTimeout(startTrial, SHORT_ANNOUNCE_MS));
+      setAnnouncing(true); // "알겠어요"를 누르면 startTrial
     } else {
       startTrial();
     }
@@ -173,7 +159,7 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.repeat) return;
-      if (announcing === "long") {
+      if (announcing) {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
           startTrial();
@@ -194,11 +180,10 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
 
   const spec = sequenceRef.current[trialIndex];
   const totalTrials = sequenceRef.current.length;
-  const framed = spec.rule === "shape";
   const isFirstTrial = trialIndex === 0;
   const isChange = !isFirstTrial && sequenceRef.current[trialIndex - 1].rule !== spec.rule;
 
-  if (announcing === "long") {
+  if (announcing) {
     return (
       <div className="mx-auto flex max-w-sm flex-col items-center gap-4 text-center">
         <p className={`text-sm font-bold ${isStory ? "text-[#a2ffcf]" : "text-indigo-600"}`}>
@@ -225,63 +210,32 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
 
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <div
-        className={`rounded-full px-4 py-2 text-sm font-bold ${
-          framed
-            ? "bg-amber-300 text-amber-950"
-            : isStory
-              ? "bg-[#00ff88] text-[#050a18]"
-              : "bg-indigo-100 text-indigo-700"
-        }`}
-      >
-        {isStory ? "지금 암호" : "지금 규칙"}: {names[spec.rule]}
-        {framed ? " (프레임)" : ""}
-      </div>
       <p className="text-xs font-medium text-slate-400">
         {trialIndex + 1} / {totalTrials}
       </p>
 
-      {announcing === "short" ? (
-        <div
-          className={`flex h-56 w-56 flex-col items-center justify-center gap-2 rounded-3xl px-4 ${
-            isStory ? "bg-white/10 ring-1 ring-white/20" : "bg-slate-50"
-          }`}
-        >
-          <p className={`text-xl font-extrabold ${isStory ? "text-white" : "text-slate-900"}`}>🔄 규칙이 바뀌었어요!</p>
-          <p className={`text-sm ${isStory ? "text-slate-200" : "text-slate-600"}`}>
-            {framed ? "프레임이 나와요 → 모양으로 나누기" : "프레임이 없어요 → 색깔로 나누기"}
-          </p>
-        </div>
-      ) : (
-        <div
-          className={`flex h-56 w-56 items-center justify-center rounded-3xl ${
-            framed
-              ? `border-8 border-amber-400 ${isStory ? "bg-white/10" : "bg-amber-50"}`
-              : isStory
-                ? "bg-white/10 ring-1 ring-white/20"
-                : "bg-slate-50"
-          }`}
-        >
-          {isStimulusVisible && <ShapeGraphic shape={spec.stimulus.shape} color={spec.stimulus.color} dark={isStory} />}
-        </div>
-      )}
+      <div
+        className={`flex h-56 w-56 items-center justify-center rounded-3xl ${
+          isStory ? "bg-white/10 ring-1 ring-white/20" : "bg-slate-50"
+        }`}
+      >
+        {isStimulusVisible && <ShapeGraphic shape={spec.stimulus.shape} color={spec.stimulus.color} dark={isStory} />}
+      </div>
 
       <div className="grid w-full max-w-sm grid-cols-2 gap-3">
         <button
           type="button"
-          disabled={announcing !== null}
           onClick={() => handleResponse("left")}
-          className="rounded-full bg-indigo-500 px-4 py-4 text-lg font-bold text-white hover:bg-indigo-600 disabled:opacity-60"
+          className="rounded-full bg-indigo-500 px-4 py-4 text-lg font-bold text-white hover:bg-indigo-600"
         >
-          {BUTTON_LABEL[spec.rule].left}
+          ← 왼쪽
         </button>
         <button
           type="button"
-          disabled={announcing !== null}
           onClick={() => handleResponse("right")}
-          className="rounded-full bg-indigo-500 px-4 py-4 text-lg font-bold text-white hover:bg-indigo-600 disabled:opacity-60"
+          className="rounded-full bg-indigo-500 px-4 py-4 text-lg font-bold text-white hover:bg-indigo-600"
         >
-          {BUTTON_LABEL[spec.rule].right}
+          오른쪽 →
         </button>
       </div>
     </div>

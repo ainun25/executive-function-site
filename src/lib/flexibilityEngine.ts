@@ -12,14 +12,11 @@ export interface FlexibilityStimulus {
   color: ColorType;
 }
 
-// 규칙 안내 방식: long = 안내 화면을 보여주고 "알겠어요"를 누르면 시작, short = 잠깐 자동으로 알려줌
-export type RuleAnnounce = "long" | "short" | null;
-
 export interface FlexibilityTrialSpec {
   block: BlockType;
   rule: RuleType;
   stimulus: FlexibilityStimulus;
-  announce: RuleAnnounce; // 이 문항 앞에서 규칙을 안내할지 (블록의 첫 문항, 규칙이 바뀌는 문항)
+  announce: boolean; // 이 문항 앞에서 규칙을 한 번 안내할지 (블록의 첫 문항, 규칙이 바뀌는 문항)
 }
 
 export interface FlexibilityConfig {
@@ -60,24 +57,25 @@ export function getCorrectAnswer(rule: RuleType, stimulus: FlexibilityStimulus):
 }
 
 // 혼합 블록: 규칙이 "연속 → 전환 → 연속 → 전환"으로 이어지다가, 마지막에만 짧게 자주 바뀝니다.
-//  - 앞쪽 약 2/3: 같은 규칙이 4번씩 이어지고 바뀔 때마다 안내 화면을 보여줍니다 (long)
-//  - 뒤쪽 약 1/3: 같은 규칙이 2번씩 이어지고 바뀔 때 잠깐 자동 안내를 보여줍니다 (short)
+//  - 앞쪽 약 2/3: 같은 규칙이 4번씩 이어집니다
+//  - 뒤쪽 약 1/3: 같은 규칙이 2번씩 이어집니다
+// 규칙이 바뀔 때 안내 화면을 한 번 보여주고, 문항이 진행되는 동안에는 규칙 단서를 따로 주지 않습니다.
 // 직전 블록(모양 규칙)에 이어 색깔 규칙부터 시작해 첫 문항에서 규칙이 바뀝니다.
 export const LONG_RUN_LENGTH = 4;
 export const SHORT_RUN_LENGTH = 2;
 
-export function planMixedRuns(total: number): { length: number; announce: "long" | "short" }[] {
+export function planMixedRuns(total: number): number[] {
   const longTarget = Math.ceil((total * 2) / 3);
-  const runs: { length: number; announce: "long" | "short" }[] = [];
+  const runs: number[] = [];
   let used = 0;
   while (used < longTarget) {
     const length = Math.min(LONG_RUN_LENGTH, total - used);
-    runs.push({ length, announce: "long" });
+    runs.push(length);
     used += length;
   }
   while (used < total) {
     const length = Math.min(SHORT_RUN_LENGTH, total - used);
-    runs.push({ length, announce: "short" });
+    runs.push(length);
     used += length;
   }
   return runs;
@@ -87,20 +85,20 @@ export function generateTrialSequence(config: FlexibilityConfig): FlexibilityTri
   const sequence: FlexibilityTrialSpec[] = [];
 
   for (let i = 0; i < config.colorBlockTrials; i++) {
-    sequence.push({ block: "colorBlock", rule: "color", stimulus: randomStimulus(), announce: i === 0 ? "long" : null });
+    sequence.push({ block: "colorBlock", rule: "color", stimulus: randomStimulus(), announce: i === 0 });
   }
   for (let i = 0; i < config.shapeBlockTrials; i++) {
-    sequence.push({ block: "shapeBlock", rule: "shape", stimulus: randomStimulus(), announce: i === 0 ? "long" : null });
+    sequence.push({ block: "shapeBlock", rule: "shape", stimulus: randomStimulus(), announce: i === 0 });
   }
 
   let rule: RuleType = "color";
-  planMixedRuns(config.mixedBlockTrials).forEach((run) => {
-    for (let i = 0; i < run.length; i++) {
+  planMixedRuns(config.mixedBlockTrials).forEach((runLength) => {
+    for (let i = 0; i < runLength; i++) {
       sequence.push({
         block: "mixed",
         rule,
         stimulus: randomStimulus(),
-        announce: i === 0 ? run.announce : null,
+        announce: i === 0,
       });
     }
     rule = rule === "color" ? "shape" : "color";

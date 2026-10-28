@@ -86,9 +86,9 @@ function PhaseContent({
             <p className="mt-3 leading-relaxed text-slate-200">
               마지막 임무는 비밀 통신 암호 해독이에요! 우주선 신호가 하나씩 나타나면, 지금 암호에 맞게 왼쪽 또는 오른쪽 기지로 보내세요.
               <br />
-              <strong className="text-white">프레임이 없으면 색깔 암호, 노란 프레임이 있으면 모양 암호!</strong>
+              <strong className="text-white">암호는 색깔 암호와 모양 암호 두 가지예요!</strong>
               <br />
-              암호는 한동안 이어지다가 바뀌어요. 바뀔 때마다 안내가 나오고, 버튼에도 지금 암호가 적혀 있어요.
+              암호는 한동안 이어지다가 바뀌어요. 바뀔 때 한 번만 알려주니, 그 암호를 기억하고 신호를 나누세요.
               <br />
               본 미션 중에는 정답을 알려주지 않아요.
             </p>

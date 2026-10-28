@@ -2,17 +2,13 @@ import type { ReactNode } from "react";
 import type { RuleType } from "@/lib/flexibilityEngine";
 
 // 규칙을 그림으로 설명하는 카드입니다. 검사 소개, 규칙이 바뀔 때 안내 화면에서 함께 씁니다.
-//  - 색깔 규칙: 자극 창에 프레임(노란 테두리)이 없음. 빨강 → 왼쪽, 파랑 → 오른쪽
-//  - 모양 규칙: 자극 창에 프레임(노란 테두리)이 있음. 원 → 왼쪽, 세모 → 오른쪽
+//  - 색깔 규칙: 빨강 → 왼쪽, 파랑 → 오른쪽
+//  - 모양 규칙: 원 → 왼쪽, 세모 → 오른쪽
+// 검사 중에는 규칙 단서를 계속 보여주지 않으므로, 이 카드로 한 번 분명히 알려줍니다.
 // 색만으로 구분하지 않도록 글자와 모양 기호를 함께 보여줍니다.
 
 export const RULE_NAME: Record<RuleType, string> = { color: "색깔 규칙", shape: "모양 규칙" };
 export const STORY_RULE_NAME: Record<RuleType, string> = { color: "색깔 암호", shape: "모양 암호" };
-
-export const RULE_FRAME_NOTE: Record<RuleType, string> = {
-  color: "프레임이 없으면 → 색깔로 나눠요",
-  shape: "노란 프레임이 있으면 → 모양으로 나눠요",
-};
 
 const HEX = { red: "#f43f5e", blue: "#0ea5e9" };
 
@@ -53,30 +49,14 @@ export function RuleCard({
   title?: string;
   dark?: boolean;
 }) {
-  const framed = rule === "shape";
   const label = dark ? "text-slate-100" : "text-slate-700";
   return (
     <div
       className={`rounded-2xl p-4 text-center ${
-        dark ? "bg-white/5 ring-1 ring-white/20" : framed ? "bg-amber-50 ring-1 ring-amber-200" : "bg-indigo-50 ring-1 ring-indigo-200"
+        dark ? "bg-white/5 ring-1 ring-white/20" : "bg-indigo-50 ring-1 ring-indigo-200"
       }`}
     >
       <p className={`text-base font-extrabold ${dark ? "text-[#00ff88]" : "text-slate-900"}`}>{title ?? RULE_NAME[rule]}</p>
-      <div className="mt-3 flex justify-center">
-        {/* 자극 창 모양 예시: 모양 규칙이면 프레임이 있어요 */}
-        <div
-          className={`flex h-14 w-24 items-center justify-center rounded-xl text-xs font-semibold ${
-            framed
-              ? "border-4 border-amber-400 bg-amber-100 text-amber-800"
-              : dark
-                ? "border border-white/30 bg-white/10 text-slate-200"
-                : "border border-slate-300 bg-white text-slate-500"
-          }`}
-        >
-          {framed ? "프레임 있음" : "프레임 없음"}
-        </div>
-      </div>
-      <p className={`mt-2 text-xs ${dark ? "text-slate-300" : "text-slate-500"}`}>{RULE_FRAME_NOTE[rule]}</p>
       <div className="mt-3 flex gap-2">
         {rule === "color" ? (
           <>
@@ -116,8 +96,8 @@ export function RuleGuide({ dark, story }: { dark?: boolean; story?: boolean }) 
         <RuleCard rule="shape" title={names.shape} dark={dark} />
       </div>
       <p className={`text-center text-xs leading-relaxed ${dark ? "text-slate-300" : "text-slate-500"}`}>
-        규칙이 바뀔 때마다 이 설명을 다시 보여줘요. 그리고 규칙은 한동안 이어지다가 바뀌어요. 버튼에도 지금
-        규칙의 기준이 적혀 있어요.
+        규칙은 한동안 이어지다가 바뀌어요. 바뀔 때만 이 설명을 한 번 보여주고, 그 뒤에는 규칙을 기억해서
+        진행해요.
       </p>
     </div>
   );
