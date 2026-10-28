@@ -150,7 +150,7 @@ function AdminDashboard({ email }: { email: string }) {
           onClick={() => setActiveTab("knowledge")}
         />
         <TabButton label="실행기능 자료 관리" isActive={activeTab === "content"} onClick={() => setActiveTab("content")} />
-        <TabButton label="훈련자료 관리" isActive={activeTab === "training"} onClick={() => setActiveTab("training")} />
+        <TabButton label="놀이자료 관리" isActive={activeTab === "training"} onClick={() => setActiveTab("training")} />
         <TabButton
           label="문항별 상세 원자료"
           isActive={activeTab === "rawData"}

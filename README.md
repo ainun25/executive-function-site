@@ -68,7 +68,7 @@ src/
       Footer.tsx         # 하단 정보
   data/                 # 화면에 보여줄 예시/기본 데이터
     efDomains.ts         # 실행기능 3영역 설명, 검사 카드 정보
-    trainingMaterials.ts # 훈련자료 예시 데이터
+    trainingMaterials.ts # 놀이자료 예시 데이터
   types/
     index.ts             # 프로젝트 전체에서 사용하는 타입(데이터 구조) 정의
 ```

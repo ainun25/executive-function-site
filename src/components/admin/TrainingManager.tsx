@@ -176,7 +176,7 @@ export default function TrainingManager() {
     const result = await deleteTrainingMaterial(pendingDelete.id);
     setIsDeleting(false);
     setPendingDelete(null);
-    setNotice(result.error ? `삭제 실패: ${result.error}` : "훈련자료를 삭제했어요.");
+    setNotice(result.error ? `삭제 실패: ${result.error}` : "놀이자료를 삭제했어요.");
     if (!result.error) {
       void removeTrainingFileByUrl(pendingDelete.fileUrl); // 자료가 지워지면 첨부 파일도 저장소에서 지웁니다
       loadMaterials();
@@ -187,7 +187,7 @@ export default function TrainingManager() {
     <div className="space-y-8">
       <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-slate-200 p-5">
         <h3 className="font-bold text-slate-800">
-          {editingId ? "훈련자료 수정" : "새 훈련자료 등록"}
+          {editingId ? "놀이자료 수정" : "새 놀이자료 등록"}
         </h3>
 
         <input
@@ -348,11 +348,11 @@ export default function TrainingManager() {
       </form>
 
       <div>
-        <h3 className="mb-3 font-bold text-slate-800">등록된 훈련자료 ({materials.length}개)</h3>
+        <h3 className="mb-3 font-bold text-slate-800">등록된 놀이자료 ({materials.length}개)</h3>
         {pendingDelete && (
           <div className="mb-3">
             <ConfirmBar
-              message={`"${pendingDelete.title}" 훈련자료를 삭제할까요?`}
+              message={`"${pendingDelete.title}" 놀이자료를 삭제할까요?`}
               isBusy={isDeleting}
               onConfirm={handleConfirmDelete}
               onCancel={() => setPendingDelete(null)}
