@@ -60,7 +60,7 @@ export default function Home() {
             <FeatureCard title="① 실행기능 이해" desc="개념과 생활 속 예시를 쉽게 알아봐요." href="/about" />
             <FeatureCard title="② 자료 찾아보기" desc="키워드로 관련 자료를 검색해요." href="/search" />
             <FeatureCard title="③ 실행기능 검사" desc="간단한 수행과제로 살펴봐요." href="/tests" />
-            <FeatureCard title="④ 실행기능 훈련" desc="재미있는 활동으로 연습해요." href="/training" />
+            <FeatureCard title="④ 실행기능 놀이" desc="재미있는 활동으로 연습해요." href="/training" />
           </div>
         </div>
       </section>

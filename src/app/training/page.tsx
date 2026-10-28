@@ -29,7 +29,7 @@ export default function TrainingPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
       <header className="text-center">
-        <h1 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">실행기능 훈련</h1>
+        <h1 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">실행기능 놀이</h1>
         <p className="mt-4 text-base text-slate-600">
           실행기능을 재미있게 연습할 수 있는 활동 자료예요.
         </p>

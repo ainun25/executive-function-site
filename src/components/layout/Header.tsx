@@ -9,7 +9,7 @@ const navItems = [
   { href: "/about", label: "실행기능 알아보기" },
   { href: "/search", label: "실행기능 찾아보기" },
   { href: "/tests", label: "실행기능 검사" },
-  { href: "/training", label: "실행기능 훈련" },
+  { href: "/training", label: "실행기능 놀이" },
   { href: "/results", label: "내 결과" },
 ];
 

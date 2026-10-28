@@ -10,7 +10,7 @@
 1. 실행기능 이해 (`/about`)
 2. 실행기능 자료 검색 (추후 PHASE에서 구현)
 3. 실행기능 검사 (`/tests`, 검사 엔진은 추후 PHASE에서 구현)
-4. 실행기능 훈련 (`/training`)
+4. 실행기능 놀이 (`/training`)
 
 > ⚠️ 본 사이트의 검사는 교육·연구용 수행과제이며 의학적·심리학적 진단 도구가 아닙니다.
 
@@ -59,7 +59,7 @@ src/
     page.tsx          # 메인 페이지 (/)
     about/page.tsx     # 실행기능 알아보기 (/about)
     tests/page.tsx      # 실행기능 검사 메뉴 (/tests)
-    training/page.tsx    # 실행기능 훈련 (/training)
+    training/page.tsx    # 실행기능 놀이 (/training)
     layout.tsx          # 모든 페이지에 공통으로 적용되는 뼈대 (헤더/푸터 포함)
     globals.css         # 전체 스타일
   components/
