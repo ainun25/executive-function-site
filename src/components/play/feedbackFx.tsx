@@ -188,3 +188,9 @@ export function FxHint({ fx, children }: { fx: Fx; children: React.ReactNode }) 
 export function shakeClass(fx: Fx): string {
   return fx.shaking ? "ef-shake" : "";
 }
+
+/** 피아노 건반 한 음을 소리 냅니다. 건반을 누르는 순간(사용자 동작)에 불러야 브라우저가 소리를 막지 않아요. */
+export function playNote(freq: number): void {
+  if (isFxMuted()) return;
+  tone(freq, 0, 0.55, "sine", 0.22);
+}
