@@ -25,6 +25,7 @@ export function buildSessionSummary(
 }
 
 export interface SessionSummaryRow {
+  id: string;
   participantId: string;
   participantName: string | null;
   ageYears: number | null;
@@ -35,6 +36,7 @@ export interface SessionSummaryRow {
 }
 
 interface SessionSummaryDbRow {
+  id: string;
   participant_id: string;
   participant_name: string | null;
   age_years: number | null;
@@ -52,7 +54,7 @@ export async function fetchSessionSummaries(taskFilter: EFDomain | "all"): Promi
 
   let query = supabase
     .from("test_sessions")
-    .select("participant_id, participant_name, age_years, age_months, task_type, started_at, summary")
+    .select("id, participant_id, participant_name, age_years, age_months, task_type, started_at, summary")
     .order("started_at", { ascending: false })
     .limit(2000);
 
@@ -68,6 +70,7 @@ export async function fetchSessionSummaries(taskFilter: EFDomain | "all"): Promi
   }
 
   return (data as SessionSummaryDbRow[]).map((row) => ({
+    id: row.id,
     participantId: row.participant_id,
     participantName: row.participant_name,
     ageYears: row.age_years,
@@ -76,6 +79,17 @@ export async function fetchSessionSummaries(taskFilter: EFDomain | "all"): Promi
     date: row.started_at?.slice(0, 10) ?? "",
     summary: row.summary,
   }));
+}
+
+// 선택한 검사 결과(세션)를 삭제합니다. 문항별 원자료(trials)는 DB 설정(on delete cascade)으로 함께 삭제됩니다.
+// RLS 때문에 삭제 권한이 없으면 오류 없이 0건이 지워질 수 있어서, 실제로 지워진 개수를 돌려줍니다.
+export async function deleteSessions(ids: string[]): Promise<{ deletedCount: number; error: string | null }> {
+  if (!supabase) return { deletedCount: 0, error: "Supabase가 설정되어 있지 않습니다." };
+  if (ids.length === 0) return { deletedCount: 0, error: null };
+
+  const { data, error } = await supabase.from("test_sessions").delete().in("id", ids).select("id");
+  if (error) return { deletedCount: 0, error: error.message };
+  return { deletedCount: data?.length ?? 0, error: null };
 }
 
 function escapeCsvCell(value: string | number | boolean | null | undefined): string {

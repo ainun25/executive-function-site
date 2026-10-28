@@ -4,6 +4,7 @@ import { Fragment, useEffect, useState } from "react";
 import { downloadCsv } from "@/lib/rawDataRepository";
 import {
   buildSessionSummaryCsv,
+  deleteSessions,
   fetchSessionSummaries,
   type SessionSummaryRow,
 } from "@/lib/sessionSummaryRepository";
@@ -52,14 +53,56 @@ export default function SessionSummaryViewer() {
   const [rows, setRows] = useState<SessionSummaryRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
+  const loadRows = () => {
     setIsLoading(true);
+    setSelectedIds(new Set());
     fetchSessionSummaries(taskFilter).then((data) => {
       setRows(data);
       setIsLoading(false);
     });
+  };
+
+  useEffect(() => {
+    loadRows();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskFilter]);
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedIds(selectedIds.size === rows.length ? new Set() : new Set(rows.map((row) => row.id)));
+  };
+
+  const handleDeleteSelected = async () => {
+    const count = selectedIds.size;
+    if (count === 0) return;
+    if (!window.confirm(`선택한 ${count}건의 검사 결과를 삭제할까요?\n문항별 원자료도 함께 지워지며, 되돌릴 수 없어요.`)) return;
+
+    setIsDeleting(true);
+    const result = await deleteSessions(Array.from(selectedIds));
+    setIsDeleting(false);
+
+    if (result.error) {
+      window.alert(`삭제 실패: ${result.error}`);
+      return;
+    }
+    if (result.deletedCount < count) {
+      window.alert(
+        `${count}건 중 ${result.deletedCount}건만 삭제되었어요. 삭제 권한 설정(phase12_schema.sql)이 적용되었는지 확인해주세요.`
+      );
+    }
+    loadRows();
+  };
 
   const handleDownload = () => {
     const csv = buildSessionSummaryCsv(rows);
@@ -81,14 +124,24 @@ export default function SessionSummaryViewer() {
             />
           ))}
         </div>
-        <button
-          type="button"
-          onClick={handleDownload}
-          disabled={rows.length === 0}
-          className="rounded-full bg-indigo-500 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-600 disabled:opacity-40"
-        >
-          CSV 다운로드 ({rows.length}건)
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={handleDeleteSelected}
+            disabled={selectedIds.size === 0 || isDeleting}
+            className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+          >
+            {isDeleting ? "삭제 중..." : `선택 삭제 (${selectedIds.size}건)`}
+          </button>
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={rows.length === 0}
+            className="rounded-full bg-indigo-500 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-600 disabled:opacity-40"
+          >
+            CSV 다운로드 ({rows.length}건)
+          </button>
+        </div>
       </div>
 
       <p className="text-xs text-indigo-600">
@@ -106,6 +159,14 @@ export default function SessionSummaryViewer() {
           <table className="min-w-full text-left text-xs">
             <thead className="bg-slate-50 text-slate-500">
               <tr>
+                <th className="px-3 py-2">
+                  <input
+                    type="checkbox"
+                    aria-label="전체 선택"
+                    checked={rows.length > 0 && selectedIds.size === rows.length}
+                    onChange={toggleSelectAll}
+                  />
+                </th>
                 {["이름", "나이", "검사", "정확도", "반응시간", "기타 지표", "날짜", ""].map((col) => (
                   <th key={col} className="whitespace-nowrap px-3 py-2 font-semibold">
                     {col}
@@ -117,6 +178,14 @@ export default function SessionSummaryViewer() {
               {rows.map((row, index) => (
                 <Fragment key={index}>
                   <tr className="border-t border-slate-100">
+                    <td className="px-3 py-2">
+                      <input
+                        type="checkbox"
+                        aria-label="이 결과 선택"
+                        checked={selectedIds.has(row.id)}
+                        onChange={() => toggleSelected(row.id)}
+                      />
+                    </td>
                     <td className="whitespace-nowrap px-3 py-2 font-medium text-slate-700">
                       {row.participantName ?? row.participantId.slice(0, 8) + "..."}
                     </td>
@@ -140,7 +209,7 @@ export default function SessionSummaryViewer() {
                   </tr>
                   {expandedIndex === index && (
                     <tr className="border-t border-slate-100 bg-slate-50">
-                      <td colSpan={8} className="px-3 py-2">
+                      <td colSpan={9} className="px-3 py-2">
                         <pre className="whitespace-pre-wrap break-all text-[11px] text-slate-600">
                           {JSON.stringify(row.summary, null, 2)}
                         </pre>
