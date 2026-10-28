@@ -7,6 +7,7 @@ import ContentManager from "@/components/admin/ContentManager";
 import TrainingManager from "@/components/admin/TrainingManager";
 import RawDataViewer from "@/components/admin/RawDataViewer";
 import SessionSummaryViewer from "@/components/admin/SessionSummaryViewer";
+import KnowledgeManager from "@/components/admin/KnowledgeManager";
 
 export default function AdminPage() {
   const { session, isLoading, isLoggedIn } = useAdminSession();
@@ -91,7 +92,9 @@ function AdminLoginForm() {
 }
 
 function AdminDashboard({ email }: { email: string }) {
-  const [activeTab, setActiveTab] = useState<"summary" | "content" | "training" | "rawData">("summary");
+  const [activeTab, setActiveTab] = useState<"summary" | "knowledge" | "content" | "training" | "rawData">(
+    "summary"
+  );
 
   const handleLogout = async () => {
     await supabase?.auth.signOut();
@@ -115,6 +118,11 @@ function AdminDashboard({ email }: { email: string }) {
 
       <div className="mb-6 flex flex-wrap gap-2">
         <TabButton label="검사 결과 요약" isActive={activeTab === "summary"} onClick={() => setActiveTab("summary")} />
+        <TabButton
+          label="알아보기 설명 관리"
+          isActive={activeTab === "knowledge"}
+          onClick={() => setActiveTab("knowledge")}
+        />
         <TabButton label="실행기능 자료 관리" isActive={activeTab === "content"} onClick={() => setActiveTab("content")} />
         <TabButton label="훈련자료 관리" isActive={activeTab === "training"} onClick={() => setActiveTab("training")} />
         <TabButton
@@ -125,6 +133,7 @@ function AdminDashboard({ email }: { email: string }) {
       </div>
 
       {activeTab === "summary" && <SessionSummaryViewer />}
+      {activeTab === "knowledge" && <KnowledgeManager />}
       {activeTab === "content" && <ContentManager />}
       {activeTab === "training" && <TrainingManager />}
       {activeTab === "rawData" && <RawDataViewer />}

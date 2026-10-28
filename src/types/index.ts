@@ -14,6 +14,19 @@ export interface EFDomainInfo {
   color: string; // 카드 강조 색상 (tailwind 클래스 접두어)
 }
 
+// "실행기능 알아보기" 페이지에 보이는 설명 카드 한 장 (관리자가 추가/수정/삭제 가능, PHASE 13).
+// EFDomainInfo와 달리 검사/훈련 분류와 연결되지 않는 "자유 설명 카드"입니다.
+export interface KnowledgeCard {
+  id: string;
+  nameKo: string;
+  nameEn: string | null;
+  concept: string;
+  examples: string[];
+  learningRelation: string | null;
+  difficultySigns: string[];
+  sortOrder: number;
+}
+
 // 실행기능 검사 3종류를 나타내는 카드 정보
 export interface TestInfo {
   id: EFDomain;

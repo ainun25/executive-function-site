@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { efDomains } from "@/data/efDomains";
+import KnowledgeCardList from "@/components/about/KnowledgeCardList";
 
 export const metadata: Metadata = {
   title: "실행기능 알아보기 | 실행기능 놀이터",
@@ -16,61 +16,12 @@ export default function AboutPage() {
         </p>
       </header>
 
-      <div className="mt-12 space-y-8">
-        {efDomains.map((domain) => {
-          return (
-            <section
-              key={domain.id}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
-            >
-              <div className="flex flex-wrap items-baseline gap-2">
-                <h2 className="text-2xl font-bold text-slate-900">{domain.nameKo}</h2>
-                <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
-                  {domain.nameEn}
-                </span>
-              </div>
-
-              <p className="mt-4 leading-relaxed text-slate-700">{domain.concept}</p>
-
-              <div className="mt-6 grid gap-6 sm:grid-cols-3">
-                <InfoBlock title="생활 속 예">
-                  <ul className="list-inside list-disc space-y-1 text-sm text-slate-600">
-                    {domain.examples.map((example) => (
-                      <li key={example}>{example}</li>
-                    ))}
-                  </ul>
-                </InfoBlock>
-
-                <InfoBlock title="학습과의 관계">
-                  <p className="text-sm text-slate-600">{domain.learningRelation}</p>
-                </InfoBlock>
-
-                <InfoBlock title="어려움이 나타날 수 있는 모습">
-                  <ul className="list-inside list-disc space-y-1 text-sm text-slate-600">
-                    {domain.difficultySigns.map((sign) => (
-                      <li key={sign}>{sign}</li>
-                    ))}
-                  </ul>
-                </InfoBlock>
-              </div>
-            </section>
-          );
-        })}
-      </div>
+      <KnowledgeCardList />
 
       <p className="mt-12 rounded-xl bg-slate-50 p-5 text-center text-sm text-slate-500">
-        이 세 가지 영역은 실행기능을 대표하는 핵심 구성요소이지만, 이것만으로 한 아이의 실행기능 전체를
-        판단하거나 진단할 수는 없어요.
+        이 영역들은 실행기능을 이해하는 데 도움이 되는 핵심 구성요소이지만, 이것만으로 한 아이의 실행기능
+        전체를 판단하거나 진단할 수는 없어요.
       </p>
-    </div>
-  );
-}
-
-function InfoBlock({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <h3 className="text-sm font-bold text-slate-800">{title}</h3>
-      <div className="mt-2">{children}</div>
     </div>
   );
 }
