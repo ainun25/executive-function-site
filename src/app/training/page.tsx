@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { fetchTrainingMaterials } from "@/lib/trainingRepository";
 import { TrainingCategory, TrainingMaterial } from "@/types";
 
@@ -34,6 +35,27 @@ export default function TrainingPage() {
           실행기능을 재미있게 연습할 수 있는 활동 자료예요.
         </p>
       </header>
+
+      <section className="mt-10">
+        <h2 className="text-lg font-bold text-slate-800">🎮 게임으로 놀기</h2>
+        <Link
+          href="/training/earth-guard"
+          className="mt-3 flex items-center gap-4 rounded-2xl bg-gradient-to-r from-[#1a1f3c] to-[#2b2f6e] p-5 text-white shadow-sm transition-shadow hover:shadow-md"
+        >
+          <span className="text-4xl" aria-hidden="true">
+            🛸
+          </span>
+          <span className="flex-1">
+            <span className="block text-lg font-bold">지구 수호대 작전</span>
+            <span className="mt-1 block text-sm text-slate-200">
+              아군은 터치! 적군은 참기! 3단계 우주 미션 (약 3분)
+            </span>
+          </span>
+          <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">억제통제</span>
+        </Link>
+      </section>
+
+      <h2 className="mt-10 text-lg font-bold text-slate-800">📋 활동 자료</h2>
 
       {!materials ? (
         <p className="mt-10 text-center text-slate-400">불러오는 중...</p>

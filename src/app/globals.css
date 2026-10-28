@@ -24,3 +24,27 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 지구 수호대 작전(놀이)의 UFO 불꽃이 깜박이는 효과 */
+@keyframes ef-flicker {
+  from {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.ef-flicker {
+  animation: ef-flicker 0.15s infinite alternate;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ef-flicker {
+    animation: none;
+  }
+}
