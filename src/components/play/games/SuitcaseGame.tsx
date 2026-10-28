@@ -141,8 +141,7 @@ export default function SuitcaseGame({ level, onFinish }: GameProps) {
                 key={item}
                 className="flex h-20 w-20 flex-col items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/30"
               >
-                <span className="text-4xl">{ITEMS[item].emoji}</span>
-                <span className="text-[11px] text-slate-200">{ITEMS[item].name}</span>
+                <span className="text-5xl" role="img" aria-label={ITEMS[item].name}>{ITEMS[item].emoji}</span>
               </div>
             ))}
           </div>
@@ -177,9 +176,8 @@ export default function SuitcaseGame({ level, onFinish }: GameProps) {
                           : "bg-white/10 ring-1 ring-white/20 hover:bg-white/20"
                   }`}
                 >
-                  <span className="text-4xl">{ITEMS[item].emoji}</span>
-                  <span className="text-[11px] text-slate-200">{ITEMS[item].name}</span>
-                </button>
+                  <span className="text-5xl" role="img" aria-label={ITEMS[item].name}>{ITEMS[item].emoji}</span>
+                  </button>
               );
             })}
           </div>

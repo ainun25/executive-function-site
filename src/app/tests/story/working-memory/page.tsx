@@ -1,6 +1,6 @@
 "use client";
 
-import { CommanderSay } from "@/components/tasks/story/StoryParts";
+import { StoryIntro } from "@/components/tasks/story/StoryParts";
 import { useState } from "react";
 import Link from "next/link";
 import TestSessionShell from "@/components/tasks/common/TestSessionShell";
@@ -81,22 +81,16 @@ function PhaseContent({
     case "intro":
       return (
         <div className="space-y-6">
-          <div className="rounded-2xl bg-gradient-to-b from-[#1a1f3c] to-[#050a18] p-6 text-white">
-            <p className="text-sm font-semibold text-[#a2ffcf]">지구 수호대 작전 · 2부</p>
-            <h2 className="mt-1 text-2xl font-extrabold text-[#00ff88]">신호 기억</h2>
-            <div className="mt-4">
-              <CommanderSay>선별을 통과했군! 이번엔 기지에서 오는 비밀 신호를 기억해 전달하는 임무일세.</CommanderSay>
-            </div>
-            <p className="mt-3 leading-relaxed text-slate-200">
-              선별된 요원에게 우주 기지의 비밀 신호가 도착해요! 두 가지 임무가 있어요.
-              <br />
-              <strong className="text-white">2-A 보급품 확인:</strong> 물건이나 숫자가 한꺼번에 잠깐 보여요. 사라지면 창고에서 본 것을 모두 찾아 담으세요.
-              <br />
-              <strong className="text-white">2-B 신호 기억:</strong> 9개의 기지가 순서대로 반짝여요. 같은 순서로 눌러 신호를 보내세요.
-              <br />
-              본 미션 중에는 정답을 알려주지 않아요.
-            </p>
-          </div>
+          <StoryIntro
+            part="2부"
+            title="신호 기억"
+            commander="선별을 통과했군! 이번엔 기지에서 오는 비밀 신호를 기억해 전달하는 임무일세."
+            steps={[
+              "2-A 보급품 확인: 물건이나 숫자가 한꺼번에 잠깐 보여요. 사라지면 창고에서 본 것을 모두 찾아 담아요.",
+              "2-B 신호 기억: 9개의 기지가 순서대로 반짝여요. 같은 순서로 눌러 신호를 보내요.",
+              "본 미션 중에는 정답을 알려주지 않아요.",
+            ]}
+          />
           <DeviceRecommendationNotice />
           <div className="rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
             본 검사는 실행기능의 일부 특성을 살펴보기 위한 교육·연구용 수행과제이며, 의학적 또는 심리학적

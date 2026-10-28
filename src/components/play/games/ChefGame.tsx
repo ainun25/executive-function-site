@@ -265,8 +265,8 @@ export default function ChefGame({ level, onFinish }: GameProps) {
           type="button"
           disabled={!!feedback}
           onClick={() => choose("left")}
-          className={`rounded-2xl px-4 py-7 text-2xl font-extrabold text-white disabled:opacity-70 ${
-            showCue ? text.leftBg : "bg-indigo-500 hover:bg-indigo-600"
+          className={`rounded-2xl px-2 py-7 font-extrabold text-white disabled:opacity-70 ${
+            showCue ? `text-2xl ${text.leftBg}` : "whitespace-nowrap text-lg bg-indigo-500 hover:bg-indigo-600"
           }`}
         >
           {showCue ? text.left : "왼쪽 바구니"}
@@ -275,8 +275,8 @@ export default function ChefGame({ level, onFinish }: GameProps) {
           type="button"
           disabled={!!feedback}
           onClick={() => choose("right")}
-          className={`rounded-2xl px-4 py-7 text-2xl font-extrabold text-white disabled:opacity-70 ${
-            showCue ? text.rightBg : "bg-indigo-500 hover:bg-indigo-600"
+          className={`rounded-2xl px-2 py-7 font-extrabold text-white disabled:opacity-70 ${
+            showCue ? `text-2xl ${text.rightBg}` : "whitespace-nowrap text-lg bg-indigo-500 hover:bg-indigo-600"
           }`}
         >
           {showCue ? text.right : "오른쪽 바구니"}

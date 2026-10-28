@@ -1,6 +1,6 @@
 "use client";
 
-import { CommanderSay } from "@/components/tasks/story/StoryParts";
+import { StoryIntro } from "@/components/tasks/story/StoryParts";
 import { useState } from "react";
 import Link from "next/link";
 import TestSessionShell from "@/components/tasks/common/TestSessionShell";
@@ -81,22 +81,16 @@ function PhaseContent({
     case "intro":
       return (
         <div className="space-y-6">
-          <div className="rounded-2xl bg-gradient-to-b from-[#1a1f3c] to-[#050a18] p-6 text-white">
-            <p className="text-sm font-semibold text-[#a2ffcf]">지구 수호대 작전 · 3부</p>
-            <h2 className="mt-1 text-2xl font-extrabold text-[#00ff88]">규칙 변경</h2>
-            <div className="mt-4">
-              <CommanderSay>마지막 임무일세, 요원! 비밀 통신 암호를 해독해야 하네.</CommanderSay>
-            </div>
-            <p className="mt-3 leading-relaxed text-slate-200">
-              마지막 임무는 비밀 통신 암호 해독이에요! 우주선 신호가 하나씩 나타나면, 지금 암호에 맞게 왼쪽 또는 오른쪽 기지로 보내세요.
-              <br />
-              <strong className="text-white">암호는 색과 모양 두 가지예요!</strong>
-              <br />
-              암호는 한동안 이어지다가 바뀌어요. 바뀔 때 한 번만 알려주니, 그 암호를 기억하고 신호를 나누세요.
-              <br />
-              본 미션 중에는 정답을 알려주지 않아요.
-            </p>
-          </div>
+          <StoryIntro
+            part="3부"
+            title="규칙 변경"
+            commander="마지막 임무일세, 요원! 비밀 통신 암호를 해독해야 하네."
+            steps={[
+              "우주선 신호가 하나씩 나타나면, 지금 암호에 맞게 왼쪽 또는 오른쪽 기지로 보내요.",
+              "암호는 색과 모양 두 가지예요. 한동안 이어지다가 바뀌고, 바뀔 때 한 번만 알려줘요.",
+              "본 미션 중에는 정답을 알려주지 않아요.",
+            ]}
+          />
           <div className="rounded-2xl bg-gradient-to-b from-[#1a1f3c] to-[#050a18] p-4">
             <RuleGuide dark story />
           </div>

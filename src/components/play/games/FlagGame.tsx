@@ -28,7 +28,7 @@ interface Spec {
 
 const MID: Record<Flag, Pos> = { blue: "mid", white: "mid" };
 const POS_LABEL: Record<Pos, string> = { up: "올라감", mid: "가운데", down: "내려감" };
-const POS_BOTTOM: Record<Pos, number> = { down: 0, mid: 28, up: 56 };
+const POS_BOTTOM: Record<Pos, number> = { down: 0, mid: 20, up: 40 };
 
 // 단계별 설정: 문항 수, 도깨비 비율, 반대 대장 비율, 반응 시간(ms), "내려" 지시를 쓰는지
 const CONFIG = {
@@ -195,20 +195,20 @@ export default function FlagGame({ level, onFinish }: GameProps) {
 
       {/* 말하는 사람 + 지시: 크게 보여줘서 누가 말하는지 한눈에 알 수 있어요 */}
       {phase === "wait" || !spec ? (
-        <div className="flex min-h-[11.5rem] w-full flex-col items-center justify-center rounded-3xl border-4 border-white/20 bg-white/5 p-4">
+        <div className="flex min-h-[9.5rem] w-full flex-col items-center justify-center rounded-3xl border-4 border-white/20 bg-white/5 p-4">
           <p className="text-6xl" aria-hidden="true">
             🎤
           </p>
           <p className="mt-2 text-lg font-bold text-slate-200">누가 말할까요?</p>
         </div>
       ) : (
-        <div className={`flex min-h-[11.5rem] w-full flex-col items-center justify-center rounded-3xl border-4 p-4 ${speaker.box}`}>
-          <p className="text-7xl leading-none" aria-hidden="true">
+        <div className={`flex min-h-[9.5rem] w-full flex-col items-center justify-center rounded-3xl border-4 p-4 ${speaker.box}`}>
+          <p className="text-6xl leading-none" aria-hidden="true">
             {speaker.icon}
           </p>
           <p className="mt-2 text-2xl font-extrabold text-white">{speaker.name}</p>
           <p className="mt-1 text-sm font-bold text-slate-100">{speaker.role}</p>
-          <p className="mt-3 rounded-2xl bg-black/30 px-6 py-2 text-4xl font-extrabold text-white">
+          <p className="mt-3 rounded-2xl bg-black/30 px-6 py-1.5 text-3xl font-extrabold text-white">
             {FLAG_NAME[spec.flag]} {ACTION_NAME[spec.spoken]}!
           </p>
         </div>
@@ -218,10 +218,10 @@ export default function FlagGame({ level, onFinish }: GameProps) {
       <div className="flex w-full justify-center gap-14 rounded-2xl bg-white/5 py-2 ring-1 ring-white/15">
         {(["blue", "white"] as Flag[]).map((flag) => (
           <div key={flag} className="flex flex-col items-center">
-            <div className="relative h-24 w-20">
-              <div className="absolute bottom-0 left-1/2 h-24 w-1.5 -translate-x-1/2 rounded bg-slate-400" />
+            <div className="relative h-20 w-20">
+              <div className="absolute bottom-0 left-1/2 h-20 w-1.5 -translate-x-1/2 rounded bg-slate-400" />
               <div
-                className={`absolute left-1/2 flex h-10 w-16 items-center justify-center rounded-sm text-sm font-extrabold transition-all duration-300 ${
+                className={`absolute left-1/2 flex h-8 w-14 items-center justify-center rounded-sm text-sm font-extrabold transition-all duration-300 ${
                   flag === "blue" ? "bg-sky-500 text-white" : "bg-white text-slate-700"
                 }`}
                 style={{ bottom: POS_BOTTOM[pos[flag]] }}
@@ -249,7 +249,7 @@ export default function FlagGame({ level, onFinish }: GameProps) {
             type="button"
             disabled={phase !== "command"}
             onClick={() => press(flag, action)}
-            className={`rounded-2xl px-4 py-4 text-lg font-extrabold transition-colors disabled:opacity-60 ${
+            className={`rounded-2xl px-4 py-3 text-lg font-extrabold transition-colors disabled:opacity-60 ${
               flag === "blue" ? "bg-sky-500 text-white hover:bg-sky-400" : "bg-white text-slate-800 hover:bg-slate-200"
             }`}
           >

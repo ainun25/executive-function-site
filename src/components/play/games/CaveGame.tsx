@@ -110,7 +110,7 @@ function makeTrials(level: 1 | 2 | 3): TrialSpec[] {
 
 function CaveCard({ cave, large }: { cave: Cave; large?: boolean }) {
   const color = COLORS[cave.color].hex;
-  const px = large ? 64 : 30; // 기준이 되는 지도 도형은 크게
+  const px = large ? 64 : cave.count === 3 ? 20 : 26; // 기준이 되는 지도 도형은 크게, 선택지는 동굴 안에 들어가게
   const shape = (key: number) => {
     const s = SHAPES[cave.shape];
     if (s === "원") return <span key={key} className="inline-block rounded-full" style={{ width: px, height: px, backgroundColor: color }} />;

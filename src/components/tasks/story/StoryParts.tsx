@@ -77,3 +77,43 @@ export function CommanderCentered({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
+/**
+ * 스토리형 검사(1~3부) 시작 화면입니다. 놀이와 같은 디자인으로,
+ * 어두운 카드 안에 제목과 본부 대장(가운데)을 묶고, 방법은 흰 상자에 점(·) 목록으로 보여줍니다.
+ */
+export function StoryIntro({
+  part,
+  title,
+  commander,
+  steps,
+}: {
+  part: string;
+  title: string;
+  commander: string;
+  steps: string[];
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-4 rounded-2xl bg-gradient-to-b from-[#1a1f3c] to-[#050a18] px-5 py-6 text-center text-white">
+        <div>
+          <p className="text-sm font-semibold text-[#a2ffcf]">지구 수호대 작전 · {part}</p>
+          <h2 className="mt-1 text-2xl font-extrabold text-[#00ff88]">{title}</h2>
+        </div>
+        <div className="mx-auto h-px w-16 bg-white/20" />
+        <CommanderCentered>{commander}</CommanderCentered>
+      </div>
+      <div className="rounded-2xl bg-white px-5 py-5 text-left text-slate-900 ring-1 ring-slate-200">
+        <p className="text-sm font-extrabold text-indigo-600">🎯 이렇게 해요</p>
+        <ul className="mt-2 space-y-2 text-base font-semibold leading-relaxed">
+          {steps.map((line) => (
+            <li key={line} className="flex gap-2">
+              <span aria-hidden="true">·</span>
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}

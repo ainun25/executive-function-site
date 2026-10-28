@@ -235,7 +235,7 @@ export function MessageBar({
       className={`flex min-h-[3rem] w-full items-center justify-center rounded-2xl px-4 py-2 text-center text-base font-extrabold leading-snug ${color}`}
       aria-live="polite"
     >
-      {children}
+      <span>{children}</span>
     </p>
   );
 }
