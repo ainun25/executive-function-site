@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-slate-50">
+    <footer className="border-t border-slate-200 bg-slate-50 print:hidden">
       <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-slate-500 sm:px-6">
         <p className="font-medium text-slate-600">실행기능 놀이터</p>
         <p className="mt-1">

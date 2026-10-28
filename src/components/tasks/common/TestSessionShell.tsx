@@ -19,6 +19,8 @@ interface TestSessionShellProps {
   title: string;
   /** 각 단계(phase)에 맞는 화면을 그려주는 함수. goToNext를 호출하면 다음 단계로 넘어갑니다. */
   renderPhase: (phase: TestPhase, goToNext: () => void) => React.ReactNode;
+  /** 연습/본검사 중 화면 전체를 덮는 배경 스타일. 스토리형 검사는 우주 배경을 씁니다. */
+  focusedBackgroundClass?: string;
 }
 
 /**
@@ -29,7 +31,11 @@ interface TestSessionShellProps {
  * "practice"와 "main" 단계에서는 학생이 검사에만 집중할 수 있도록
  * 상단 메뉴/푸터를 화면 전체를 덮는 레이어로 가립니다 (섹션 3).
  */
-export default function TestSessionShell({ title, renderPhase }: TestSessionShellProps) {
+export default function TestSessionShell({
+  title,
+  renderPhase,
+  focusedBackgroundClass = "bg-white",
+}: TestSessionShellProps) {
   const [phaseIndex, setPhaseIndex] = useState(0);
   const phase = PHASE_ORDER[phaseIndex];
 
@@ -41,7 +47,7 @@ export default function TestSessionShell({ title, renderPhase }: TestSessionShel
 
   if (isFocusedPhase) {
     return (
-      <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-white px-4">
+      <div className={`fixed inset-0 z-[60] flex flex-col items-center justify-center px-4 ${focusedBackgroundClass}`}>
         <div className="w-full max-w-xl">{renderPhase(phase, goToNext)}</div>
       </div>
     );

@@ -11,6 +11,7 @@ export interface RawDataRow {
   ageMonths: number | null;
   grade: string | null;
   ageGroup: string | null;
+  testVersion: string; // standard | story
   task: EFDomain;
   trialNumber: number;
   condition: string | null;
@@ -43,6 +44,7 @@ interface SessionWithTrials {
   age_months: number | null;
   grade: string | null;
   age_group: string | null;
+  test_version: string | null;
   started_at: string;
   trials: TrialRow[];
 }
@@ -62,7 +64,7 @@ export async function fetchRawDataRows(taskFilter: EFDomain | "all"): Promise<Ra
   let query = supabase
     .from("test_sessions")
     .select(
-      "participant_id, participant_name, age_years, age_months, grade, age_group, started_at, task_type, trials(trial_number, task_type, condition, stimulus, user_answer, is_correct, reaction_time, is_omission, is_commission_error, valid_trial, invalid_reason)"
+      "participant_id, participant_name, age_years, age_months, grade, age_group, test_version, started_at, task_type, trials(trial_number, task_type, condition, stimulus, user_answer, is_correct, reaction_time, is_omission, is_commission_error, valid_trial, invalid_reason)"
     )
     .order("started_at", { ascending: false })
     .order("trial_number", { referencedTable: "trials", ascending: true })
@@ -89,6 +91,7 @@ export async function fetchRawDataRows(taskFilter: EFDomain | "all"): Promise<Ra
         ageMonths: session.age_months,
         grade: session.grade,
         ageGroup: session.age_group,
+        testVersion: session.test_version ?? "standard",
         task: trial.task_type,
         trialNumber: trial.trial_number,
         condition: trial.condition,
@@ -125,6 +128,7 @@ export function buildRawDataCsv(rows: RawDataRow[]): string {
     "ageMonths",
     "grade",
     "ageGroup",
+    "testVersion",
     "task",
     "trial",
     "condition",
@@ -144,6 +148,7 @@ export function buildRawDataCsv(rows: RawDataRow[]): string {
       row.ageMonths ?? "",
       row.grade ?? "",
       row.ageGroup ?? "",
+      row.testVersion,
       row.task,
       row.trialNumber,
       row.condition,

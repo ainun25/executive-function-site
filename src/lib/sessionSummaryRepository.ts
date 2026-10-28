@@ -1,5 +1,6 @@
 import { supabase } from "./supabaseClient";
-import type { EFDomain, TrialRecord } from "@/types";
+import type { EFDomain, TestVersion, TrialRecord } from "@/types";
+import { summarizeByStage } from "./storyInhibition";
 import { analyzeInhibitionTrials } from "./inhibitionAnalysis";
 import { analyzeWorkingMemoryTrials } from "./workingMemoryAnalysis";
 import { analyzeFlexibilityTrials } from "./flexibilityAnalysis";
@@ -13,7 +14,8 @@ import { defaultInhibitionConfig } from "./inhibitionEngine";
 export function buildSessionSummary(
   domain: EFDomain,
   trials: TrialRecord[],
-  settings?: Record<string, number>
+  settings?: Record<string, number>,
+  version: TestVersion = "standard"
 ): Record<string, unknown> {
   let analysis: Record<string, unknown>;
   if (domain === "inhibition") {
@@ -26,6 +28,10 @@ export function buildSessionSummary(
   } else {
     analysis = analyzeFlexibilityTrials(trials) as unknown as Record<string, unknown>;
   }
+  // 스토리형 억제통제는 단계(행성/UFO/요원)별 요약도 함께 저장합니다.
+  if (version === "story" && domain === "inhibition") {
+    analysis = { ...analysis, stageSummary: summarizeByStage(trials) };
+  }
   return settings ? { ...analysis, testSettings: settings } : analysis;
 }
 
@@ -37,6 +43,7 @@ export interface SessionSummaryRow {
   ageMonths: number | null;
   grade: string | null; // preschool | "1"~"6"
   ageGroup: string | null; // preschool | lower | upper
+  testVersion: string; // standard | story
   task: EFDomain;
   date: string; // YYYY-MM-DD
   summary: Record<string, unknown> | null;
@@ -50,6 +57,7 @@ interface SessionSummaryDbRow {
   age_months: number | null;
   grade: string | null;
   age_group: string | null;
+  test_version: string | null;
   task_type: EFDomain;
   started_at: string;
   summary: Record<string, unknown> | null;
@@ -63,7 +71,7 @@ export async function fetchSessionSummaries(taskFilter: EFDomain | "all"): Promi
 
   let query = supabase
     .from("test_sessions")
-    .select("id, participant_id, participant_name, age_years, age_months, grade, age_group, task_type, started_at, summary")
+    .select("id, participant_id, participant_name, age_years, age_months, grade, age_group, test_version, task_type, started_at, summary")
     .order("started_at", { ascending: false })
     .limit(2000);
 
@@ -86,6 +94,7 @@ export async function fetchSessionSummaries(taskFilter: EFDomain | "all"): Promi
     ageMonths: row.age_months,
     grade: row.grade,
     ageGroup: row.age_group,
+    testVersion: row.test_version ?? "standard",
     task: row.task_type,
     date: row.started_at?.slice(0, 10) ?? "",
     summary: row.summary,
@@ -129,6 +138,7 @@ export function buildSessionSummaryCsv(rows: SessionSummaryRow[]): string {
     "ageMonths",
     "grade",
     "ageGroup",
+    "testVersion",
     "task",
     "date",
     ...orderedSummaryKeys,
@@ -142,6 +152,7 @@ export function buildSessionSummaryCsv(rows: SessionSummaryRow[]): string {
       row.ageMonths ?? "",
       row.grade ?? "",
       row.ageGroup ?? "",
+      row.testVersion,
       row.task,
       row.date,
     ];

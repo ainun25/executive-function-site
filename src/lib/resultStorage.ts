@@ -1,6 +1,6 @@
 "use client";
 
-import { EFDomain, ParticipantInfo, TestSessionSummary, TrialRecord } from "@/types";
+import { EFDomain, ParticipantInfo, TestSessionSummary, TestVersion, TrialRecord } from "@/types";
 import { supabase, isSupabaseConfigured } from "./supabaseClient";
 import { getParticipantId } from "./participant";
 import { buildSessionSummary } from "./sessionSummaryRepository";
@@ -13,11 +13,17 @@ const STORAGE_KEY_PREFIX = "ef-site:result:";
 
 const ALL_DOMAINS: EFDomain[] = ["inhibition", "workingMemory", "flexibility"];
 
+// 이 브라우저에 저장할 때 쓰는 이름표. 스토리형은 표준형 결과를 덮어쓰지 않도록 따로 저장합니다.
+function localStorageKey(domain: EFDomain, version: TestVersion): string {
+  return version === "standard" ? STORAGE_KEY_PREFIX + domain : `${STORAGE_KEY_PREFIX}${domain}:${version}`;
+}
+
 export function saveTestResult(
   domain: EFDomain,
   trials: TrialRecord[],
   participant: ParticipantInfo | null = null,
-  settings?: Record<string, number>
+  settings?: Record<string, number>,
+  version: TestVersion = "standard"
 ): void {
   if (typeof window === "undefined" || trials.length === 0) return;
   const summary: TestSessionSummary = {
@@ -28,20 +34,21 @@ export function saveTestResult(
     settings,
   };
   try {
-    window.localStorage.setItem(STORAGE_KEY_PREFIX + domain, JSON.stringify(summary));
+    window.localStorage.setItem(localStorageKey(domain, version), JSON.stringify(summary));
   } catch {
     // 저장 공간이 없거나 접근할 수 없어도 검사 자체는 계속 진행되어야 하므로 조용히 무시합니다.
   }
 
   if (isSupabaseConfigured) {
-    void syncResultToSupabase(domain, summary, participant);
+    void syncResultToSupabase(domain, summary, participant, version);
   }
 }
 
 async function syncResultToSupabase(
   domain: EFDomain,
   summary: TestSessionSummary,
-  participant: ParticipantInfo | null
+  participant: ParticipantInfo | null,
+  version: TestVersion
 ): Promise<void> {
   if (!supabase) return;
   try {
@@ -67,7 +74,9 @@ async function syncResultToSupabase(
       browser: firstTrial.browser,
       screen_width: firstTrial.screenWidth,
       screen_height: firstTrial.screenHeight,
-      summary: buildSessionSummary(domain, summary.trials, summary.settings),
+      summary: buildSessionSummary(domain, summary.trials, summary.settings, version),
+      // 표준형은 DB 기본값('standard')을 쓰도록 보내지 않습니다. (기존 검사 저장 방식을 그대로 유지)
+      ...(version !== "standard" ? { test_version: version } : {}),
     });
 
     if (sessionError) {
@@ -122,6 +131,7 @@ export function loadAllTestResults(): Record<EFDomain, TestSessionSummary | null
 export function clearAllResults(): void {
   if (typeof window === "undefined") return;
   ALL_DOMAINS.forEach((domain) => {
-    window.localStorage.removeItem(STORAGE_KEY_PREFIX + domain);
+    window.localStorage.removeItem(localStorageKey(domain, "standard"));
+    window.localStorage.removeItem(localStorageKey(domain, "story"));
   });
 }

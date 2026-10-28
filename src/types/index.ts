@@ -85,6 +85,10 @@ export interface ParticipantInfo {
   ageGroup: AgeGroup; // 학년으로 정해지는 연령군 (검사 설정을 연령군별로 다르게 적용)
 }
 
+// 검사 유형: 표준형(기본 검사) / 스토리형(이야기 속에서 하는 검사).
+// 자극과 구성이 달라 점수를 직접 비교할 수 없으므로, 결과마다 유형을 기록해 따로 분석합니다.
+export type TestVersion = "standard" | "story";
+
 // 입력 화면에서 선택하는 학년과, 그로부터 정해지는 연령군
 export type GradeCode = "preschool" | "1" | "2" | "3" | "4" | "5" | "6";
 export type AgeGroup = "preschool" | "lower" | "upper";

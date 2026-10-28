@@ -74,6 +74,7 @@ export default function RawDataViewer() {
                   "name",
                   "age",
                   "ageGroup",
+                  "version",
                   "task",
                   "trial",
                   "condition",
@@ -100,6 +101,9 @@ export default function RawDataViewer() {
                     {row.ageYears !== null ? `${row.ageYears}세 ${row.ageMonths}개월` : "-"}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2">{ageGroupShortLabel(row.ageGroup)}</td>
+                  <td className="whitespace-nowrap px-3 py-2">
+                    {row.testVersion === "story" ? "스토리형" : "표준형"}
+                  </td>
                   <td className="whitespace-nowrap px-3 py-2">{TASK_LABELS[row.task]}</td>
                   <td className="whitespace-nowrap px-3 py-2">{row.trialNumber}</td>
                   <td className="whitespace-nowrap px-3 py-2">{row.condition}</td>

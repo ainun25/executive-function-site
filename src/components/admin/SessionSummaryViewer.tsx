@@ -188,7 +188,7 @@ export default function SessionSummaryViewer() {
                     onChange={toggleSelectAll}
                   />
                 </th>
-                {["이름", "나이", "연령군", "검사", "정확도", "반응시간", "기타 지표", "날짜", ""].map((col) => (
+                {["이름", "나이", "연령군", "검사", "유형", "정확도", "반응시간", "기타 지표", "날짜", ""].map((col) => (
                   <th key={col} className="whitespace-nowrap px-3 py-2 font-semibold">
                     {col}
                   </th>
@@ -220,6 +220,9 @@ export default function SessionSummaryViewer() {
                       )}
                     </td>
                     <td className="whitespace-nowrap px-3 py-2">{TASK_LABELS[row.task]}</td>
+                    <td className="whitespace-nowrap px-3 py-2">
+                      {row.testVersion === "story" ? "스토리형" : "표준형"}
+                    </td>
                     <td className="whitespace-nowrap px-3 py-2">{getAccuracy(row)}</td>
                     <td className="whitespace-nowrap px-3 py-2">{getMeanRT(row)}</td>
                     <td className="whitespace-nowrap px-3 py-2">{getHeadlineMetric(row)}</td>
@@ -236,7 +239,7 @@ export default function SessionSummaryViewer() {
                   </tr>
                   {expandedIndex === index && (
                     <tr className="border-t border-slate-100 bg-slate-50">
-                      <td colSpan={10} className="px-3 py-2">
+                      <td colSpan={11} className="px-3 py-2">
                         <pre className="whitespace-pre-wrap break-all text-[11px] text-slate-600">
                           {JSON.stringify(row.summary, null, 2)}
                         </pre>
