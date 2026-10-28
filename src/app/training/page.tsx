@@ -58,36 +58,41 @@ export default function TrainingPage() {
 
       <section className="mt-6">
         <h3 className="text-sm font-semibold text-slate-500">단계별 게임 (1단계 예비초등 · 2단계 저학년 · 3단계 고학년)</h3>
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
-          {GAMES.map((game) => {
-            const stars = loadStars(game.id);
-            return (
-              <Link
-                key={game.id}
-                href={game.route}
-                className="flex flex-col rounded-2xl bg-gradient-to-b from-[#1a1f3c] to-[#2b2f6e] p-4 text-white shadow-sm transition-shadow hover:shadow-md"
-              >
-                <span className="flex items-center justify-between">
-                  <span className="text-3xl" aria-hidden="true">
-                    {game.icon}
-                  </span>
-                  <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
-                    {DOMAIN_NAMES[game.domain]}
-                  </span>
-                </span>
-                <span className="mt-2 text-base font-bold">{game.title}</span>
-                <span className="mt-1 flex-1 text-xs text-slate-200">{game.tagline}</span>
-                <span className="mt-3 flex gap-3 text-xs text-slate-300">
-                  {GAME_LEVELS.map((lv) => (
-                    <span key={lv}>
-                      {lv}단계 {"⭐".repeat(stars[lv] ?? 0) || "·"}
-                    </span>
-                  ))}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+        {(["inhibition", "workingMemory", "flexibility"] as const).map((domain) => (
+          <div key={domain} className="mt-4">
+            <h4 className="text-sm font-bold text-slate-700">{DOMAIN_NAMES[domain]}</h4>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {GAMES.filter((game) => game.domain === domain).map((game) => {
+                const stars = loadStars(game.id);
+                return (
+                      <Link
+                        key={game.id}
+                        href={game.route}
+                        className="flex flex-col rounded-2xl bg-gradient-to-b from-[#1a1f3c] to-[#2b2f6e] p-4 text-white shadow-sm transition-shadow hover:shadow-md"
+                      >
+                        <span className="flex items-center justify-between">
+                          <span className="text-3xl" aria-hidden="true">
+                            {game.icon}
+                          </span>
+                          <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
+                            {DOMAIN_NAMES[game.domain]}
+                          </span>
+                        </span>
+                        <span className="mt-2 text-base font-bold">{game.title}</span>
+                        <span className="mt-1 flex-1 text-xs text-slate-200">{game.tagline}</span>
+                        <span className="mt-3 flex gap-3 text-xs text-slate-300">
+                          {GAME_LEVELS.map((lv) => (
+                            <span key={lv}>
+                              {lv}단계 {"⭐".repeat(stars[lv] ?? 0) || "·"}
+                            </span>
+                          ))}
+                        </span>
+                      </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </section>
 
       <h2 className="mt-10 text-lg font-bold text-slate-800">📋 활동 자료</h2>

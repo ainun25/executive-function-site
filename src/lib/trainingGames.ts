@@ -3,7 +3,7 @@
 
 import type { EFDomain } from "@/types";
 
-export type GameId = "brake" | "piano" | "cave";
+export type GameId = "brake" | "flag" | "piano" | "suitcase" | "cave" | "chef";
 export type GameLevel = 1 | 2 | 3;
 export const GAME_LEVELS: GameLevel[] = [1, 2, 3];
 
@@ -46,6 +46,28 @@ export const GAMES: GameInfo[] = [
     route: "/training/play/brake",
   },
   {
+    id: "flag",
+    domain: "inhibition",
+    title: "청기백기 깃발 대장",
+    icon: "🚩",
+    tagline: "대장의 말만 따라 깃발을 올리고 내려요. 도깨비 말은 따라 하면 안 돼요!",
+    sceneEmoji: "🏴‍☠️",
+    sceneText: "깃발 마을 운동회 날! 깃발 대장이 청기와 백기로 신호를 보내요. 그런데 장난꾸러기 도깨비가 대장 흉내를 내고 있어요!",
+    commanderLine: "깃발 요원님, 누가 말하는지 잘 보고 움직여요!",
+    howTo: [
+      "🧑‍✈️ 깃발 대장이 말하면 그대로 깃발 버튼을 눌러요.",
+      "👹 도깨비가 말하면 아무것도 누르지 말고 꾹 참아요!",
+      "🔄 3단계의 반대 대장은 말한 것과 반대로 눌러요. (올려 → 내려)",
+    ],
+    levelNames: { 1: "1단계 · 연습 운동장", 2: "2단계 · 운동회 본경기", 3: "3단계 · 반대 대장 등장" },
+    levelDescs: {
+      1: "예비초등 · 올리기만, 도깨비는 가끔",
+      2: "초등 저학년 · 올리기와 내리기가 나와요",
+      3: "초등 고학년 · 반대로 해야 할 때도 있어요",
+    },
+    route: "/training/play/flag",
+  },
+  {
     id: "piano",
     domain: "workingMemory",
     title: "마법 피아노",
@@ -68,6 +90,28 @@ export const GAMES: GameInfo[] = [
     route: "/training/play/piano",
   },
   {
+    id: "suitcase",
+    domain: "workingMemory",
+    title: "여행 가방 챙기기",
+    icon: "🧳",
+    tagline: "한꺼번에 보여준 물건을 기억해서 가방에 챙겨요!",
+    sceneEmoji: "🛫",
+    sceneText: "내일은 신나는 여행 출발일! 탁자 위에 여행 물건들이 잠깐 나타났다 사라져요. 잊지 말고 챙겨야 해요!",
+    commanderLine: "여행 가이드예요! 어떤 물건이 있었는지 잘 기억해 주세요.",
+    howTo: [
+      "👀 물건들이 한꺼번에 잠깐 나타나요. 모두 잘 봐요.",
+      "🧺 물건이 사라지면, 보였던 물건을 모두 골라 가방에 담아요.",
+      "➕ 단계가 오르면 물건이 더 많아져요!",
+    ],
+    levelNames: { 1: "1단계 · 간식 가방", 2: "2단계 · 하루 여행 가방", 3: "3단계 · 긴 여행 가방" },
+    levelDescs: {
+      1: "예비초등 · 물건 2~3개",
+      2: "초등 저학년 · 물건 3~5개",
+      3: "초등 고학년 · 물건 4~6개, 보는 시간이 짧아요",
+    },
+    route: "/training/play/suitcase",
+  },
+  {
     id: "cave",
     domain: "flexibility",
     title: "조건에 맞는 동굴 항해",
@@ -88,6 +132,28 @@ export const GAMES: GameInfo[] = [
       3: "초등 고학년 · 규칙이 세 가지, 지도가 사라져요",
     },
     route: "/training/play/cave",
+  },
+  {
+    id: "chef",
+    domain: "flexibility",
+    title: "변덕쟁이 요리사",
+    icon: "🧑‍🍳",
+    tagline: "손님의 주문 규칙에 맞게 재료를 나눠요. 주문이 자꾸 바뀌어요!",
+    sceneEmoji: "🍳",
+    sceneText: "별빛 식당에 손님이 가득해요! 손님은 재료를 두 바구니에 나눠 달라고 하는데, 마음이 자주 바뀐대요.",
+    commanderLine: "주방장이에요! 손님의 주문이 바뀌면 바로 알려 줄게요.",
+    howTo: [
+      "🥕 재료가 하나씩 나와요. 지금 주문 규칙대로 왼쪽/오른쪽 바구니에 넣어요.",
+      "🔔 손님이 주문을 바꾸면 새 규칙이 알림으로 나와요.",
+      "🙈 3단계는 바구니 글자가 사라져요. 규칙을 기억해요!",
+    ],
+    levelNames: { 1: "1단계 · 한가한 점심", 2: "2단계 · 북적이는 저녁", 3: "3단계 · 바쁜 파티" },
+    levelDescs: {
+      1: "예비초등 · 주문이 한 번 바뀌어요",
+      2: "초등 저학년 · 주문이 여러 번 바뀌어요",
+      3: "초등 고학년 · 바구니 글자가 사라지고 더 자주 바뀌어요",
+    },
+    route: "/training/play/chef",
   },
 ];
 

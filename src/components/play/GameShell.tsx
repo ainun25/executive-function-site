@@ -16,6 +16,9 @@ import { CommanderSay, StoryScene } from "@/components/tasks/story/StoryParts";
 import BrakeGame from "./games/BrakeGame";
 import PianoGame from "./games/PianoGame";
 import CaveGame from "./games/CaveGame";
+import FlagGame from "./games/FlagGame";
+import SuitcaseGame from "./games/SuitcaseGame";
+import ChefGame from "./games/ChefGame";
 
 export interface GameResult {
   correct: number;
@@ -29,8 +32,11 @@ export interface GameProps {
 
 const GAME_COMPONENTS: Record<GameId, (props: GameProps) => React.ReactElement> = {
   brake: BrakeGame,
+  flag: FlagGame,
   piano: PianoGame,
+  suitcase: SuitcaseGame,
   cave: CaveGame,
+  chef: ChefGame,
 };
 
 type Screen = "intro" | "levels" | "play" | "result";
