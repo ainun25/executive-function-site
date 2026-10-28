@@ -9,7 +9,7 @@ export default function PrivacyPage() {
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
       <h1 className="text-3xl font-extrabold text-slate-900">개인정보 보호 안내</h1>
       <p className="mt-4 text-slate-600">
-        이 사이트는 초등학생을 대상으로 하므로, 개인정보를 최소한으로만 수집하도록 설계되었습니다.
+        이 사이트는 유초등 아동을 대상으로 하므로, 개인정보를 최소한으로만 수집하도록 설계되었습니다.
       </p>
 
       <section className="mt-8 space-y-3">

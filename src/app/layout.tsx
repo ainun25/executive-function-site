@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "실행기능 놀이터",
-  description: "초등학생을 위한 실행기능 정보·검사·훈련 통합 사이트",
+  description: "유초등을 위한 실행기능 정보·검사·훈련 통합 사이트",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
