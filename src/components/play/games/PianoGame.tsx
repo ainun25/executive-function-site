@@ -2,41 +2,27 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
-import {
-  FxHint,
-  FxOverlay,
-  canSpeak,
-  cancelSpeech,
-  isFxMuted,
-  playClip,
-  playNote,
-  preloadClips,
-  shakeClass,
-  speakText,
-  useFx,
-} from "../feedbackFx";
+import { FxHint, FxOverlay, playNote, shakeClass, useFx } from "../feedbackFx";
 
 /**
  * 마법 피아노 (작업기억 - 순서 기억 놀이).
  * 건반을 칠 때마다 건반이 반짝이고 그 음("도레미파솔")이 소리 납니다. 네 가지 방식이 있어요.
  *  1) 위치 기억(position): 반짝이는 위치(글자 없음)를 기억해서 똑같이 칩니다 (공간 위치 기억).
  *  2) 글자 보고 치기(text): "솔 → 미 → 도"를 글자로 보고, 글자에 맞는 건반을 찾아 칩니다.
- *  3) 소리 기억(sound): 불빛 없이 "도, 레, 미"처럼 건반 이름을 말로만 들려주고, 듣고 기억해서 칩니다 (청각 기억).
- *     말소리는 미리 만든 음성 파일(public/audio/solfege)을 재생합니다. 파일을 못 읽으면 브라우저 음성 읽기,
- *     그것도 안 되면 음(소리)으로 대신 들려줍니다.
+ *  3) 글자 기억(recall): "솔 → 미 → 도"를 글자로 한꺼번에 보여준 뒤 글자를 없애고, 기억해서 같은 순서로 칩니다.
  *  4) 거꾸로 따라 치기(backward): 불빛과 소리를 보고 마지막 소리부터 거꾸로 칩니다 (기억 + 조작).
  * 틀리면 같은 순서를 한 번 더 보여주고 다시 도전할 수 있어요(두 번째 시도는 점수에 넣지 않고 격려만 해요).
  * ⚠️ 놀이이므로 정답을 바로 알려줍니다. 결과는 별 개수 외에 저장하지 않습니다.
  */
 
-type Mode = "text" | "position" | "sound" | "backward";
+type Mode = "text" | "position" | "recall" | "backward";
 
 const KEYS = [
-  { label: "도", color: "#f43f5e", freq: 262, voice: "/audio/solfege/do.wav" },
-  { label: "레", color: "#f59e0b", freq: 294, voice: "/audio/solfege/re.wav" },
-  { label: "미", color: "#10b981", freq: 330, voice: "/audio/solfege/mi.wav" },
-  { label: "파", color: "#0ea5e9", freq: 349, voice: "/audio/solfege/fa.wav" },
-  { label: "솔", color: "#8b5cf6", freq: 392, voice: "/audio/solfege/sol.wav" },
+  { label: "도", color: "#f43f5e", freq: 262 },
+  { label: "레", color: "#f59e0b", freq: 294 },
+  { label: "미", color: "#10b981", freq: 330 },
+  { label: "파", color: "#0ea5e9", freq: 349 },
+  { label: "솔", color: "#8b5cf6", freq: 392 },
 ];
 
 const MODE_INFO: Record<Mode, { icon: string; title: string; howto: string; playMsg: string }> = {
@@ -52,11 +38,11 @@ const MODE_INFO: Record<Mode, { icon: string; title: string; howto: string; play
     howto: "반짝이는 건반의 위치를 기억해서 똑같은 순서로 쳐요. 건반에 글자가 없어요!",
     playMsg: "📍 반짝인 위치 순서대로 쳐요",
   },
-  sound: {
-    icon: "🎧",
-    title: "소리 기억",
-    howto: "불빛 없이 \"도, 레, 미\"처럼 건반 이름을 말로만 들려줘요. 잘 듣고 기억해서 같은 건반을 쳐요!",
-    playMsg: "🎧 들은 말 순서대로 건반을 쳐요",
+  recall: {
+    icon: "🧠",
+    title: "글자 기억",
+    howto: "글자가 한꺼번에 잠깐 나왔다가 사라져요. 순서를 기억해서 같은 순서로 건반을 쳐요!",
+    playMsg: "🧠 글자가 사라졌어요! 기억한 순서대로 쳐요",
   },
   backward: {
     icon: "⬅️",
@@ -79,20 +65,25 @@ const PLAN: Record<1 | 2 | 3, { mode: Mode; len: number }[]> = {
   2: [
     { mode: "position", len: 3 },
     { mode: "position", len: 4 },
-    { mode: "sound", len: 2 },
-    { mode: "sound", len: 3 },
-    { mode: "sound", len: 3 },
-    { mode: "sound", len: 4 },
+    { mode: "recall", len: 2 },
+    { mode: "recall", len: 3 },
+    { mode: "recall", len: 3 },
+    { mode: "recall", len: 4 },
   ],
   3: [
-    { mode: "sound", len: 3 },
-    { mode: "sound", len: 4 },
+    { mode: "recall", len: 3 },
+    { mode: "recall", len: 4 },
     { mode: "backward", len: 2 },
     { mode: "backward", len: 3 },
     { mode: "backward", len: 3 },
     { mode: "backward", len: 4 },
   ],
 };
+
+// 글자 기억에서 글자를 보여주는 시간(ms): 글자가 많을수록 길게
+function recallShowMs(len: number): number {
+  return 1600 + 700 * len;
+}
 
 // 건반이 켜지는 시간과 사이 간격(ms)
 const TIMING = {
@@ -130,29 +121,20 @@ export default function PianoGame({ level, onFinish }: GameProps) {
   const [message, setMessage] = useState("");
   const [lastOk, setLastOk] = useState<boolean | null>(null);
   const [replayUsed, setReplayUsed] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [speechFallback, setSpeechFallback] = useState(false);
 
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const attemptRef = useRef(0); // 이번 판의 시도 횟수 (0: 첫 시도)
   const correctFirstTryRef = useRef(0);
   const roundRef = useRef(0);
   const finishedRef = useRef(false);
-  const listenTokenRef = useRef(0); // 말소리 듣기 도중에 판이 바뀌면 이전 듣기를 멈추기 위한 표시
 
   const schedule = (fn: () => void, ms: number) => {
     timeoutsRef.current.push(setTimeout(fn, ms));
   };
 
   useEffect(() => {
-    setMuted(isFxMuted());
-    preloadClips(KEYS.map((key) => key.voice));
     beginRound(0);
-    return () => {
-      listenTokenRef.current += 1;
-      cancelSpeech();
-      timeoutsRef.current.forEach(clearTimeout);
-    };
+    return () => timeoutsRef.current.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -160,7 +142,7 @@ export default function PianoGame({ level, onFinish }: GameProps) {
   const info = MODE_INFO[round.mode];
   const expectedOf = (r: Round) => (r.mode === "backward" ? [...r.seq].reverse() : r.seq);
 
-  // 순서를 보여주고(또는 소리만 들려주고) 건반 치기 단계로 넘어갑니다.
+  // 순서를 보여주고 건반 치기 단계로 넘어갑니다.
   const startListen = (idx: number) => {
     const r = rounds[idx];
     setInput([]);
@@ -172,36 +154,14 @@ export default function PianoGame({ level, onFinish }: GameProps) {
       return;
     }
     setPhase("listen");
-    listenTokenRef.current += 1;
-    const token = listenTokenRef.current;
-    cancelSpeech();
 
-    // 소리 기억: "도, 레, 미"를 말로 들려줍니다 (불빛 없음). 말하기를 지원하지 않으면 음으로 대신 들려줍니다.
-    if (r.mode === "sound") {
-      setSpeechFallback(false);
-      setMessage("🎧 말소리를 잘 들어요!");
-      const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-      void (async () => {
-        await wait(700);
-        for (const key of r.seq) {
-          if (token !== listenTokenRef.current) return;
-          // 1순위: 미리 만든 음성 파일 → 2순위: 브라우저 음성 읽기 → 3순위: 음(띵)
-          const played = await playClip(KEYS[key].voice);
-          if (token !== listenTokenRef.current) return;
-          if (!played) {
-            if (canSpeak()) await speakText(KEYS[key].label, 0.9);
-            else {
-              setSpeechFallback(true);
-              playNote(KEYS[key].freq);
-              await wait(600);
-            }
-          }
-          await wait(500);
-        }
-        if (token !== listenTokenRef.current) return;
+    // 글자 기억: 글자를 한꺼번에 보여주고, 시간이 지나면 글자를 없애고 건반 치기 단계로 넘어갑니다.
+    if (r.mode === "recall") {
+      setMessage("👀 글자를 한꺼번에 잘 보고 기억해요!");
+      schedule(() => {
         setPhase("play");
-        setMessage(MODE_INFO.sound.playMsg);
-      })();
+        setMessage(MODE_INFO.recall.playMsg);
+      }, recallShowMs(r.seq.length));
       return;
     }
     setMessage("👀 잘 보고 기억해요!");
@@ -273,7 +233,9 @@ export default function PianoGame({ level, onFinish }: GameProps) {
         setMessage(
           round.mode === "text"
             ? `앗, ${KEYS[key].label}이(가) 아니에요. 글자를 다시 보고 쳐 봐요!`
-            : "앗, 다른 건반이에요. 다시 한 번 들어볼까요? 🎧"
+            : round.mode === "recall"
+              ? "앗, 다른 건반이에요. 글자를 다시 보여줄게요! 👀"
+              : "앗, 다른 건반이에요. 다시 한 번 보여줄게요! 👀"
         );
         schedule(() => startListen(roundRef.current), 1700);
       } else {
@@ -293,9 +255,9 @@ export default function PianoGame({ level, onFinish }: GameProps) {
     }
   };
 
-  // 소리 기억 방식에서는 한 번 더 들을 수 있어요(힌트를 쓰면 첫 시도 점수에는 넣지 않아요).
+  // 글자 기억 방식에서는 글자를 한 번 더 볼 수 있어요(힌트를 쓰면 첫 시도 점수에는 넣지 않아요).
   const replay = () => {
-    if (phase !== "play" || round.mode !== "sound") return;
+    if (phase !== "play" || round.mode !== "recall") return;
     attemptRef.current = 1;
     setReplayUsed(true);
     startListen(roundRef.current);
@@ -340,11 +302,22 @@ export default function PianoGame({ level, onFinish }: GameProps) {
         </div>
       )}
 
-      {/* 소리 기억: 불빛 대신 귀 모양으로 알려줘요 */}
-      {round.mode === "sound" && phase === "listen" && (
-        <p className="animate-pulse text-6xl" aria-hidden="true">
-          🎧
-        </p>
+      {/* 글자 기억: 글자를 한꺼번에 보여줬다가 없애요 (없어진 뒤에는 물음표 칸만 남아요) */}
+      {round.mode === "recall" && phase !== "intro" && (
+        <div className="flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/20">
+          {round.seq.map((key, i) => (
+            <span key={i} className="flex items-center gap-2">
+              {i > 0 && <span className="text-slate-400">→</span>}
+              <span
+                className={`flex h-14 w-14 items-center justify-center rounded-xl text-3xl font-extrabold ${
+                  phase === "listen" ? "bg-white/15 text-white" : "border-2 border-dashed border-white/30 text-slate-500"
+                }`}
+              >
+                {phase === "listen" ? KEYS[key].label : "?"}
+              </span>
+            </span>
+          ))}
+        </div>
       )}
 
       <p
@@ -356,16 +329,9 @@ export default function PianoGame({ level, onFinish }: GameProps) {
         {message}
       </p>
 
-      {round.mode === "sound" && muted && (
-        <p className="text-xs text-amber-300">🔇 소리가 꺼져 있어요. 위쪽 🔊 버튼을 눌러 소리를 켜 주세요!</p>
-      )}
-      {round.mode === "sound" && speechFallback && (
-        <p className="text-xs text-amber-300">이 기기는 말소리 읽기를 지원하지 않아서, 말 대신 음(띵)으로 들려줘요.</p>
-      )}
-
       <FxHint fx={fx}>
-        소리를 마음속으로 "도-미-솔"처럼 따라 말하면서 기억해 봐요!
-        {round.mode === "backward" && " 거꾸로는 마지막 소리부터 쳐요."}
+        글자나 위치를 마음속으로 "도-미-솔"처럼 따라 말하면서 기억해 봐요!
+        {round.mode === "backward" && " 거꾸로는 마지막 음부터 쳐요."}
       </FxHint>
 
       <div className="flex w-full justify-center gap-2">
@@ -418,13 +384,13 @@ export default function PianoGame({ level, onFinish }: GameProps) {
         })}
       </div>
 
-      {round.mode === "sound" && phase === "play" && !replayUsed && (
+      {round.mode === "recall" && phase === "play" && !replayUsed && (
         <button
           type="button"
           onClick={replay}
           className="rounded-full border border-white/30 px-4 py-2 text-xs font-semibold text-slate-200 hover:bg-white/10"
         >
-          🔁 한 번 더 듣기 (힌트)
+          🔁 한 번 더 보기 (힌트)
         </button>
       )}
     </div>
