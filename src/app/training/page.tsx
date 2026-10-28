@@ -70,6 +70,17 @@ export default function TrainingPage() {
                   </div>
                 </dl>
 
+                {material.fileUrl && /^https?:\/\//i.test(material.fileUrl) && (
+                  <a
+                    href={material.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex w-fit items-center rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+                  >
+                    📎 자료 열기
+                  </a>
+                )}
+
                 {(material.materials || material.activitySteps || material.learningGoal) && (
                   <>
                     <button

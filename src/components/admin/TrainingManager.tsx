@@ -8,6 +8,13 @@ import {
   updateTrainingMaterial,
   type TrainingMaterialInput,
 } from "@/lib/trainingRepository";
+import {
+  FILE_ACCEPT_ATTRIBUTE,
+  FILE_RULE_TEXT,
+  isOwnFileUrl,
+  removeTrainingFileByUrl,
+  uploadTrainingFile,
+} from "@/lib/fileUpload";
 import type { TrainingCategory, TrainingMaterial } from "@/types";
 import ConfirmBar from "./ConfirmBar";
 
@@ -40,6 +47,14 @@ export default function TrainingManager() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  // 파일 업로드 관련 상태.
+  // pendingUploadUrl: 방금 올렸지만 아직 "저장"하지 않은 파일 (저장 전에 취소하면 저장소에서 지웁니다)
+  // originalFileUrl: 수정 중인 자료가 원래 가지고 있던 파일 (다른 파일로 바꿔 저장하면 옛 파일을 지웁니다)
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+  const [pendingUploadUrl, setPendingUploadUrl] = useState<string | null>(null);
+  const [originalFileUrl, setOriginalFileUrl] = useState<string | null>(null);
+
   const loadMaterials = async () => {
     setIsLoading(true);
     const data = await fetchTrainingMaterials();
@@ -51,13 +66,57 @@ export default function TrainingManager() {
     loadMaterials();
   }, []);
 
+  // 저장하지 않은 채 폼을 닫는 경우(취소, 다른 자료 수정 시작)에는, 방금 올린 파일을 저장소에서 지웁니다.
+  const discardPendingUpload = () => {
+    if (pendingUploadUrl) void removeTrainingFileByUrl(pendingUploadUrl);
+    setPendingUploadUrl(null);
+  };
+
   const resetForm = () => {
     setEditingId(null);
     setForm(EMPTY_FORM);
     setErrorMessage(null);
+    setUploadMessage(null);
+    setOriginalFileUrl(null);
+  };
+
+  const handleCancel = () => {
+    discardPendingUpload();
+    resetForm();
+  };
+
+  const handleFileSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = ""; // 같은 파일을 다시 고를 수 있도록 선택값을 비웁니다
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadMessage(null);
+    const result = await uploadTrainingFile(file);
+    setIsUploading(false);
+
+    if (result.error || !result.url) {
+      setUploadMessage(result.error ?? "업로드에 실패했어요.");
+      return;
+    }
+
+    // 이전에 올렸다가 저장하지 않은 파일이 있으면 정리하고, 새 파일 주소를 칸에 채웁니다.
+    discardPendingUpload();
+    setPendingUploadUrl(result.url);
+    setForm((prev) => ({ ...prev, fileUrl: result.url }));
+    setUploadMessage("업로드했어요. 아래 '등록/수정 저장'을 눌러야 자료에 반영돼요.");
+  };
+
+  const handleRemoveFile = () => {
+    if (form.fileUrl && form.fileUrl === pendingUploadUrl) discardPendingUpload();
+    setForm((prev) => ({ ...prev, fileUrl: null }));
+    setUploadMessage("첨부를 뺐어요. 저장하면 자료에서 제거돼요.");
   };
 
   const startEdit = (material: TrainingMaterial) => {
+    discardPendingUpload();
+    setUploadMessage(null);
+    setOriginalFileUrl(material.fileUrl ?? null);
     setEditingId(material.id);
     setForm({
       title: material.title,
@@ -96,6 +155,12 @@ export default function TrainingManager() {
       return;
     }
 
+    // 저장이 끝났으니 방금 올린 파일은 "사용 중"이 됩니다. 그리고 수정 중 파일을 바꾼 경우에만 옛 파일을 지웁니다.
+    setPendingUploadUrl(null);
+    if (editingId && originalFileUrl && originalFileUrl !== form.fileUrl && isOwnFileUrl(originalFileUrl)) {
+      void removeTrainingFileByUrl(originalFileUrl);
+    }
+
     resetForm();
     loadMaterials();
   };
@@ -112,7 +177,10 @@ export default function TrainingManager() {
     setIsDeleting(false);
     setPendingDelete(null);
     setNotice(result.error ? `삭제 실패: ${result.error}` : "훈련자료를 삭제했어요.");
-    if (!result.error) loadMaterials();
+    if (!result.error) {
+      void removeTrainingFileByUrl(pendingDelete.fileUrl); // 자료가 지워지면 첨부 파일도 저장소에서 지웁니다
+      loadMaterials();
+    }
   };
 
   return (
@@ -197,21 +265,64 @@ export default function TrainingManager() {
           onChange={(e) => setForm({ ...form, learningGoal: e.target.value || null })}
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
         />
-        <div className="grid gap-3 sm:grid-cols-2">
-          <input
-            type="url"
-            placeholder="파일/외부 링크 (선택)"
-            value={form.fileUrl ?? ""}
-            onChange={(e) => setForm({ ...form, fileUrl: e.target.value || null })}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          />
-          <input
-            type="text"
-            placeholder="출처 (선택)"
-            value={form.source ?? ""}
-            onChange={(e) => setForm({ ...form, source: e.target.value || null })}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          />
+        <input
+          type="text"
+          placeholder="출처 (선택)"
+          value={form.source ?? ""}
+          onChange={(e) => setForm({ ...form, source: e.target.value || null })}
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        />
+
+        <div className="space-y-2 rounded-xl border border-dashed border-slate-300 p-4">
+          <p className="text-sm font-semibold text-slate-700">첨부 파일 (선택)</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <label
+              className={`cursor-pointer rounded-full bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-900 ${
+                isUploading ? "pointer-events-none opacity-50" : ""
+              }`}
+            >
+              {isUploading ? "올리는 중..." : "파일 선택해서 올리기"}
+              <input
+                type="file"
+                accept={FILE_ACCEPT_ATTRIBUTE}
+                onChange={handleFileSelected}
+                disabled={isUploading}
+                className="sr-only"
+              />
+            </label>
+            <span className="text-xs text-slate-400">{FILE_RULE_TEXT}</span>
+          </div>
+          {uploadMessage && <p className="text-xs text-indigo-600">{uploadMessage}</p>}
+          <p className="text-xs text-slate-400">
+            ⚠️ 올린 파일은 주소를 아는 사람 누구나 열 수 있어요. 아이 이름 등 개인정보가 든 파일은 올리지 마세요.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <input
+              type="url"
+              placeholder="또는 외부 링크 직접 입력 (https://...)"
+              value={form.fileUrl ?? ""}
+              onChange={(e) => setForm({ ...form, fileUrl: e.target.value || null })}
+              className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
+            {form.fileUrl && (
+              <button
+                type="button"
+                onClick={handleRemoveFile}
+                className="rounded-full border border-slate-300 px-3 py-2 text-xs text-slate-500 hover:bg-slate-50"
+              >
+                첨부 빼기
+              </button>
+            )}
+          </div>
+          {form.fileUrl && isOwnFileUrl(form.fileUrl) && (
+            <p className="text-xs text-slate-500">
+              현재 첨부: 업로드한 파일{" "}
+              <a href={form.fileUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 underline">
+                열어보기
+              </a>
+            </p>
+          )}
         </div>
 
         {errorMessage && <p className="text-sm text-indigo-600">{errorMessage}</p>}
@@ -219,15 +330,15 @@ export default function TrainingManager() {
         <div className="flex gap-2">
           <button
             type="submit"
-            disabled={isSaving}
+            disabled={isSaving || isUploading}
             className="rounded-full bg-indigo-500 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-600 disabled:opacity-50"
           >
             {isSaving ? "저장 중..." : editingId ? "수정 저장" : "등록"}
           </button>
-          {editingId && (
+          {(editingId || pendingUploadUrl) && (
             <button
               type="button"
-              onClick={resetForm}
+              onClick={handleCancel}
               className="rounded-full border border-slate-300 px-5 py-2 text-sm text-slate-500"
             >
               취소
