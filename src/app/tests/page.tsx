@@ -70,7 +70,20 @@ export default function TestsPage() {
               검사 소개 보러가기
             </Link>
           </div>
-          <ComingSoonStoryCard part="2부" title="신호 기억" domain="작업기억" />
+          <div className="flex flex-col rounded-2xl bg-gradient-to-b from-[#1a1f3c] to-[#050a18] p-6 text-white">
+            <p className="text-xs font-semibold text-[#a2ffcf]">지구 수호대 작전 · 2부</p>
+            <h3 className="mt-1 text-xl font-bold text-[#00ff88]">신호 기억</h3>
+            <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-200">
+              기지에서 반짝이는 신호의 순서를 기억해서 그대로 보내는 작업기억 검사예요.
+            </p>
+            <p className="mt-4 text-xs text-slate-400">작업기억 · 예상 소요시간 약 5분</p>
+            <Link
+              href="/tests/story/working-memory"
+              className="mt-5 block w-full rounded-full bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-600"
+            >
+              검사 소개 보러가기
+            </Link>
+          </div>
           <ComingSoonStoryCard part="3부" title="규칙 변경" domain="인지적 유연성" />
         </div>
       </section>

@@ -9,6 +9,8 @@ type TaskPhase = "showing" | "recall";
 
 interface SpanTaskProps {
   config: WorkingMemoryConfig;
+  /** story: 스토리형 검사(지구 수호대 작전)의 어두운 우주 배경용 모양. 문항 규칙은 같습니다. */
+  theme?: "standard" | "story";
   onComplete: (trials: TrialRecord[]) => void;
 }
 
@@ -18,7 +20,8 @@ interface SpanTaskProps {
  * span(기억할 칸의 개수)은 2개부터 시작해 정답을 맞출 때마다 1씩 늘어나고,
  * 같은 길이에서 정해진 횟수만큼 계속 틀리면 검사가 종료됩니다 (섹션 10).
  */
-export default function SpanTask({ config, onComplete }: SpanTaskProps) {
+export default function SpanTask({ config, theme = "standard", onComplete }: SpanTaskProps) {
+  const isStory = theme === "story";
   const [span, setSpan] = useState(config.startSpan);
   const [attempt, setAttempt] = useState(0); // 같은 span에서 몇 번째 시도인지 (0부터 시작)
   const [phase, setPhase] = useState<TaskPhase>("showing");
@@ -145,10 +148,18 @@ export default function SpanTask({ config, onComplete }: SpanTaskProps) {
 
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <p className="text-xs font-medium text-slate-400">기억할 칸 수: {span}개</p>
+      <p className="text-xs font-medium text-slate-400">
+        {isStory ? `신호 길이: ${span}개` : `기억할 칸 수: ${span}개`}
+      </p>
 
-      <p className="text-sm text-slate-500">
-        {phase === "showing" ? "잘 보고 순서를 기억하세요" : "방금 본 순서대로 눌러보세요"}
+      <p className={`text-sm ${isStory ? "text-slate-200" : "text-slate-500"}`}>
+        {isStory
+          ? phase === "showing"
+            ? "📡 기지에서 신호가 와요! 순서를 잘 기억하세요"
+            : "📡 받은 신호 순서대로 기지를 눌러 보내세요"
+          : phase === "showing"
+            ? "잘 보고 순서를 기억하세요"
+            : "방금 본 순서대로 눌러보세요"}
       </p>
 
       <div className="grid grid-cols-3 gap-3">
@@ -162,15 +173,21 @@ export default function SpanTask({ config, onComplete }: SpanTaskProps) {
               type="button"
               disabled={phase !== "recall"}
               onClick={() => handleCellClick(cellIndex)}
-              className={`flex h-20 w-20 items-center justify-center rounded-2xl text-lg font-bold ring-1 ring-slate-200 transition-colors sm:h-24 sm:w-24 ${
-                isHighlighted
-                  ? "bg-indigo-500 text-white"
-                  : isClicked
-                    ? "bg-indigo-100 text-indigo-700"
-                    : "bg-slate-50 text-slate-300"
+              className={`flex h-20 w-20 items-center justify-center rounded-2xl text-lg font-bold transition-colors sm:h-24 sm:w-24 ${
+                isStory
+                  ? isHighlighted
+                    ? "bg-[#00ff88] text-[#050a18] shadow-[0_0_24px_#00ff88] ring-2 ring-[#a2ffcf]"
+                    : isClicked
+                      ? "bg-indigo-400/40 text-white ring-1 ring-indigo-300"
+                      : "bg-white/10 text-slate-400 ring-1 ring-white/20"
+                  : isHighlighted
+                    ? "bg-indigo-500 text-white ring-1 ring-slate-200"
+                    : isClicked
+                      ? "bg-indigo-100 text-indigo-700 ring-1 ring-slate-200"
+                      : "bg-slate-50 text-slate-300 ring-1 ring-slate-200"
               }`}
             >
-              {isClicked ? clickedOrder + 1 : cellIndex + 1}
+              {isClicked ? clickedOrder + 1 : isStory ? "🛰️" : cellIndex + 1}
             </button>
           );
         })}
