@@ -49,3 +49,15 @@ export function StoryProgress({ current, total }: { current: number; total: numb
     </div>
   );
 }
+
+/** 단계 사이에 한두 줄로 보여주는 장면(컷신). 정답 여부와 무관한 이야기만 담습니다. */
+export function StoryScene({ emoji, children }: { emoji: string; children: ReactNode }) {
+  return (
+    <div className="w-full rounded-2xl bg-white/5 px-4 py-5 text-center ring-1 ring-white/15">
+      <p className="text-4xl" aria-hidden="true">
+        {emoji}
+      </p>
+      <p className="mt-2 text-sm italic leading-relaxed text-slate-200">{children}</p>
+    </div>
+  );
+}

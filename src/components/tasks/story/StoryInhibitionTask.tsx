@@ -11,7 +11,14 @@ import {
 import { useTrialTimer } from "@/lib/reactionTimer";
 import { STORY_STAGES, makeStimulusLabel, splitTrialCounts, type StoryStage } from "@/lib/storyInhibition";
 import type { TrialRecord } from "@/types";
-import { CommanderSay, StoryProgress } from "./StoryParts";
+import { CommanderSay, StoryProgress, StoryScene } from "./StoryParts";
+
+// 단계 사이의 장면 (인덱스 = 다음에 시작할 단계). 정답 여부와 무관한 이야기만 담습니다.
+const CUTSCENES: { emoji: string; text: string }[] = [
+  { emoji: "🌍", text: "" },
+  { emoji: "🌌", text: "행성 구역 순찰이 끝났다. 그런데 레이더에 수상한 불빛이 깜빡인다… UFO 편대가 다가오고 있다!" },
+  { emoji: "🛸", text: "UFO 구역 순찰도 끝났다. 이제 마지막이다. 요원들 사이에 변장한 적이 숨어 있다는 제보가 들어왔다…" },
+];
 
 type Phase = "fixation" | "stimulus" | "gap";
 
@@ -57,7 +64,7 @@ export default function StoryInhibitionTask({ config, mode, onComplete }: StoryI
   const plan = planRef.current;
   const totalTrials = plan.reduce((sum, item) => sum + item.conditions.length, 0);
 
-  const [screen, setScreen] = useState<"guide" | "trials">("guide");
+  const [screen, setScreen] = useState<"cutscene" | "guide" | "trials">("guide");
   const [stageIndex, setStageIndex] = useState(0);
   const [trialInStage, setTrialInStage] = useState(1);
   const [phase, setPhase] = useState<Phase>("fixation");
@@ -146,7 +153,7 @@ export default function StoryInhibitionTask({ config, mode, onComplete }: StoryI
       } else {
         stageIndexRef.current = stageIdx + 1;
         setStageIndex(stageIdx + 1);
-        setScreen("guide");
+        setScreen("cutscene");
       }
     }, config.interTrialGapMs);
   };
@@ -210,6 +217,19 @@ export default function StoryInhibitionTask({ config, mode, onComplete }: StoryI
       style={{ touchAction: "manipulation" }}
       onPointerDown={screen === "trials" ? handleResponse : undefined}
     >
+      {screen === "cutscene" && (
+        <div className="flex w-full max-w-sm flex-col items-center gap-5 px-2">
+          <StoryScene emoji={CUTSCENES[stageIndex]?.emoji ?? "🌌"}>{CUTSCENES[stageIndex]?.text}</StoryScene>
+          <button
+            type="button"
+            onClick={() => setScreen("guide")}
+            className="w-full rounded-full bg-indigo-500 px-6 py-4 text-lg font-bold text-white hover:bg-indigo-600"
+          >
+            다음 장면
+          </button>
+        </div>
+      )}
+
       {screen === "guide" && (
         <div className="flex w-full flex-col items-center px-2">
           <h2 className="text-2xl font-extrabold text-[#ffcc00]">

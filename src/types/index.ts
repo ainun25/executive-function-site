@@ -142,4 +142,5 @@ export interface TestSessionSummary {
   finishedAt: number;
   trials: TrialRecord[];
   settings?: Record<string, number>; // 이 검사를 진행할 때 적용된 검사 설정
+  participant?: ParticipantInfo; // 이 기기(브라우저)에만 저장. 스토리형 종합 결과서/임명장에 이름을 보여주기 위함
 }

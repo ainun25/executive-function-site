@@ -15,7 +15,7 @@ import {
 } from "@/lib/flexibilityEngine";
 import type { TrialRecord } from "@/types";
 import { RULE_NAME, STORY_RULE_NAME, RuleCard } from "./RuleCard";
-import { CommanderSay, StoryProgress } from "../story/StoryParts";
+import { CommanderSay, StoryProgress, StoryScene } from "../story/StoryParts";
 
 // 규칙 안내 화면이 뜬 뒤 "알겠어요"를 누를 수 있기까지 잠깐 기다립니다 (실수로 바로 넘기는 것을 막기 위함).
 const ANNOUNCE_READ_MS = 1200;
@@ -190,9 +190,19 @@ export default function FlexibilitySwitchTask({ config, theme = "standard", onCo
   const isFirstTrial = trialIndex === 0;
   const isChange = !isFirstTrial && sequenceRef.current[trialIndex - 1].rule !== spec.rule;
 
+  // 스토리형: 단계가 바뀌는 지점에서는 규칙 안내 위에 한 줄 장면을 보여줍니다.
+  const previousBlock = isFirstTrial ? null : sequenceRef.current[trialIndex - 1].block;
+  const scene =
+    isStory && previousBlock !== null && previousBlock !== spec.block
+      ? spec.block === "shapeBlock"
+        ? "색깔 암호 해독이 끝났다. 그런데 적의 통신망에서 또 다른 암호 체계가 잡힌다…"
+        : "두 암호를 모두 풀었다. 이제 적은 암호를 수시로 바꿔 가며 교신하고 있다!"
+      : null;
+
   if (announcing) {
     return (
       <div className="mx-auto flex max-w-sm flex-col items-center gap-4 text-center">
+        {scene && <StoryScene emoji="📡">{scene}</StoryScene>}
         {isStory ? (
           <CommanderSay radio={!isFirstTrial}>
             {isFirstTrial

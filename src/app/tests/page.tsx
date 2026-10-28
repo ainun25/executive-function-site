@@ -88,6 +88,15 @@ export default function TestsPage() {
         </div>
       </section>
 
+      <div className="mt-6 text-center">
+        <Link
+          href="/results/story"
+          className="inline-block rounded-full border border-indigo-300 px-6 py-3 text-sm font-semibold text-indigo-600 hover:bg-indigo-50"
+        >
+          🎖️ 스토리 종합 결과서 · 임명장 보기
+        </Link>
+      </div>
+
       <div className="mt-10 rounded-xl border border-indigo-200 bg-indigo-50 p-5 text-center text-sm text-indigo-800">
         본 검사는 실행기능의 일부 특성을 살펴보기 위한 교육·연구용 수행과제이며, 의학적 또는
         심리학적 진단을 목적으로 하지 않습니다.

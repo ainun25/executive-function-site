@@ -169,6 +169,7 @@ function PhaseContent({
       return (
         <div className="space-y-6 text-center">
           <h2 className="text-2xl font-bold text-slate-900">미션 완료! 🎉</h2>
+          <p className="text-sm italic text-slate-500">📡 신호 전달 임무 완료! 마지막 3부 규칙 변경이 남았다.</p>
           <p className="text-slate-500">신호 전송 미션을 마쳤어요. 결과서를 확인해볼까요?</p>
           <button type="button" onClick={goToNext} className={primaryButton}>
             결과서 보기
@@ -180,6 +181,12 @@ function PhaseContent({
       return (
         <div className="space-y-6">
           <StoryWorkingMemoryReport trials={mainTrials} participant={participant} />
+          <Link
+            href="/results/story"
+            className="block w-full rounded-full bg-indigo-500 px-6 py-3 text-center text-base font-semibold text-white hover:bg-indigo-600 print:hidden"
+          >
+            🎖️ 스토리 종합 결과서 · 임명장 보기
+          </Link>
           <Link
             href="/tests"
             className="block w-full rounded-full border border-indigo-300 px-6 py-3 text-center text-base font-semibold text-indigo-600 hover:bg-indigo-50 print:hidden"

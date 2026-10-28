@@ -32,6 +32,7 @@ export function saveTestResult(
     finishedAt: Date.now(),
     trials,
     settings,
+    participant: participant ?? undefined,
   };
   try {
     window.localStorage.setItem(localStorageKey(domain, version), JSON.stringify(summary));
@@ -118,6 +119,25 @@ export function loadTestResult(domain: EFDomain): TestSessionSummary | null {
   } catch {
     return null;
   }
+}
+
+// 스토리형(지구 수호대 작전) 결과는 표준형과 따로 저장되어 있습니다.
+export function loadStoryResult(domain: EFDomain): TestSessionSummary | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(localStorageKey(domain, "story"));
+    return raw ? (JSON.parse(raw) as TestSessionSummary) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function loadAllStoryResults(): Record<EFDomain, TestSessionSummary | null> {
+  return {
+    inhibition: loadStoryResult("inhibition"),
+    workingMemory: loadStoryResult("workingMemory"),
+    flexibility: loadStoryResult("flexibility"),
+  };
 }
 
 export function loadAllTestResults(): Record<EFDomain, TestSessionSummary | null> {

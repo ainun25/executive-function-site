@@ -60,6 +60,12 @@ export default function ResultsPage() {
         <p className="mt-2 text-xs text-slate-400">
           이 결과는 이 브라우저에만 임시로 저장돼요 (데모 모드). 브라우저 데이터를 지우면 사라져요.
         </p>
+        <Link
+          href="/results/story"
+          className="mt-4 inline-block rounded-full border border-indigo-300 px-5 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-50"
+        >
+          🎖️ 스토리 종합 결과서 · 임명장 보기
+        </Link>
       </header>
 
       {!hasAnyResult ? (
