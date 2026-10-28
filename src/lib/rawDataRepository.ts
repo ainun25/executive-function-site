@@ -120,6 +120,16 @@ function escapeCsvCell(value: string | number | boolean | null): string {
 
 // 섹션 14의 CSV 컬럼 형식에 name/ageYears/ageMonths/grade/ageGroup을 추가로 포함합니다.
 // ⚠️ 이 CSV에는 실명이 포함되므로, 다운로드한 파일은 안전하게 보관/관리해야 합니다.
+// 스토리형 작업기억은 한 세션에 두 활동이 함께 기록됩니다. condition 값으로 활동을 구분해 알려줍니다.
+//  - cap-*  : 2-A 보급품 확인 (한꺼번에 기억하는 용량)
+//  - span-* : 2-B 신호 기억 (순서 기억)
+export function activityLabel(task: string, condition: string | null): string {
+  if (task !== "workingMemory" || !condition) return "";
+  if (condition.startsWith("cap-")) return "보급품 확인(기억 용량)";
+  if (condition.startsWith("span-")) return "신호 기억(순서 기억)";
+  return "";
+}
+
 export function buildRawDataCsv(rows: RawDataRow[]): string {
   const header = [
     "participantId",
@@ -130,6 +140,7 @@ export function buildRawDataCsv(rows: RawDataRow[]): string {
     "ageGroup",
     "testVersion",
     "task",
+    "activity",
     "trial",
     "condition",
     "stimulus",
@@ -150,6 +161,7 @@ export function buildRawDataCsv(rows: RawDataRow[]): string {
       row.ageGroup ?? "",
       row.testVersion,
       row.task,
+      activityLabel(row.task, row.condition),
       row.trialNumber,
       row.condition,
       row.stimulus,

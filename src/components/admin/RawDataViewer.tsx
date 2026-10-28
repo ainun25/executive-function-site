@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { buildRawDataCsv, downloadCsv, fetchRawDataRows, type RawDataRow } from "@/lib/rawDataRepository";
+import {
+  activityLabel,
+  buildRawDataCsv,
+  downloadCsv,
+  fetchRawDataRows,
+  type RawDataRow,
+} from "@/lib/rawDataRepository";
 import { ageGroupShortLabel } from "@/lib/ageGroup";
 import type { EFDomain } from "@/types";
 
@@ -100,6 +106,7 @@ export default function RawDataViewer() {
                   "ageGroup",
                   "version",
                   "task",
+                  "activity",
                   "trial",
                   "condition",
                   "stimulus",
@@ -129,6 +136,7 @@ export default function RawDataViewer() {
                     {row.testVersion === "story" ? "스토리형" : "표준형"}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2">{TASK_LABELS[row.task]}</td>
+                  <td className="whitespace-nowrap px-3 py-2">{activityLabel(row.task, row.condition) || "-"}</td>
                   <td className="whitespace-nowrap px-3 py-2">{row.trialNumber}</td>
                   <td className="whitespace-nowrap px-3 py-2">{row.condition}</td>
                   <td className="whitespace-nowrap px-3 py-2">{row.stimulus}</td>

@@ -19,10 +19,21 @@ const TASK_LABELS: Record<EFDomain, string> = {
 };
 
 // 검사 종류별로 화면에 보여줄 핵심 지표 한 가지씩 (전체 지표는 CSV/상세보기에서 확인)
+// 스토리형 작업기억은 "보급품 확인(기억 용량)"과 "신호 기억(순서 기억)" 두 활동의 지표가 따로 저장되어 있습니다.
+function getCapacity(row: SessionSummaryRow): Record<string, unknown> | null {
+  const capacity = row.summary?.capacitySummary;
+  return capacity && typeof capacity === "object" ? (capacity as Record<string, unknown>) : null;
+}
+
 function getHeadlineMetric(row: SessionSummaryRow): string {
   const summary = row.summary;
   if (!summary) return "-";
   if (row.task === "workingMemory") {
+    const span = summary.maxSpanAchieved !== undefined ? `신호 최대 ${summary.maxSpanAchieved}칸` : null;
+    const capacity = getCapacity(row);
+    if (capacity) {
+      return `보급품 최대 ${capacity.maxSizeAllCorrect}개 · ${span ?? "신호 -"}`;
+    }
     return summary.maxSpanAchieved !== undefined ? `최대 ${summary.maxSpanAchieved}칸` : "-";
   }
   if (row.task === "flexibility") {
@@ -35,14 +46,20 @@ function getHeadlineMetric(row: SessionSummaryRow): string {
 
 function getAccuracy(row: SessionSummaryRow): string {
   const value = row.summary?.overallAccuracy;
-  return typeof value === "number" ? `${value}%` : "-";
+  const text = typeof value === "number" ? `${value}%` : "-";
+  const capacity = getCapacity(row);
+  // 스토리형 작업기억: overallAccuracy는 신호 기억(순서) 기준이므로 보급품(용량) 정확도를 함께 표시
+  return capacity ? `보급품 ${capacity.accuracy}% · 신호 ${text}` : text;
 }
 
 function getMeanRT(row: SessionSummaryRow): string {
   const summary = row.summary;
   if (!summary) return "-";
   const value = summary.meanRT ?? summary.meanResponseTime ?? summary.repeatMeanRT;
-  return typeof value === "number" ? `${value}ms` : "-";
+  const text = typeof value === "number" ? `${value}ms` : "-";
+  const capacity = getCapacity(row);
+  const capacityRT = capacity?.meanResponseTime;
+  return capacity ? `보급품 ${typeof capacityRT === "number" ? `${capacityRT}ms` : "-"} · 신호 ${text}` : text;
 }
 
 /**

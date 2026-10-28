@@ -134,7 +134,24 @@ function escapeCsvCell(value: string | number | boolean | null | undefined): str
 // summary(JSON)의 키를 모두 모아 CSV 컬럼으로 자동 확장합니다.
 // 검사 종류마다 지표가 다르므로(예: 억제통제는 omissionCount, 작업기억은 maxSpanAchieved),
 // 한 CSV에 다 같이 내보내되 해당 없는 칸은 빈 값으로 둡니다.
-export function buildSessionSummaryCsv(rows: SessionSummaryRow[]): string {
+// 스토리형 작업기억의 보급품 확인(기억 용량) 요약을 CSV에서 따로 읽을 수 있게 열로 풀어줍니다.
+// 이 경우 overallAccuracy, maxSpanAchieved, meanResponseTime 등 기존 열은 "신호 기억(순서 기억)" 기준입니다.
+function withCapacityColumns(summary: Record<string, unknown> | null): Record<string, unknown> | null {
+  const capacity = summary?.capacitySummary as Record<string, unknown> | undefined;
+  if (!summary || !capacity) return summary;
+  return {
+    ...summary,
+    capacity_accuracy: capacity.accuracy,
+    capacity_hitRate: capacity.hitRate,
+    capacity_maxSizeAllCorrect: capacity.maxSizeAllCorrect,
+    capacity_falsePicks: capacity.falsePicks,
+    capacity_meanResponseTime: capacity.meanResponseTime,
+    capacity_trials: capacity.totalTrials,
+  };
+}
+
+export function buildSessionSummaryCsv(inputRows: SessionSummaryRow[]): string {
+  const rows = inputRows.map((row) => ({ ...row, summary: withCapacityColumns(row.summary) }));
   const summaryKeys = new Set<string>();
   rows.forEach((row) => {
     if (row.summary) Object.keys(row.summary).forEach((key) => summaryKeys.add(key));
