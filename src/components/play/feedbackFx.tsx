@@ -209,3 +209,33 @@ export function unlockAudio(): void {
     // 지원하지 않으면 무시합니다.
   }
 }
+
+/**
+ * 게임 중 활동 지시문과 피드백을 보여주는 막대입니다. 모든 놀이에서 같은 모양을 씁니다.
+ *  - info: 흰 바탕에 검은 글씨 (지시문 — 어두운 배경에서도 잘 보이도록)
+ *  - good: 초록 바탕 (맞았을 때)  - bad: 노랑 바탕 (틀렸을 때)
+ * 내용이 없으면 자리만 차지해서 화면이 흔들리지 않습니다.
+ */
+export function MessageBar({
+  tone = "info",
+  children,
+}: {
+  tone?: "info" | "good" | "bad";
+  children?: React.ReactNode;
+}) {
+  const color = !children
+    ? ""
+    : tone === "good"
+      ? "bg-[#00ff88] text-[#050a18]"
+      : tone === "bad"
+        ? "bg-amber-300 text-amber-950"
+        : "bg-white text-slate-900";
+  return (
+    <p
+      className={`flex min-h-[3rem] w-full items-center justify-center rounded-2xl px-4 py-2 text-center text-base font-extrabold leading-snug ${color}`}
+      aria-live="polite"
+    >
+      {children}
+    </p>
+  );
+}

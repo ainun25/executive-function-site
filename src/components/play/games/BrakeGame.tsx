@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
-import { FxHint, FxOverlay, shakeClass, useFx } from "../feedbackFx";
+import { FxHint, FxOverlay, shakeClass, useFx, MessageBar } from "../feedbackFx";
 
 /**
  * 꼬마 자동차 브레이크 (억제통제 놀이).
@@ -216,14 +216,7 @@ export default function BrakeGame({ level, onFinish }: GameProps) {
         </p>
       </div>
 
-      <p
-        className={`min-h-[2.5rem] text-base font-bold ${
-          lastOk === null ? "text-slate-200" : lastOk ? "text-[#00ff88]" : "text-amber-300"
-        }`}
-        aria-live="polite"
-      >
-        {message}
-      </p>
+      <MessageBar tone={lastOk === null ? "info" : lastOk ? "good" : "bad"}>{message}</MessageBar>
 
       <FxHint fx={fx}>🛑·🚧가 나오면 손 떼기, 🟢·🌳·🟡가 나오면 계속 누르고 있기!</FxHint>
 

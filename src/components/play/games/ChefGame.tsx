@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
-import { FxHint, FxOverlay, shakeClass, useFx } from "../feedbackFx";
+import { FxHint, FxOverlay, shakeClass, useFx, MessageBar } from "../feedbackFx";
 
 /**
  * 변덕쟁이 요리사 (인지적 유연성 놀이).
@@ -184,12 +184,9 @@ export default function ChefGame({ level, onFinish }: GameProps) {
         <p className="mt-1 text-sm font-bold text-slate-100">{trial.food.name}</p>
       </div>
 
-      <p
-        className={`min-h-[3rem] text-base font-bold ${feedback ? (feedback.ok ? "text-[#00ff88]" : "text-amber-300") : "text-slate-300"}`}
-        aria-live="polite"
-      >
+      <MessageBar tone={feedback ? (feedback.ok ? "good" : "bad") : "info"}>
         {feedback ? feedback.text : "🧺 어느 바구니에 넣을까요?"}
-      </p>
+      </MessageBar>
       <FxHint fx={fx}>지금은 "{text.title}" 주문이에요! 바구니 글자를 다시 보여줄게요.</FxHint>
 
       <div className="grid w-full grid-cols-2 gap-3">

@@ -12,7 +12,7 @@ import {
   type GameId,
   type GameLevel,
 } from "@/lib/trainingGames";
-import { CommanderSay, StoryScene } from "@/components/tasks/story/StoryParts";
+import { CommanderCentered } from "@/components/tasks/story/StoryParts";
 import { isFxMuted, setFxMuted, unlockAudio } from "./feedbackFx";
 import BrakeGame from "./games/BrakeGame";
 import PianoGame from "./games/PianoGame";
@@ -127,13 +127,25 @@ export default function GameShell({ gameId }: { gameId: GameId }) {
             <h1 className="mt-2 text-2xl font-extrabold text-[#00ff88]">{game.title}</h1>
             <p className="mt-1 text-sm text-slate-300">{game.tagline}</p>
           </div>
-          <StoryScene emoji={game.sceneEmoji}>{game.sceneText}</StoryScene>
-          <CommanderSay>{game.commanderLine}</CommanderSay>
-          <ul className="space-y-2 rounded-2xl bg-white/5 p-4 text-sm leading-relaxed text-slate-100 ring-1 ring-white/15">
-            {game.howTo.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
+          {/* 이야기 카드: 장면 + 본부 대장을 한 상자로 묶어요 */}
+          <div className="space-y-4 rounded-2xl bg-white/5 px-5 py-6 text-center ring-1 ring-white/15">
+            <p className="text-4xl" aria-hidden="true">
+              {game.sceneEmoji}
+            </p>
+            <p className="text-sm italic leading-relaxed text-slate-200">{game.sceneText}</p>
+            <div className="mx-auto h-px w-16 bg-white/20" />
+            <CommanderCentered>{game.commanderLine}</CommanderCentered>
+          </div>
+
+          {/* 활동 방법: 흰 바탕에 검은 글씨로 눈에 띄게 */}
+          <div className="rounded-2xl bg-white px-5 py-5 text-left text-slate-900">
+            <p className="text-sm font-extrabold text-indigo-600">🎯 이렇게 놀아요</p>
+            <ul className="mt-2 space-y-2 text-base font-semibold leading-relaxed">
+              {game.howTo.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </div>
           <button type="button" onClick={() => setScreen("levels")} className={primaryButton}>
             단계 고르기
           </button>
@@ -188,10 +200,11 @@ export default function GameShell({ gameId }: { gameId: GameId }) {
           <p className="text-4xl">
             <Stars count={result.stars} />
           </p>
-          <p className="text-sm text-slate-200">
+          <p className="rounded-2xl bg-white px-4 py-3 text-base font-extrabold text-slate-900">
             {result.total}번 중 {result.correct}번 잘 해냈어요.
           </p>
-          <CommanderSay>
+          <div className="rounded-2xl bg-white/5 px-5 py-5 ring-1 ring-white/15">
+            <CommanderCentered>
             {result.stars === 3
               ? level < 3
                 ? "대단해요! 다음 단계에 도전해 볼까요?"
@@ -199,7 +212,8 @@ export default function GameShell({ gameId }: { gameId: GameId }) {
               : result.stars === 2
                 ? "좋아요! 한 번 더 하면 더 멋져질 거예요."
                 : "끝까지 해낸 게 멋져요! 다시 하면 점점 쉬워져요."}
-          </CommanderSay>
+            </CommanderCentered>
+          </div>
           <div className="space-y-3">
             <button type="button" onClick={() => start(level)} className={primaryButton}>
               한 번 더 하기

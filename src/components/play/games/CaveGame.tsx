@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
-import { FxHint, FxOverlay, shakeClass, useFx } from "../feedbackFx";
+import { FxHint, FxOverlay, shakeClass, useFx, MessageBar } from "../feedbackFx";
 
 /**
  * 조건에 맞는 동굴 항해 (인지적 유연성 놀이).
@@ -244,12 +244,9 @@ export default function CaveGame({ level, onFinish }: GameProps) {
         </p>
       </div>
 
-      <p
-        className={`min-h-[2.5rem] text-base font-bold ${feedback ? (feedback.ok ? "text-[#00ff88]" : "text-amber-300") : "text-slate-300"}`}
-        aria-live="polite"
-      >
+      <MessageBar tone={feedback ? (feedback.ok ? "good" : "bad") : "info"}>
         {feedback ? feedback.text : "⛵ 어느 동굴로 들어갈까요?"}
-      </p>
+      </MessageBar>
       <FxHint fx={fx}>지도 그림과 "{DIM_NAME[trial.rule]}"이 같은 동굴을 골라요!</FxHint>
 
       <div className={`grid w-full gap-3 ${cfg.options === 2 ? "grid-cols-2" : "grid-cols-3"}`}>

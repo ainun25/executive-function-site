@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
-import { FxHint, FxOverlay, shakeClass, useFx } from "../feedbackFx";
+import { FxHint, FxOverlay, shakeClass, useFx, MessageBar } from "../feedbackFx";
 
 /**
  * 청기백기 깃발 대장 (억제통제 놀이).
@@ -236,14 +236,9 @@ export default function FlagGame({ level, onFinish }: GameProps) {
         ))}
       </div>
 
-      <p
-        className={`min-h-[2.5rem] text-base font-bold ${
-          feedback ? (feedback.ok ? "text-[#00ff88]" : "text-amber-300") : "text-slate-300"
-        }`}
-        aria-live="polite"
-      >
+      <MessageBar tone={feedback ? (feedback.ok ? "good" : "bad") : "info"}>
         {feedback ? feedback.text : phase === "command" ? "도깨비면 누르지 말고 참아요!" : ""}
-      </p>
+      </MessageBar>
 
       <FxHint fx={fx}>도깨비 말은 참기 · 깃발 대장은 말한 그대로 · 반대 대장은 반대로!</FxHint>
 

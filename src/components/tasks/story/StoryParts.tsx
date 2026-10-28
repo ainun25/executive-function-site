@@ -61,3 +61,19 @@ export function StoryScene({ emoji, children }: { emoji: string; children: React
     </div>
   );
 }
+
+/** 얼굴을 가운데에 크게 두고 그 아래에 말을 적는 대장 소개입니다 (놀이의 시작/결과 카드 안에서 씁니다). */
+export function CommanderCentered({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-col items-center gap-2 text-center">
+      <div
+        className="flex h-16 w-16 items-center justify-center rounded-full bg-[#1a1f3c] text-4xl ring-2 ring-[#00ff88]"
+        aria-hidden="true"
+      >
+        🧑‍🚀
+      </div>
+      <p className="text-xs font-semibold text-[#a2ffcf]">지구 수호대 본부 대장</p>
+      <p className="max-w-sm text-base leading-relaxed text-white">{children}</p>
+    </div>
+  );
+}

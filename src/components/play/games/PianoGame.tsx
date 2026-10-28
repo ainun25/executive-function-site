@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
-import { FxHint, FxOverlay, playNote, shakeClass, useFx } from "../feedbackFx";
+import { FxHint, FxOverlay, playNote, shakeClass, useFx, MessageBar } from "../feedbackFx";
 
 /**
  * 마법 피아노 (작업기억 - 순서 기억 놀이).
@@ -333,14 +333,7 @@ export default function PianoGame({ level, onFinish }: GameProps) {
         </div>
       )}
 
-      <p
-        className={`min-h-[3rem] text-base font-bold ${
-          lastOk === null ? "text-slate-100" : lastOk ? "text-[#00ff88]" : "text-amber-300"
-        }`}
-        aria-live="polite"
-      >
-        {message}
-      </p>
+      <MessageBar tone={lastOk === null ? "info" : lastOk ? "good" : "bad"}>{message}</MessageBar>
 
       <FxHint fx={fx}>
         글자나 위치를 마음속으로 "도-미-솔"처럼 따라 말하면서 기억해 봐요!

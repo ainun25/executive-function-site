@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { GameProps } from "../GameShell";
-import { FxHint, FxOverlay, shakeClass, useFx } from "../feedbackFx";
+import { FxHint, FxOverlay, shakeClass, useFx, MessageBar } from "../feedbackFx";
 
 /**
  * 여행 가방 챙기기 (작업기억 - 기억 용량 놀이).
@@ -134,7 +134,7 @@ export default function SuitcaseGame({ level, onFinish }: GameProps) {
 
       {phase === "show" && (
         <>
-          <p className="text-sm font-bold text-slate-100">👀 물건을 한꺼번에 잘 보고 기억해요!</p>
+          <MessageBar>👀 물건을 한꺼번에 잘 보고 기억해요!</MessageBar>
           <div className="flex min-h-[8rem] flex-wrap justify-center gap-3">
             {round.shown.map((item) => (
               <div
@@ -151,9 +151,11 @@ export default function SuitcaseGame({ level, onFinish }: GameProps) {
 
       {phase !== "show" && (
         <>
-          <p className="text-sm font-bold text-slate-100">
-            🧳 방금 본 물건을 <strong className="text-[#00ff88]">{round.shown.length}개</strong> 골라 가방에 담아요
-          </p>
+          {!result && (
+            <MessageBar>
+              🧳 방금 본 물건을 <strong className="text-indigo-600">{round.shown.length}개</strong> 골라 가방에 담아요
+            </MessageBar>
+          )}
           <div className="flex max-w-md flex-wrap justify-center gap-3">
             {round.options.map((item) => {
               const isSelected = selected.includes(item);
@@ -187,12 +189,7 @@ export default function SuitcaseGame({ level, onFinish }: GameProps) {
         </>
       )}
 
-      <p
-        className={`min-h-[2.5rem] text-base font-bold ${result ? (result.ok ? "text-[#00ff88]" : "text-amber-300") : "text-slate-300"}`}
-        aria-live="polite"
-      >
-        {result?.text ?? ""}
-      </p>
+      {result && <MessageBar tone={result.ok ? "good" : "bad"}>{result.text}</MessageBar>}
       <FxHint fx={fx}>물건들로 짧은 이야기를 지어 보세요. (모자를 쓰고, 양말을 신고, 손전등을 들었어요)</FxHint>
     </div>
   );
