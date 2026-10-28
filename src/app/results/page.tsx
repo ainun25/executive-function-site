@@ -32,7 +32,10 @@ export default function ResultsPage() {
   const hasAnyResult = results.inhibition || results.workingMemory || results.flexibility;
 
   const inhibitionAnalysis = results.inhibition
-    ? analyzeInhibitionTrials(results.inhibition.trials, defaultInhibitionConfig.anticipatoryThresholdMs)
+    ? analyzeInhibitionTrials(
+        results.inhibition.trials,
+        results.inhibition.settings?.anticipatoryThresholdMs ?? defaultInhibitionConfig.anticipatoryThresholdMs
+      )
     : null;
   const workingMemoryAnalysis = results.workingMemory
     ? analyzeWorkingMemoryTrials(results.workingMemory.trials)

@@ -131,4 +131,5 @@ export interface TestSessionSummary {
   startedAt: number;
   finishedAt: number;
   trials: TrialRecord[];
+  settings?: Record<string, number>; // 이 검사를 진행할 때 적용된 검사 설정
 }

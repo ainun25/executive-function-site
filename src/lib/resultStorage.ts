@@ -16,7 +16,8 @@ const ALL_DOMAINS: EFDomain[] = ["inhibition", "workingMemory", "flexibility"];
 export function saveTestResult(
   domain: EFDomain,
   trials: TrialRecord[],
-  participant: ParticipantInfo | null = null
+  participant: ParticipantInfo | null = null,
+  settings?: Record<string, number>
 ): void {
   if (typeof window === "undefined" || trials.length === 0) return;
   const summary: TestSessionSummary = {
@@ -24,6 +25,7 @@ export function saveTestResult(
     startedAt: trials[0].timestamp,
     finishedAt: Date.now(),
     trials,
+    settings,
   };
   try {
     window.localStorage.setItem(STORAGE_KEY_PREFIX + domain, JSON.stringify(summary));
@@ -63,7 +65,7 @@ async function syncResultToSupabase(
       browser: firstTrial.browser,
       screen_width: firstTrial.screenWidth,
       screen_height: firstTrial.screenHeight,
-      summary: buildSessionSummary(domain, summary.trials),
+      summary: buildSessionSummary(domain, summary.trials, summary.settings),
     });
 
     if (sessionError) {

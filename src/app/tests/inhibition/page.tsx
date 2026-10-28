@@ -6,7 +6,9 @@ import TestSessionShell from "@/components/tasks/common/TestSessionShell";
 import DeviceRecommendationNotice from "@/components/tasks/common/DeviceRecommendationNotice";
 import ParticipantGate from "@/components/tasks/common/ParticipantGate";
 import GoNoGoTask from "@/components/tasks/inhibition/GoNoGoTask";
-import { defaultInhibitionConfig, practiceInhibitionConfig } from "@/lib/inhibitionEngine";
+import type { InhibitionConfig } from "@/lib/inhibitionEngine";
+import { toPracticeConfig } from "@/lib/testConfig";
+import { useTestConfig } from "@/lib/useTestConfig";
 import { analyzeInhibitionTrials } from "@/lib/inhibitionAnalysis";
 import { saveTestResult } from "@/lib/resultStorage";
 import AccuracyPieChart from "@/components/results/AccuracyPieChart";
@@ -17,6 +19,11 @@ import type { ParticipantInfo, TestPhase, TrialRecord } from "@/types";
 export default function InhibitionTestPage() {
   const [practiceTrials, setPracticeTrials] = useState<TrialRecord[]>([]);
   const [mainTrials, setMainTrials] = useState<TrialRecord[]>([]);
+  const { config, isReady } = useTestConfig<InhibitionConfig>("inhibition");
+
+  if (!isReady) {
+    return <p className="py-20 text-center text-slate-400">불러오는 중...</p>;
+  }
 
   return (
     <ParticipantGate>
@@ -27,6 +34,7 @@ export default function InhibitionTestPage() {
             <PhaseContent
               phase={phase}
               goToNext={goToNext}
+              config={config}
               participant={participant}
               practiceTrials={practiceTrials}
               setPracticeTrials={setPracticeTrials}
@@ -43,6 +51,7 @@ export default function InhibitionTestPage() {
 interface PhaseContentProps {
   phase: TestPhase;
   goToNext: () => void;
+  config: InhibitionConfig;
   participant: ParticipantInfo;
   practiceTrials: TrialRecord[];
   setPracticeTrials: (trials: TrialRecord[]) => void;
@@ -53,6 +62,7 @@ interface PhaseContentProps {
 function PhaseContent({
   phase,
   goToNext,
+  config,
   participant,
   practiceTrials,
   setPracticeTrials,
@@ -60,6 +70,7 @@ function PhaseContent({
   setMainTrials,
 }: PhaseContentProps) {
   const [viewMode, setViewMode] = useState<ResultViewMode>("easy");
+  const practiceConfig = toPracticeConfig("inhibition", config);
 
   switch (phase) {
     case "intro":
@@ -91,7 +102,7 @@ function PhaseContent({
     case "practice":
       return (
         <GoNoGoTask
-          config={practiceInhibitionConfig}
+          config={practiceConfig}
           onComplete={(trials) => {
             setPracticeTrials(trials);
             goToNext();
@@ -102,7 +113,7 @@ function PhaseContent({
     case "practiceResult": {
       const analysis = analyzeInhibitionTrials(
         practiceTrials,
-        practiceInhibitionConfig.anticipatoryThresholdMs
+        practiceConfig.anticipatoryThresholdMs
       );
       return (
         <div className="space-y-6">
@@ -149,10 +160,10 @@ function PhaseContent({
     case "main":
       return (
         <GoNoGoTask
-          config={defaultInhibitionConfig}
+          config={config}
           onComplete={(trials) => {
             setMainTrials(trials);
-            saveTestResult("inhibition", trials, participant);
+            saveTestResult("inhibition", trials, participant, { ...config });
             goToNext();
           }}
         />
@@ -176,7 +187,7 @@ function PhaseContent({
     case "result": {
       const analysis = analyzeInhibitionTrials(
         mainTrials,
-        defaultInhibitionConfig.anticipatoryThresholdMs
+        config.anticipatoryThresholdMs
       );
       return (
         <div className="space-y-6">

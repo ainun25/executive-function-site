@@ -8,20 +8,25 @@ import { defaultInhibitionConfig } from "./inhibitionEngine";
 // 검사 종류에 맞는 분석 함수를 골라 요약 지표(JSON)를 계산합니다.
 // 이 요약값이 test_sessions.summary 컬럼에 저장되어, 문항별 원자료를 다시
 // 계산하지 않고도 사람별/연령별 통계를 바로 낼 수 있게 해줍니다.
+// settings는 그 검사를 진행한 시점의 검사 설정(문항 수, 기준값 등)이며,
+// testSettings로 함께 저장해 나중에 설정이 다른 결과를 구분해 분석할 수 있게 합니다.
 export function buildSessionSummary(
   domain: EFDomain,
-  trials: TrialRecord[]
+  trials: TrialRecord[],
+  settings?: Record<string, number>
 ): Record<string, unknown> {
+  let analysis: Record<string, unknown>;
   if (domain === "inhibition") {
-    return analyzeInhibitionTrials(
+    analysis = analyzeInhibitionTrials(
       trials,
-      defaultInhibitionConfig.anticipatoryThresholdMs
+      settings?.anticipatoryThresholdMs ?? defaultInhibitionConfig.anticipatoryThresholdMs
     ) as unknown as Record<string, unknown>;
+  } else if (domain === "workingMemory") {
+    analysis = analyzeWorkingMemoryTrials(trials) as unknown as Record<string, unknown>;
+  } else {
+    analysis = analyzeFlexibilityTrials(trials) as unknown as Record<string, unknown>;
   }
-  if (domain === "workingMemory") {
-    return analyzeWorkingMemoryTrials(trials) as unknown as Record<string, unknown>;
-  }
-  return analyzeFlexibilityTrials(trials) as unknown as Record<string, unknown>;
+  return settings ? { ...analysis, testSettings: settings } : analysis;
 }
 
 export interface SessionSummaryRow {
