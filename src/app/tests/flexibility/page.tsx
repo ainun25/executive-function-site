@@ -83,9 +83,9 @@ function PhaseContent({
           <div className="rounded-2xl bg-indigo-50 p-6 ring-1 ring-indigo-200">
             <h2 className="text-lg font-bold text-slate-900">이런 검사예요</h2>
             <p className="mt-3 leading-relaxed text-slate-700">
-              화면에 도형이 나타나요. 규칙에 따라 왼쪽 또는 오른쪽 버튼을 눌러요. <strong>색깔 규칙</strong>과{" "}
-              <strong>모양 규칙</strong> 두 가지가 있어요. 규칙은 한동안 이어지다가 바뀌고, 바뀔 때마다 안내가
-              한 번 나와요. 안내 뒤에는 규칙이 화면에 계속 나오지 않으니, 규칙을 기억하고 진행해요.
+              화면에 도형이 나타나요. 기준에 따라 왼쪽 또는 오른쪽 버튼을 눌러요. 기준은 <strong>색</strong>과{" "}
+              <strong>모양</strong> 두 가지가 있어요. 기준은 한동안 이어지다가 바뀌고, 바뀔 때마다 안내가
+              한 번 나와요. 안내 뒤에는 기준이 화면에 계속 나오지 않으니, 기억하고 진행해요.
             </p>
           </div>
           <RuleGuide />

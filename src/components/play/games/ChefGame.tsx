@@ -32,8 +32,8 @@ const FOODS: Food[] = [
 ];
 
 const RULE_TEXT: Record<Rule, { title: string; left: string; right: string; icon: string }> = {
-  color: { title: "색깔로 나눠요", left: "🔴 빨간 것", right: "🟢 초록 것", icon: "🎨" },
-  kind: { title: "종류로 나눠요", left: "🍎 과일", right: "🥦 채소", icon: "🍽️" },
+  color: { title: "색", left: "🔴 빨간 것", right: "🟢 초록 것", icon: "" },
+  kind: { title: "종류", left: "🍎 과일", right: "🥦 채소", icon: "" },
 };
 
 // 단계별 설정: 규칙이 이어지는 길이(run) 목록, 규칙 글자를 계속 보여줄지
@@ -116,7 +116,7 @@ export default function ChefGame({ level, onFinish }: GameProps) {
     setFeedback(
       ok
         ? { ok: true, text: "👍 맛있게 담겼어요!" }
-        : { ok: false, text: `이번 주문은 ${text.title}. ${trial.food.name}은(는) "${answer}" 바구니예요` }
+        : { ok: false, text: `지금은 ${text.title} 기준! ${trial.food.name}은(는) "${answer}" 바구니예요` }
     );
     schedule(() => {
       setFeedback(null);
@@ -141,8 +141,9 @@ export default function ChefGame({ level, onFinish }: GameProps) {
           {isChange ? "손님이 주문을 바꿨어요!" : "첫 번째 주문이에요"}
         </p>
         <div className="w-full rounded-2xl bg-white/10 p-5 ring-1 ring-white/20">
-          <p className="text-2xl font-extrabold text-white">
-            {text.icon} {text.title}
+          <p className="text-sm text-slate-300">지금부터 이것으로 나눠요</p>
+          <p className="mt-3 inline-block rounded-2xl bg-white px-10 py-3 text-5xl font-extrabold text-slate-900">
+            {text.title}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3 text-sm font-bold">
             <div className="rounded-xl bg-white/10 p-3">
@@ -177,8 +178,8 @@ export default function ChefGame({ level, onFinish }: GameProps) {
         {index + 1} / {trials.length}
       </p>
 
-      <div className="flex h-36 w-full flex-col items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20">
-        <p className="text-6xl" role="img" aria-label={trial.food.name}>
+      <div className="flex h-44 w-full flex-col items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20">
+        <p className="text-8xl leading-none" role="img" aria-label={trial.food.name}>
           {trial.food.emoji}
         </p>
         <p className="mt-1 text-sm font-bold text-slate-100">{trial.food.name}</p>
@@ -187,7 +188,7 @@ export default function ChefGame({ level, onFinish }: GameProps) {
       <MessageBar tone={feedback ? (feedback.ok ? "good" : "bad") : "info"}>
         {feedback ? feedback.text : "🧺 어느 바구니에 넣을까요?"}
       </MessageBar>
-      <FxHint fx={fx}>지금은 "{text.title}" 주문이에요! 바구니 글자를 다시 보여줄게요.</FxHint>
+      <FxHint fx={fx}>지금은 "{text.title}" 기준이에요! 바구니 글자를 다시 보여줄게요.</FxHint>
 
       <div className="grid w-full grid-cols-2 gap-3">
         <button

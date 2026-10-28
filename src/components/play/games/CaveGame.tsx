@@ -26,8 +26,9 @@ const COLORS = [
 ];
 const SHAPES = ["원", "세모", "네모"];
 const COUNT_NAMES = ["", "하나", "둘", "셋"];
-const DIM_NAME: Record<Dim, string> = { color: "색깔", shape: "모양", count: "개수" };
-const DIM_ICON: Record<Dim, string> = { color: "🎨", shape: "🔷", count: "🔢" };
+// 기준은 "색", "모양", "개수" 단어로 분명하게 보여줍니다. (뒤에 붙는 말: 색이 / 모양이 / 개수가)
+const DIM_NAME: Record<Dim, string> = { color: "색", shape: "모양", count: "개수" };
+const DIM_SUBJ: Record<Dim, string> = { color: "이", shape: "이", count: "가" };
 
 // 단계별 설정: 규칙이 이어지는 길이(run) 목록, 동굴 수, 쓰는 규칙, 규칙 표시를 계속 보여줄지
 const CONFIG = {
@@ -102,7 +103,7 @@ function makeTrials(level: 1 | 2 | 3): TrialSpec[] {
 
 function CaveCard({ cave, large }: { cave: Cave; large?: boolean }) {
   const color = COLORS[cave.color].hex;
-  const px = large ? 34 : 28;
+  const px = large ? 64 : 30; // 기준이 되는 지도 도형은 크게
   const shape = (key: number) => {
     const s = SHAPES[cave.shape];
     if (s === "원") return <span key={key} className="inline-block rounded-full" style={{ width: px, height: px, backgroundColor: color }} />;
@@ -123,14 +124,11 @@ function CaveCard({ cave, large }: { cave: Cave; large?: boolean }) {
   };
   return (
     <div
-      className="flex flex-col items-center justify-center gap-1"
+      className="flex items-center justify-center"
       role="img"
       aria-label={`${COLORS[cave.color].name} ${SHAPES[cave.shape]} ${cave.count}개`}
     >
-      <div className="flex gap-1">{Array.from({ length: cave.count }, (_, i) => shape(i))}</div>
-      <span className="text-[11px] font-semibold text-slate-200">
-        {COLORS[cave.color].name} {SHAPES[cave.shape]} {cave.count}개
-      </span>
+      <div className={`flex ${large ? "gap-3" : "gap-1"}`}>{Array.from({ length: cave.count }, (_, i) => shape(i))}</div>
     </div>
   );
 }
@@ -177,7 +175,7 @@ export default function CaveGame({ level, onFinish }: GameProps) {
     setFeedback(
       ok
         ? { ok: true, text: "🎉 통과! 딱 맞는 동굴이에요" }
-        : { ok: false, text: `쿵! 지금은 "${DIM_NAME[trial.rule]}"이 같은 동굴이에요` }
+        : { ok: false, text: `쿵! 지금은 ${DIM_NAME[trial.rule]}${DIM_SUBJ[trial.rule]} 같은 동굴이에요` }
     );
     schedule(() => {
       setFeedback(null);
@@ -202,18 +200,13 @@ export default function CaveGame({ level, onFinish }: GameProps) {
           {prevRule ? "폭풍이 왔어요! 지도가 바뀌었어요" : "항해 지도를 펼쳐요"}
         </p>
         <div className="w-full rounded-2xl bg-white/10 p-5 ring-1 ring-white/20">
-          <p className="text-xs text-slate-300">지금부터 규칙</p>
-          <p className="mt-1 text-3xl font-extrabold text-white">
-            {DIM_ICON[trial.rule]} {DIM_NAME[trial.rule]}이 같은 동굴
-          </p>
-          <p className="mt-2 text-xs text-slate-300">
-            {trial.rule === "color" && "지도 그림과 색깔이 같은 동굴을 골라요."}
-            {trial.rule === "shape" && "지도 그림과 모양이 같은 동굴을 골라요."}
-            {trial.rule === "count" && "지도 그림과 개수가 같은 동굴을 골라요."}
+          <p className="text-sm text-slate-300">지금부터 이것이 같은 동굴을 골라요</p>
+          <p className="mt-3 inline-block rounded-2xl bg-white px-10 py-3 text-5xl font-extrabold text-slate-900">
+            {DIM_NAME[trial.rule]}
           </p>
         </div>
         {!cfg.alwaysShowRule && (
-          <p className="text-xs text-amber-300">이번 단계는 규칙을 잠깐만 보여줘요. 잘 기억해요!</p>
+          <p className="text-xs text-amber-300">이번 단계는 기준을 잠깐만 보여줘요. 잘 기억해요!</p>
         )}
         <button
           type="button"
@@ -235,19 +228,25 @@ export default function CaveGame({ level, onFinish }: GameProps) {
       </p>
 
       <div className="w-full rounded-2xl bg-white/10 p-4 ring-1 ring-white/20">
-        <p className="text-xs text-slate-300">🗺️ 항해 지도</p>
-        <div className="mt-2 flex justify-center">
+        <div className="flex min-h-[5rem] items-center justify-center">
           <CaveCard cave={trial.target} large />
         </div>
-        <p className={`mt-2 text-sm font-bold ${showRule ? "text-[#00ff88]" : "text-slate-500"}`}>
-          {showRule ? `${DIM_ICON[trial.rule]} 규칙: ${DIM_NAME[trial.rule]}이 같은 동굴` : "🙈 규칙을 기억해서 골라요"}
+        <p className="mt-3 text-lg font-extrabold text-white">
+          {showRule ? (
+            <>
+              <span className="rounded-xl bg-white px-3 py-1 text-slate-900">{DIM_NAME[trial.rule]}</span>
+              {DIM_SUBJ[trial.rule]} 같은 동굴
+            </>
+          ) : (
+            <span className="text-slate-400">🙈 기억해서 골라요</span>
+          )}
         </p>
       </div>
 
       <MessageBar tone={feedback ? (feedback.ok ? "good" : "bad") : "info"}>
         {feedback ? feedback.text : "⛵ 어느 동굴로 들어갈까요?"}
       </MessageBar>
-      <FxHint fx={fx}>지도 그림과 "{DIM_NAME[trial.rule]}"이 같은 동굴을 골라요!</FxHint>
+      <FxHint fx={fx}>지도 그림과 {DIM_NAME[trial.rule]}{DIM_SUBJ[trial.rule]} 같은 동굴을 골라요!</FxHint>
 
       <div className={`grid w-full gap-3 ${cfg.options === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
         {trial.options.map((option, i) => (

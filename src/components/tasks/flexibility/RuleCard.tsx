@@ -7,8 +7,9 @@ import type { RuleType } from "@/lib/flexibilityEngine";
 // 검사 중에는 규칙 단서를 계속 보여주지 않으므로, 이 카드로 한 번 분명히 알려줍니다.
 // 색만으로 구분하지 않도록 글자와 모양 기호를 함께 보여줍니다.
 
-export const RULE_NAME: Record<RuleType, string> = { color: "색깔 규칙", shape: "모양 규칙" };
-export const STORY_RULE_NAME: Record<RuleType, string> = { color: "색깔 암호", shape: "모양 암호" };
+// 기준은 "색", "모양" 단어로 분명하게 보여줍니다.
+export const RULE_NAME: Record<RuleType, string> = { color: "색", shape: "모양" };
+export const STORY_RULE_NAME: Record<RuleType, string> = { color: "색", shape: "모양" };
 
 const HEX = { red: "#f43f5e", blue: "#0ea5e9" };
 
@@ -96,7 +97,7 @@ export function RuleGuide({ dark, story }: { dark?: boolean; story?: boolean }) 
         <RuleCard rule="shape" title={names.shape} dark={dark} />
       </div>
       <p className={`text-center text-xs leading-relaxed ${dark ? "text-slate-300" : "text-slate-500"}`}>
-        규칙은 한동안 이어지다가 바뀌어요. 바뀔 때만 이 설명을 한 번 보여주고, 그 뒤에는 규칙을 기억해서
+        기준은 한동안 이어지다가 바뀌어요. 바뀔 때만 이 설명을 한 번 보여주고, 그 뒤에는 기준을 기억해서
         진행해요.
       </p>
     </div>
