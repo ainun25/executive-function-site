@@ -19,6 +19,17 @@ export const AGE_GROUP_LABELS: Record<AgeGroup, string> = {
   upper: "초등 고학년 (4~6학년)",
 };
 
+// 표의 칸에 짧게 보여줄 때 쓰는 이름
+export const AGE_GROUP_SHORT_LABELS: Record<AgeGroup, string> = {
+  preschool: "유치원",
+  lower: "초등 저학년",
+  upper: "초등 고학년",
+};
+
+export function ageGroupShortLabel(ageGroup: string | null): string {
+  return AGE_GROUP_SHORT_LABELS[ageGroup as AgeGroup] ?? "-";
+}
+
 // 학년 → 연령군. 유치원=예비초등, 초1~3=저학년, 초4~6=고학년.
 export function gradeToAgeGroup(grade: GradeCode): AgeGroup {
   if (grade === "preschool") return "preschool";
