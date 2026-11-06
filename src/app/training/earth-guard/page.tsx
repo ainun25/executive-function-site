@@ -1,14 +1,6 @@
-import type { Metadata } from "next";
-import EarthGuardGame from "@/components/play/EarthGuardGame";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "지구 수호대 작전 | 실행기능 놀이터",
-};
-
-export default function EarthGuardPage() {
-  return (
-    <div className="mx-auto max-w-xl px-4 py-8 sm:px-6 sm:py-12">
-      <EarthGuardGame />
-    </div>
-  );
+// 예전 주소(/training/earth-guard)로 들어온 사람도 새 위치로 안내합니다.
+export default function EarthGuardRedirect() {
+  redirect("/training/play/earth");
 }

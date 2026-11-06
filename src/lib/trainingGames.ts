@@ -3,7 +3,7 @@
 
 import type { EFDomain } from "@/types";
 
-export type GameId = "brake" | "flag" | "piano" | "suitcase" | "cave" | "chef";
+export type GameId = "brake" | "flag" | "earth" | "piano" | "suitcase" | "cave" | "chef";
 export type GameLevel = 1 | 2 | 3;
 export const GAME_LEVELS: GameLevel[] = [1, 2, 3];
 
@@ -66,6 +66,28 @@ export const GAMES: GameInfo[] = [
       3: "초등 고학년 · 반대로 해야 할 때도 있어요",
     },
     route: "/training/play/flag",
+  },
+  {
+    id: "earth",
+    domain: "inhibition",
+    title: "지구 수호대 작전",
+    icon: "🛸",
+    tagline: "아군은 터치! 적군은 참기! 우주에서 다가오는 친구와 적을 구별해요.",
+    sceneEmoji: "🌌",
+    sceneText: "지구 수호대 본부에 신호가 들어왔어요. 우주에서 아군과 적군이 한꺼번에 다가오고 있어요!",
+    commanderLine: "요원님, 아군은 반갑게 맞이하고, 적군은 꾹 참아 주세요!",
+    howTo: [
+      "🤝 아군이 나오면 빠르게 화면의 칸을 터치해요.",
+      "✋ 적군이 나오면 터치하지 말고 꾹 참아요.",
+      "🔎 단계마다 아군과 적군을 구별하는 단서가 달라져요.",
+    ],
+    levelNames: { 1: "1단계 · 행성 수호", 2: "2단계 · UFO 확인", 3: "3단계 · 요원 선별" },
+    levelDescs: {
+      1: "예비초등 · 고리 행성은 아군, 가시 행성은 적군",
+      2: "초등 저학년 · 동그란 불꽃은 아군, 뾰족한 불꽃은 적군",
+      3: "초등 고학년 · 검은 고글을 쓴 요원은 적군",
+    },
+    route: "/training/play/earth",
   },
   {
     id: "piano",

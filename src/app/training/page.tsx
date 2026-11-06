@@ -1,5 +1,6 @@
 "use client";
 
+import PageHeader from "@/components/layout/PageHeader";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchTrainingMaterials } from "@/lib/trainingRepository";
@@ -30,34 +31,13 @@ export default function TrainingPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <header className="text-center">
-        <h1 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">실행기능 놀이</h1>
-        <p className="mt-4 text-base text-slate-600">
-          실행기능을 재미있게 연습할 수 있는 활동 자료예요.
-        </p>
-      </header>
+      <PageHeader emoji="🎮" title="실행기능 놀이">
+        <p>실행기능을 재미있게 연습할 수 있는 활동 자료예요.</p>
+      </PageHeader>
 
       <section className="mt-10">
         <h2 className="text-lg font-bold text-slate-800">🎮 게임으로 놀기</h2>
-        <Link
-          href="/training/earth-guard"
-          className="mt-3 flex items-center gap-4 rounded-2xl bg-gradient-to-r from-[#1a1f3c] to-[#2b2f6e] p-5 text-white shadow-sm transition-shadow hover:shadow-md"
-        >
-          <span className="text-4xl" aria-hidden="true">
-            🛸
-          </span>
-          <span className="flex-1">
-            <span className="block text-lg font-bold">지구 수호대 작전</span>
-            <span className="mt-1 block text-sm text-slate-200">
-              아군은 터치! 적군은 참기! 3단계 우주 미션 (약 3분)
-            </span>
-          </span>
-          <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">억제통제</span>
-        </Link>
-      </section>
-
-      <section className="mt-6">
-        <h3 className="text-sm font-semibold text-slate-500">단계별 게임 (1단계 예비초등 · 2단계 저학년 · 3단계 고학년)</h3>
+        <h3 className="mt-1 text-sm font-semibold text-slate-500">단계별 게임 (1단계 예비초등 · 2단계 저학년 · 3단계 고학년)</h3>
         {(["inhibition", "workingMemory", "flexibility"] as const).map((domain) => (
           <div key={domain} className="mt-4">
             <h4 className="text-sm font-bold text-slate-700">{DOMAIN_NAMES[domain]}</h4>
