@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { testInfos, testRoutes } from "@/data/efDomains";
+import PageHeader from "@/components/layout/PageHeader";
 
 export const metadata: Metadata = {
   title: "실행기능 검사 | 실행기능 놀이터",
@@ -12,12 +13,9 @@ const buttonClass = "bg-indigo-500 hover:bg-indigo-600";
 export default function TestsPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <header className="text-center">
-        <h1 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">실행기능 검사</h1>
-        <p className="mt-4 text-base text-slate-600">
-          세 가지 실행기능 영역을 간단한 수행과제로 살펴볼 수 있어요.
-        </p>
-      </header>
+      <PageHeader emoji="📝" title="실행기능 검사">
+        <p>세 가지 실행기능 영역을 간단한 수행과제로 살펴볼 수 있어요.</p>
+      </PageHeader>
 
       <div className="mt-10 grid gap-6 sm:grid-cols-3">
         {testInfos.map((test) => (
@@ -26,7 +24,7 @@ export default function TestsPage() {
             <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-600">
               {test.shortDescription}
             </p>
-            <p className="mt-4 text-xs text-slate-400">예상 소요시간 약 {test.estimatedMinutes}분</p>
+            <p className="mt-4 text-xs text-slate-500">예상 소요시간 약 {test.estimatedMinutes}분</p>
             <Link
               href={testRoutes[test.id]}
               className={`mt-5 block w-full rounded-full px-4 py-3 text-center text-sm font-semibold text-white ${buttonClass}`}
@@ -49,7 +47,7 @@ export default function TestsPage() {
             <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-200">
               아군은 터치, 적군은 참기! 행성, UFO, 변장한 요원을 가려내는 억제통제 검사예요.
             </p>
-            <p className="mt-4 text-xs text-slate-400">억제통제 · 예상 소요시간 약 8분</p>
+            <p className="mt-4 text-xs text-slate-500">억제통제 · 예상 소요시간 약 8분</p>
             <Link
               href="/tests/story/inhibition"
               className="mt-5 block w-full rounded-full bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-600"
@@ -63,7 +61,7 @@ export default function TestsPage() {
             <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-200">
               보급품을 한꺼번에 기억해 찾고, 기지 신호의 순서를 기억해 보내는 작업기억 검사예요.
             </p>
-            <p className="mt-4 text-xs text-slate-400">작업기억 · 예상 소요시간 약 7분</p>
+            <p className="mt-4 text-xs text-slate-500">작업기억 · 예상 소요시간 약 7분</p>
             <Link
               href="/tests/story/working-memory"
               className="mt-5 block w-full rounded-full bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-600"
@@ -77,7 +75,7 @@ export default function TestsPage() {
             <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-200">
               통신 암호가 색깔에서 모양으로 바뀌어요! 바뀐 규칙에 맞게 신호를 분류하는 인지적 유연성 검사예요.
             </p>
-            <p className="mt-4 text-xs text-slate-400">인지적 유연성 · 예상 소요시간 약 6분</p>
+            <p className="mt-4 text-xs text-slate-500">인지적 유연성 · 예상 소요시간 약 6분</p>
             <Link
               href="/tests/story/flexibility"
               className="mt-5 block w-full rounded-full bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-600"

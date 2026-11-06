@@ -1,32 +1,43 @@
 import Link from "next/link";
 import { efDomains, testInfos, testRoutes } from "@/data/efDomains";
 
-const domainCardClass = "bg-indigo-50 text-indigo-600 ring-indigo-200";
+const domainCardClass = "bg-indigo-50 text-indigo-700 ring-indigo-200";
+
+const entries = [
+  { href: "/about", emoji: "🌱", title: "알아보기", desc: "개념과 생활 속 예시" },
+  { href: "/search", emoji: "🔍", title: "찾아보기", desc: "관련 자료 검색" },
+  { href: "/tests", emoji: "📝", title: "검사", desc: "간단한 수행과제" },
+  { href: "/training", emoji: "🎮", title: "놀이", desc: "게임으로 연습" },
+];
 
 export default function Home() {
   return (
     <div>
-      {/* 히어로 섹션 */}
+      {/* 첫 화면: 제목과 네 가지 시작 메뉴가 한 화면에 모두 보이도록 */}
       <section className="bg-gradient-to-b from-indigo-50 to-white">
-        <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-24">
+        <div className="mx-auto flex min-h-[calc(100svh-9rem)] max-w-6xl flex-col justify-center px-4 py-10 text-center sm:px-6">
           <p className="text-sm font-semibold text-indigo-600">유초등을 위한 실행기능 통합 플랫폼</p>
-          <h1 className="mt-4 text-3xl font-extrabold text-slate-900 sm:text-5xl">
+          <h1 className="mt-3 text-3xl font-extrabold text-slate-900 sm:text-5xl">
             생각을 조절하는 힘, <br className="sm:hidden" />
             <span className="text-indigo-600">실행기능</span>
           </h1>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/about"
-              className="w-full rounded-full bg-indigo-500 px-6 py-3 text-center text-base font-semibold text-white shadow-sm transition-colors hover:bg-indigo-600 sm:w-auto"
-            >
-              실행기능 알아보기
-            </Link>
-            <Link
-              href="/tests"
-              className="w-full rounded-full border border-indigo-500 px-6 py-3 text-center text-base font-semibold text-indigo-600 transition-colors hover:bg-indigo-50 sm:w-auto"
-            >
-              실행기능 검사 하러 가기
-            </Link>
+          <p className="mx-auto mt-3 max-w-xl text-base text-slate-600">
+            알아보고, 찾아보고, 검사하고, 놀이로 연습해요.
+          </p>
+          <div className="mx-auto mt-8 grid w-full max-w-3xl grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+            {entries.map((e) => (
+              <Link
+                key={e.href}
+                href={e.href}
+                className="flex flex-col items-center rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition-shadow hover:shadow-md sm:p-5"
+              >
+                <span className="text-3xl sm:text-4xl" aria-hidden="true">
+                  {e.emoji}
+                </span>
+                <span className="mt-2 text-base font-bold text-slate-900">{e.title}</span>
+                <span className="mt-1 text-xs leading-snug text-slate-500 sm:text-sm">{e.desc}</span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -36,32 +47,17 @@ export default function Home() {
         <h2 className="text-center text-2xl font-bold text-slate-900 sm:text-3xl">
           실행기능의 3가지 핵심 영역
         </h2>
-        <p className="mt-2 text-center text-slate-500">
+        <p className="mt-2 text-center text-slate-600">
           이 사이트는 다음 세 가지 핵심 실행기능을 중심으로 구성되어 있어요.
         </p>
         <div className="mt-10 grid gap-6 sm:grid-cols-3">
           {efDomains.map((domain) => (
             <div key={domain.id} className={`rounded-2xl p-6 ring-1 ${domainCardClass}`}>
               <h3 className="text-lg font-bold">{domain.nameKo}</h3>
-              <p className="text-xs opacity-70">{domain.nameEn}</p>
+              <p className="text-xs">{domain.nameEn}</p>
               <p className="mt-3 text-sm leading-relaxed text-slate-700">{domain.concept}</p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* 4가지 핵심 기능 소개 */}
-      <section className="bg-slate-50">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <h2 className="text-center text-2xl font-bold text-slate-900 sm:text-3xl">
-            무엇을 할 수 있나요?
-          </h2>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <FeatureCard title="① 실행기능 이해" desc="개념과 생활 속 예시를 쉽게 알아봐요." href="/about" />
-            <FeatureCard title="② 자료 찾아보기" desc="키워드로 관련 자료를 검색해요." href="/search" />
-            <FeatureCard title="③ 실행기능 검사" desc="간단한 수행과제로 살펴봐요." href="/tests" />
-            <FeatureCard title="④ 실행기능 놀이" desc="재미있는 활동으로 연습해요." href="/training" />
-          </div>
         </div>
       </section>
 
@@ -82,38 +78,11 @@ export default function Home() {
             >
               <h3 className="text-lg font-bold text-slate-900">{test.title}</h3>
               <p className="mt-2 text-sm text-slate-600">{test.shortDescription}</p>
-              <p className="mt-4 text-xs text-slate-400">예상 소요시간 약 {test.estimatedMinutes}분</p>
+              <p className="mt-4 text-xs text-slate-500">예상 소요시간 약 {test.estimatedMinutes}분</p>
             </Link>
           ))}
         </div>
       </section>
     </div>
-  );
-}
-
-function FeatureCard({
-  title,
-  desc,
-  href,
-  comingSoon,
-}: {
-  title: string;
-  desc: string;
-  href: string;
-  comingSoon?: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className="block rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 transition-shadow hover:shadow-md"
-    >
-      <h3 className="font-bold text-slate-900">{title}</h3>
-      <p className="mt-2 text-sm text-slate-500">{desc}</p>
-      {comingSoon && (
-        <span className="mt-3 inline-block rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-400">
-          준비 중
-        </span>
-      )}
-    </Link>
   );
 }

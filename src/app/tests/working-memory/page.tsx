@@ -29,7 +29,7 @@ function WorkingMemoryTestFlow({ participant }: { participant: ParticipantInfo }
   const { config, isReady } = useTestConfig<WorkingMemoryConfig>("workingMemory", participant.ageGroup);
 
   if (!isReady) {
-    return <p className="py-20 text-center text-slate-400">불러오는 중...</p>;
+    return <p className="py-20 text-center text-slate-500">불러오는 중...</p>;
   }
 
   return (

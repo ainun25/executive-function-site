@@ -1,3 +1,4 @@
+import PageHeader from "@/components/layout/PageHeader";
 import type { Metadata } from "next";
 import { privacyConfig } from "@/data/privacyConfig";
 
@@ -38,13 +39,14 @@ export default function PrivacyPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
-      <h1 className="text-3xl font-extrabold text-slate-900">개인정보처리방침</h1>
-      <p className="mt-4 text-slate-600">
+      <PageHeader emoji="🔒" title="개인정보처리방침">
+        <p>
         &quot;실행기능 놀이터&quot;(이하 &quot;이 사이트&quot;)는 유치원·초등 아동이 이용하는 사이트이므로, 개인정보를 꼭
         필요한 만큼만 받고 안전하게 다룹니다. 이 문서는 어떤 정보를 왜 받고, 얼마나 보관하며, 어떻게 지우는지
         설명합니다.
       </p>
-      <p className="mt-2 text-xs text-slate-400">시행일: {effectiveDate}</p>
+        <p className="mt-2 text-xs text-slate-500">시행일: {effectiveDate}</p>
+      </PageHeader>
 
       <Section title="1. 처리하는 개인정보와 목적">
         <p className="font-semibold text-slate-700">검사를 이용할 때 (보호자 동의 후)</p>

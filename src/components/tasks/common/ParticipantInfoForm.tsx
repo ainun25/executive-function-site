@@ -1,5 +1,6 @@
 "use client";
 
+import PageHeader from "@/components/layout/PageHeader";
 import { privacyConfig } from "@/data/privacyConfig";
 import { useState } from "react";
 import { getParticipantProfile, saveParticipantProfile } from "@/lib/participantProfile";
@@ -57,11 +58,10 @@ export default function ParticipantInfoForm({ onSubmit }: ParticipantInfoFormPro
   };
 
   return (
-    <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="text-center text-xl font-bold text-slate-900">검사 시작 전에 알려주세요</h1>
-      <p className="mt-2 text-center text-sm text-slate-500">
-        이 정보는 검사 결과를 분석하는 목적으로만 사용되며, 관리자만 확인할 수 있어요.
-      </p>
+    <div className="mx-auto max-w-sm px-4 py-12">
+      <PageHeader emoji="👋" title="검사 시작 전에 알려주세요">
+        <p className="text-sm">이 정보는 검사 결과를 분석하는 목적으로만 사용되며, 관리자만 확인할 수 있어요.</p>
+      </PageHeader>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-4">
         <div>

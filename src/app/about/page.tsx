@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import KnowledgeCardList from "@/components/about/KnowledgeCardList";
+import PageHeader from "@/components/layout/PageHeader";
 
 export const metadata: Metadata = {
   title: "실행기능 알아보기 | 실행기능 놀이터",
@@ -8,13 +9,12 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
-      <header className="text-center">
-        <h1 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">실행기능 알아보기</h1>
-        <p className="mt-4 text-base leading-relaxed text-slate-600">
+      <PageHeader emoji="🌱" title="실행기능 알아보기">
+        <p>
           <strong className="text-slate-800">실행기능(Executive Function)</strong>이란, 목표를 정하고
           자신의 생각과 행동을 조절하여 그 목표를 이루도록 돕는 인지적 조절 능력이에요.
         </p>
-      </header>
+      </PageHeader>
 
       <KnowledgeCardList />
 

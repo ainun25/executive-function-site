@@ -13,11 +13,11 @@ export default function KnowledgeCardList() {
   }, []);
 
   if (!cards) {
-    return <p className="mt-12 text-center text-slate-400">불러오는 중...</p>;
+    return <p className="mt-12 text-center text-slate-500">불러오는 중...</p>;
   }
 
   if (cards.length === 0) {
-    return <p className="mt-12 rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-400">준비 중이에요.</p>;
+    return <p className="mt-12 rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500">준비 중이에요.</p>;
   }
 
   return (

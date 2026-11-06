@@ -1,5 +1,6 @@
 "use client";
 
+import PageHeader from "@/components/layout/PageHeader";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { loadAllStoryResults } from "@/lib/resultStorage";
@@ -64,9 +65,10 @@ export default function StoryOverallResultPage() {
 
   if (done.length === 0) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16 text-center">
-        <h1 className="text-2xl font-extrabold text-slate-900">스토리 종합 결과서</h1>
-        <p className="mt-4 text-slate-500">아직 완료한 스토리형 검사가 없어요. 지구 수호대 작전을 시작해볼까요?</p>
+      <div className="mx-auto max-w-3xl px-4 py-12 text-center sm:py-16">
+        <PageHeader emoji="🛸" title="스토리 종합 결과서">
+          <p>아직 완료한 스토리형 검사가 없어요. 지구 수호대 작전을 시작해볼까요?</p>
+        </PageHeader>
         <Link
           href="/tests/story/inhibition"
           className="mt-6 inline-block rounded-full bg-indigo-500 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-600"
@@ -81,13 +83,10 @@ export default function StoryOverallResultPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8 px-4 py-12 sm:px-6 sm:py-16">
-      <header className="text-center print:hidden">
-        <h1 className="text-3xl font-extrabold text-slate-900">지구 수호대 종합 결과서</h1>
-        <p className="mt-2 text-sm text-slate-500">
-          스토리형 검사 1~3부를 하나로 모았어요. ({done.length}/{PARTS.length}부 완료)
-        </p>
-        <p className="mt-1 text-xs text-slate-400">이 결과는 이 기기(브라우저)에 저장된 가장 최근 결과예요.</p>
-      </header>
+      <PageHeader emoji="🛸" title="지구 수호대 종합 결과서" className="print:hidden">
+        <p>스토리형 검사 1~3부를 하나로 모았어요. ({done.length}/{PARTS.length}부 완료)</p>
+        <p className="mt-2 text-xs text-slate-500">이 결과는 이 기기(브라우저)에 저장된 가장 최근 결과예요.</p>
+      </PageHeader>
 
       {hasMixedNames && (
         <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800 print:hidden">

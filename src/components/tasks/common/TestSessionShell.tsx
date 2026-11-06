@@ -55,11 +55,11 @@ export default function TestSessionShell({
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
-        <Link href="/tests" className="text-sm text-slate-400 hover:underline">
-          검사 목록으로
+      <div className="mb-6">
+        <Link href="/tests" className="text-sm font-medium text-indigo-600 hover:underline">
+          ← 검사 목록으로
         </Link>
+        <h1 className="mt-2 text-2xl font-extrabold text-slate-900 sm:text-3xl">{title}</h1>
       </div>
       {renderPhase(phase, goToNext)}
     </div>

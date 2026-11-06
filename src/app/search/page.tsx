@@ -1,5 +1,6 @@
 "use client";
 
+import PageHeader from "@/components/layout/PageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { fetchContentItems } from "@/lib/contentRepository";
 import type { ContentCategory, ContentItem } from "@/types";
@@ -58,12 +59,9 @@ export default function SearchPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
-      <header className="text-center">
-        <h1 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">실행기능 찾아보기</h1>
-        <p className="mt-4 text-base text-slate-600">
-          실행기능과 관련된 개념, 연구, 교육자료를 검색해볼 수 있어요.
-        </p>
-      </header>
+      <PageHeader emoji="🔍" title="실행기능 찾아보기">
+        <p>실행기능과 관련된 개념, 연구, 교육자료를 검색해볼 수 있어요.</p>
+      </PageHeader>
 
       <div className="mt-8">
         <input
@@ -105,9 +103,9 @@ export default function SearchPage() {
 
       <div className="mt-8 space-y-4">
         {!items ? (
-          <p className="text-center text-slate-400">불러오는 중...</p>
+          <p className="text-center text-slate-500">불러오는 중...</p>
         ) : filteredItems.length === 0 ? (
-          <p className="rounded-xl bg-slate-50 p-6 text-center text-slate-400">
+          <p className="rounded-xl bg-slate-50 p-6 text-center text-slate-500">
             검색 결과가 없어요. 다른 키워드로 찾아보세요.
           </p>
         ) : (
@@ -133,7 +131,7 @@ export default function SearchPage() {
                 </div>
               )}
 
-              <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-400">
+              <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
                 {item.author && <span>저자: {item.author}</span>}
                 {item.year && <span>{item.year}년</span>}
                 {item.source && <span>출처: {item.source}</span>}

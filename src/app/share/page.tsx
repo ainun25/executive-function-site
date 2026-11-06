@@ -1,5 +1,6 @@
 "use client";
 
+import PageHeader from "@/components/layout/PageHeader";
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 
@@ -66,12 +67,9 @@ export default function SharePage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8 px-4 py-12 sm:px-6 sm:py-16">
-      <header className="text-center print:hidden">
-        <h1 className="text-3xl font-extrabold text-slate-900">앱처럼 쓰기 · 공유하기</h1>
-        <p className="mt-3 text-sm text-slate-500">
-          스토어에서 내려받지 않아도, 휴대폰 홈 화면에 아이콘을 만들어 앱처럼 쓸 수 있어요. 비용은 없어요.
-        </p>
-      </header>
+      <PageHeader emoji="📲" title="앱처럼 쓰기 · 공유하기" className="print:hidden">
+        <p>스토어에서 내려받지 않아도, 휴대폰 홈 화면에 아이콘을 만들어 앱처럼 쓸 수 있어요. 비용은 없어요.</p>
+      </PageHeader>
 
       {notice && <p className="rounded-xl bg-indigo-50 p-3 text-center text-sm text-indigo-800 print:hidden">{notice}</p>}
 
@@ -105,7 +103,7 @@ export default function SharePage() {
             </ol>
           </div>
         </div>
-        <p className="text-xs text-slate-400">PC의 크롬·엣지에서는 주소창 오른쪽의 설치 아이콘으로도 설치할 수 있어요.</p>
+        <p className="text-xs text-slate-500">PC의 크롬·엣지에서는 주소창 오른쪽의 설치 아이콘으로도 설치할 수 있어요.</p>
       </section>
 
       {/* 2. QR코드와 안내문 */}
@@ -119,7 +117,7 @@ export default function SharePage() {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={qr} alt="사이트 QR코드" className="mx-auto my-5 h-64 w-64 print:h-80 print:w-80" />
           ) : (
-            <div className="mx-auto my-5 flex h-64 w-64 items-center justify-center text-sm text-slate-400">QR코드를 만드는 중...</div>
+            <div className="mx-auto my-5 flex h-64 w-64 items-center justify-center text-sm text-slate-500">QR코드를 만드는 중...</div>
           )}
           <p className="break-all text-lg font-bold text-slate-800">{url}</p>
           <ul className="mx-auto mt-4 max-w-md space-y-1 text-left text-sm leading-relaxed text-slate-600">

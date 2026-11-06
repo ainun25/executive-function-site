@@ -1,5 +1,6 @@
 "use client";
 
+import PageHeader from "@/components/layout/PageHeader";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { loadAllTestResults, clearAllResults } from "@/lib/resultStorage";
@@ -26,7 +27,7 @@ export default function ResultsPage() {
   }, []);
 
   if (!results) {
-    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-slate-400">불러오는 중...</div>;
+    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-slate-500">불러오는 중...</div>;
   }
 
   const hasAnyResult = results.inhibition || results.workingMemory || results.flexibility;
@@ -52,21 +53,12 @@ export default function ResultsPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
-      <header className="text-center">
-        <h1 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">내 결과</h1>
-        <p className="mt-4 text-base text-slate-600">
-          지금까지 완료한 실행기능 검사 결과를 한눈에 볼 수 있어요.
+      <PageHeader emoji="📊" title="내 결과">
+        <p>지금까지 완료한 실행기능 검사 결과를 한눈에 볼 수 있어요.</p>
+        <p className="mt-2 text-xs text-slate-500">
+          이 결과는 이 브라우저에만 임시로 저장돼요. 브라우저 데이터를 지우면 사라져요.
         </p>
-        <p className="mt-2 text-xs text-slate-400">
-          이 결과는 이 브라우저에만 임시로 저장돼요 (데모 모드). 브라우저 데이터를 지우면 사라져요.
-        </p>
-        <Link
-          href="/results/story"
-          className="mt-4 inline-block rounded-full border border-indigo-300 px-5 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-50"
-        >
-          🎖️ 스토리 종합 결과서 · 임명장 보기
-        </Link>
-      </header>
+      </PageHeader>
 
       {!hasAnyResult ? (
         <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-10 text-center">
@@ -176,7 +168,7 @@ export default function ResultsPage() {
               <button
                 type="button"
                 onClick={() => setIsConfirmingClear(true)}
-                className="text-sm text-slate-400 hover:underline"
+                className="text-sm text-slate-500 hover:underline"
               >
                 결과 모두 지우기
               </button>
@@ -216,7 +208,7 @@ function DomainResultCard({
         </ul>
       ) : (
         <>
-          <p className="mt-3 text-sm text-slate-400">아직 완료하지 않았어요.</p>
+          <p className="mt-3 text-sm text-slate-500">아직 완료하지 않았어요.</p>
           <Link href={href} className="mt-3 inline-block text-sm font-semibold text-indigo-600 hover:underline">
             검사하러 가기 →
           </Link>
