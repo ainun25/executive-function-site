@@ -87,6 +87,22 @@ body {
   }
 }
 
+/* 눌렀을 때 퍼지는 물결 */
+@keyframes ef-ripple {
+  from {
+    transform: scale(0.2);
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+.ef-ripple {
+  animation: ef-ripple 0.55s ease-out both;
+}
+
 .ef-shake {
   animation: ef-shake 0.45s ease-in-out;
 }

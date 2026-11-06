@@ -44,6 +44,8 @@ export default function EarthGame({ level, onFinish }: GameProps) {
   const [phase, setPhase] = useState<Phase>("wait");
   const [message, setMessage] = useState("");
   const [lastOk, setLastOk] = useState<boolean | null>(null);
+  const [ripple, setRipple] = useState<{ key: number; x: number; y: number } | null>(null);
+  const [nudge, setNudge] = useState(false);
 
   const phaseRef = useRef<Phase>("wait");
   const indexRef = useRef(0);
@@ -113,6 +115,19 @@ export default function EarthGame({ level, onFinish }: GameProps) {
     else settle(false, "앗, 적군이었어요! 적군이 나오면 터치하지 말고 꾹 참아요");
   };
 
+  // 누르는 순간 바로 보이고(물결), 느껴지게(진동) 합니다. 자극이 나오기 전에 눌렀다면 "아직이에요"라고 알려줍니다.
+  const handlePress = (event: React.PointerEvent<HTMLDivElement>) => {
+    const box = event.currentTarget.getBoundingClientRect();
+    setRipple({ key: Date.now(), x: event.clientX - box.left, y: event.clientY - box.top });
+    if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") navigator.vibrate(12);
+    if (phaseRef.current === "wait") {
+      setNudge(true);
+      timeoutsRef.current.push(setTimeout(() => setNudge(false), 1100));
+      return;
+    }
+    touch();
+  };
+
   const begin = () => {
     setStarted(true);
     runTrial(0);
@@ -171,14 +186,21 @@ export default function EarthGame({ level, onFinish }: GameProps) {
         {Math.min(index + 1, TRIALS)} / {TRIALS}
       </p>
 
-      {/* 터치하는 곳 */}
+      {/* 터치하는 곳: 눌리는 버튼처럼 보이고, 누르면 물결이 퍼져요 */}
       <div
         role="button"
         tabIndex={0}
         aria-label="아군이 나오면 터치"
-        onPointerDown={touch}
-        className="flex h-60 w-full items-center justify-center rounded-2xl bg-white/5 ring-1 ring-white/15"
+        onPointerDown={handlePress}
+        className="relative flex h-60 w-full cursor-pointer items-center justify-center overflow-hidden rounded-3xl bg-indigo-500/15 ring-2 ring-[#00ff88]/60 transition-transform duration-75 active:scale-[0.97] active:ring-[#00ff88]"
       >
+        {ripple && (
+          <span
+            key={ripple.key}
+            className="ef-ripple pointer-events-none absolute h-24 w-24 rounded-full bg-[#00ff88]"
+            style={{ left: ripple.x - 48, top: ripple.y - 48 }}
+          />
+        )}
         {phase === "wait" ? (
           <p className="text-sm text-slate-300">우주를 살피는 중...</p>
         ) : phase === "stimulus" ? (
@@ -186,10 +208,13 @@ export default function EarthGame({ level, onFinish }: GameProps) {
         ) : (
           <EarthGuardStimulus level={visual} isAlly={sequence[index]} size={120} />
         )}
+        <span className="pointer-events-none absolute bottom-3 text-xs font-bold text-[#00ff88]/80">
+          👆 여기를 터치!
+        </span>
       </div>
 
       <MessageBar tone={lastOk === null ? "info" : lastOk ? "good" : "bad"}>
-        {message || "🛸 아군이 나오면 이 칸을 터치해요!"}
+        {nudge ? "⏳ 아직이에요! 아군이 나오면 터치해요" : message || "🛸 아군이 나오면 이 칸을 터치해요!"}
       </MessageBar>
 
       <FxHint fx={fx}>{CUES[visual]} 아군만 터치하고, 적군은 꾹 참아요!</FxHint>
