@@ -78,7 +78,7 @@ export default function EarthGame({ level, onFinish }: GameProps) {
       schedule(() => {
         if (phaseRef.current !== "stimulus") return;
         // 시간 안에 터치하지 않음: 아군이면 놓친 것, 적군이면 잘 참은 것
-        if (sequence[i]) settle(false, "아군을 놓쳤어요! 아군이 나오면 얼른 터치해요");
+        if (sequence[i]) settle(false, "아군을 놓쳤어요! 아군이 나오면 위의 박스를 얼른 터치해요");
         else settle(true, "✋ 잘 참았어요! 적군이었어요 👍");
       }, RESPONSE_WINDOW_MS);
     }, PRE_STIMULUS_MS);
@@ -164,7 +164,7 @@ export default function EarthGame({ level, onFinish }: GameProps) {
           </div>
           <p className="mt-3 text-sm leading-relaxed text-slate-200">{CUES[visual]}</p>
         </div>
-        <MessageBar>아군은 빠르게 터치! 적군은 꾹 참기!</MessageBar>
+        <MessageBar>아군이 나오면 박스를 빠르게 터치! 적군은 꾹 참기!</MessageBar>
         <button
           type="button"
           onClick={begin}
@@ -190,7 +190,7 @@ export default function EarthGame({ level, onFinish }: GameProps) {
       <div
         role="button"
         tabIndex={0}
-        aria-label="아군이 나오면 터치"
+        aria-label="아군이 나오면 이 박스를 터치"
         onPointerDown={handlePress}
         className="relative flex h-60 w-full cursor-pointer items-center justify-center overflow-hidden rounded-3xl bg-indigo-500/15 ring-2 ring-[#00ff88]/60 transition-transform duration-75 active:scale-[0.97] active:ring-[#00ff88]"
       >
@@ -214,10 +214,10 @@ export default function EarthGame({ level, onFinish }: GameProps) {
       </div>
 
       <MessageBar tone={lastOk === null ? "info" : lastOk ? "good" : "bad"}>
-        {nudge ? "⏳ 아직이에요! 아군이 나오면 터치해요" : message || "🛸 아군이 나오면 이 칸을 터치해요!"}
+        {nudge ? "⏳ 아직이에요! 아군이 나오면 위의 박스를 터치해요" : message || "🛸 아군이 나오면 위의 박스를 터치해요!"}
       </MessageBar>
 
-      <FxHint fx={fx}>{CUES[visual]} 아군만 터치하고, 적군은 꾹 참아요!</FxHint>
+      <FxHint fx={fx}>{CUES[visual]} 아군이 나오면 위의 박스를 터치하고, 적군은 꾹 참아요!</FxHint>
       <p className="text-xs text-slate-400">PC는 스페이스바를 눌러도 돼요.</p>
     </div>
   );
